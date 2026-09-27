@@ -1,6 +1,7 @@
-﻿node_modules/
+node_modules/
 .env
 .env.*
+!.env.example
 dist/
 build/
 __pycache__/
@@ -11,3 +12,8 @@ venv/
 *.log
 .DS_Store
 Thumbs.db
+
+# Django
+db.sqlite3
+media/
+staticfiles/
