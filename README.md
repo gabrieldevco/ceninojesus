@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 # Plataforma Web Institucional — Centro Educativo El Niño Jesús
+=======
+﻿# Cenino Jesús
+>>>>>>> 7aa66c088150e882f196b28ad540dd135255b871
 
 Proyecto de **Práctica Social** del programa de Ingeniería de Sistemas de la **Universidad Libre Seccional Barranquilla** (Facultad de Ingeniería — Proyección Social).
 
