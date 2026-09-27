@@ -1,0 +1,59 @@
+# Normalizar finales de línea: todo archivo de texto se guarda con LF
+# en el repositorio y en la copia de trabajo (evita los avisos LF/CRLF en Windows)
+* text=auto eol=lf
+
+# Scripts de Windows necesitan CRLF
+*.bat   text eol=crlf
+*.cmd   text eol=crlf
+*.ps1   text eol=crlf
+
+# Código y configuración
+*.js    text
+*.jsx   text
+*.ts    text
+*.tsx   text
+*.mjs   text
+*.cjs   text
+*.json  text
+*.html  text
+*.css   text
+*.scss  text
+*.vue   text
+*.py    text
+*.php   text
+*.java  text
+*.sql   text
+*.sh    text
+*.md    text
+*.txt   text
+*.yml   text
+*.yaml  text
+*.xml   text
+*.env*  text
+*.svg   text
+
+# Lockfiles: sin diff ni merge línea a línea
+package-lock.json  -diff linguist-generated
+yarn.lock          -diff linguist-generated
+pnpm-lock.yaml     -diff linguist-generated
+
+# Binarios: nunca convertir
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.pdf   binary
+*.docx  binary
+*.xlsx  binary
+*.pptx  binary
+*.zip   binary
+*.gz    binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.eot   binary
+*.otf   binary
+*.mp4   binary
+*.mp3   binary
