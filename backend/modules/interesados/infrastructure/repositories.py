@@ -12,7 +12,7 @@ class DjangoInteresadoRepository(InteresadoRepository):
             id=interesado.id,
             defaults={
                 "nombre_completo": interesado.nombre_completo,
-                "email": interesado.email,
+                "correo": interesado.correo,
                 "telefono": interesado.telefono,
                 "mensaje": interesado.mensaje,
                 "autoriza_tratamiento_datos": interesado.autoriza_tratamiento_datos,
@@ -38,7 +38,7 @@ class DjangoInteresadoRepository(InteresadoRepository):
         return Interesado(
             id=model.id,
             nombre_completo=model.nombre_completo,
-            email=model.email,
+            correo=model.correo,
             telefono=model.telefono,
             mensaje=model.mensaje,
             autoriza_tratamiento_datos=model.autoriza_tratamiento_datos,

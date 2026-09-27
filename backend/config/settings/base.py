@@ -45,6 +45,7 @@ THIRD_PARTY_APPS = [
 # Cada módulo del dominio registra su adaptador de Django (modelos, admin,
 # migraciones) desde su capa de infraestructura.
 LOCAL_APPS = [
+    "modules.usuarios.infrastructure.apps.UsuariosConfig",
     "modules.interesados.infrastructure.apps.InteresadosConfig",
 ]
 
@@ -102,6 +103,11 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+
+# Usuarios: modelo propio con tabla "usuarios" (ver modules/usuarios)
+
+AUTH_USER_MODEL = "usuarios.Usuario"
 
 
 # Contraseñas (RNF-03)

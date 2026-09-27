@@ -36,7 +36,7 @@ class InMemoryInteresadoRepository(InteresadoRepository):
 def crear_interesado(**kwargs):
     datos = {
         "nombre_completo": "Ana Pérez",
-        "email": "ana@example.com",
+        "correo": "ana@example.com",
         "telefono": "3000000000",
         "autoriza_tratamiento_datos": True,
     }
@@ -71,7 +71,7 @@ class CasosDeUsoTests(TestCase):
         interesado = RegistrarInteresado(self.repository).execute(
             RegistrarInteresadoCommand(
                 nombre_completo="Ana Pérez",
-                email="ana@example.com",
+                correo="ana@example.com",
                 telefono="3000000000",
                 autoriza_tratamiento_datos=True,
             )

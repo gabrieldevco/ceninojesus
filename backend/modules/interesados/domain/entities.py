@@ -41,7 +41,7 @@ def _ahora():
 @dataclass
 class Interesado:
     nombre_completo: str
-    email: str
+    correo: str
     telefono: str
     autoriza_tratamiento_datos: bool
     mensaje: str = ""

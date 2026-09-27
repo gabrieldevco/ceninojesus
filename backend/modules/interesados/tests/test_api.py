@@ -7,7 +7,7 @@ URL = "/api/interesados/"
 
 DATOS = {
     "nombre_completo": "Ana Pérez",
-    "email": "ana@example.com",
+    "correo": "ana@example.com",
     "telefono": "3000000000",
     "autoriza_tratamiento_datos": True,
 }

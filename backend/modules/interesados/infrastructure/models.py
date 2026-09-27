@@ -5,7 +5,7 @@ from modules.interesados.domain.entities import EstadoInteresado
 
 class InteresadoModel(models.Model):
     nombre_completo = models.CharField(max_length=150)
-    email = models.EmailField()
+    correo = models.EmailField()
     telefono = models.CharField(max_length=20)
     mensaje = models.TextField(blank=True)
     autoriza_tratamiento_datos = models.BooleanField()

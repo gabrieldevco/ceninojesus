@@ -14,7 +14,7 @@ from modules.interesados.domain.ports import InteresadoRepository
 @dataclass(frozen=True)
 class RegistrarInteresadoCommand:
     nombre_completo: str
-    email: str
+    correo: str
     telefono: str
     autoriza_tratamiento_datos: bool
     mensaje: str = ""
@@ -29,7 +29,7 @@ class RegistrarInteresado:
     def execute(self, command: RegistrarInteresadoCommand) -> Interesado:
         interesado = Interesado(
             nombre_completo=command.nombre_completo,
-            email=command.email,
+            correo=command.correo,
             telefono=command.telefono,
             autoriza_tratamiento_datos=command.autoriza_tratamiento_datos,
             mensaje=command.mensaje,

@@ -86,6 +86,13 @@ infrastructure  ──►  application  ──►  domain
 
 Gracias a esto, el dominio y los casos de uso se prueban sin base de datos, con repositorios en memoria (ver `modules/interesados/tests/test_domain.py`).
 
+### Convención: base de datos en español
+
+- Toda tabla propia define `db_table` en español y en plural (`interesados`, `usuarios`).
+- Los campos se nombran en español (`correo`, `fecha_registro`). Si Django exige un atributo en inglés (por ejemplo `is_staff` o `password`), se le asigna `db_column` en español.
+- El usuario es un modelo propio (`modules/usuarios`, `AUTH_USER_MODEL = "usuarios.Usuario"`) con la tabla `usuarios`. Nunca uses `auth.User`; usa `get_user_model()` o `settings.AUTH_USER_MODEL`.
+- Las tablas internas del framework (`auth_group`, `auth_permission`, `django_session`, `django_admin_log`, `django_content_type` y `django_migrations`) conservan su nombre, porque Django las gestiona.
+
 ### Módulo de referencia: `interesados`
 
 Es el formulario de interesados (RF-16 a RF-19). Úsenlo como plantilla para los demás módulos.
@@ -108,4 +115,4 @@ Es el formulario de interesados (RF-16 a RF-19). Úsenlo como plantilla para los
 5. Registrar la app en `LOCAL_APPS` (`config/settings/base.py`) y sus rutas en `config/urls.py`.
 6. Crear las migraciones: `python manage.py makemigrations <label>`.
 
-Módulos previstos: `institucional`, `usuarios` (roles y permisos), `grupos` (matrícula extracurricular), `contenidos` (LMS) e `interesados`.
+Módulos previstos: `institucional`, `usuarios` (ya creado: modelo de usuario; faltan roles y permisos de RF-20), `grupos` (matrícula extracurricular), `contenidos` (LMS) e `interesados`.
