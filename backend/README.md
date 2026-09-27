@@ -21,6 +21,34 @@ python manage.py runserver
 - API: http://127.0.0.1:8000/api/
 - Admin: http://127.0.0.1:8000/admin/
 
+Sin `POSTGRES_DB` en el `.env`, Django usa SQLite. Con esa variable, usa PostgreSQL. Puedes usar el contenedor `db`, que queda expuesto en `localhost:5432`.
+
+### Con Docker
+
+Desde la raíz del repositorio, con Docker Desktop abierto y `backend/.env` creado:
+
+```bash
+docker compose up -d --build
+```
+
+| Servicio | URL | Descripción |
+|---|---|---|
+| `backend` | http://localhost:8000 | Django con recarga automática (el código se monta como volumen) |
+| `db` | `localhost:5432` | PostgreSQL 17 (volumen `postgres_data`) |
+| `pgadmin` | http://localhost:5050 | pgAdmin, con el servidor "Ceniño Jesús (Docker)" ya registrado (volumen `pgadmin_data`) |
+
+Las migraciones se aplican solas al arrancar el backend. Comandos útiles:
+
+```bash
+docker compose exec backend python manage.py createsuperuser
+docker compose exec backend python manage.py test
+docker compose logs -f backend
+docker compose down        # detiene los contenedores y conserva los datos
+docker compose down -v     # detiene los contenedores y BORRA los volúmenes (base de datos incluida)
+```
+
+En producción, la imagen arranca por defecto con gunicorn y `config.settings.prod`, sin el `command` ni el volumen de código de `docker-compose.yml`.
+
 Para ejecutar las pruebas:
 
 ```bash
