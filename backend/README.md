@@ -35,7 +35,7 @@ docker compose up -d --build
 |---|---|---|
 | `backend` | http://localhost:8000 | Django con recarga automática (el código se monta como volumen) |
 | `db` | `localhost:5432` | PostgreSQL 17 (volumen `postgres_data`) |
-| `pgadmin` | http://localhost:5050 | pgAdmin, con el servidor "Ceniño Jesús (Docker)" ya registrado (volumen `pgadmin_data`) |
+| `pgadmin` | http://localhost:5050 | pgAdmin, con el servidor "Cenino Jesús (Docker)" ya registrado (volumen `pgadmin_data`) |
 
 Las migraciones se aplican solas al arrancar el backend. Comandos útiles:
 

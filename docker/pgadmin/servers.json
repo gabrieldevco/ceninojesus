@@ -1,7 +1,7 @@
 {
   "Servers": {
     "1": {
-      "Name": "Ceniño Jesús (Docker)",
+      "Name": "Cenino Jesús (Docker)",
       "Group": "Servers",
       "Host": "db",
       "Port": 5432,
