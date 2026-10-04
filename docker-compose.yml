@@ -1,4 +1,5 @@
-# Entorno de desarrollo: PostgreSQL + backend Django + pgAdmin
+# Entorno de desarrollo: PostgreSQL + backend Django + workflow + copias de seguridad + pgAdmin
+# Producción: ver docker-compose.prod.yml
 # Uso: docker compose up -d --build   (requiere backend/.env, ver backend/.env.example)
 
 services:
@@ -9,7 +10,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "127.0.0.1:5432:5432"
+      # 5434 en el equipo para no chocar con otros PostgreSQL locales; dentro de Docker es 5432
+      - "127.0.0.1:5434:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
@@ -32,6 +34,46 @@ services:
       - media_data:/app/media
     ports:
       - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/salud/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    restart: unless-stopped
+
+  # Tareas automáticas (cada hora): recordatorios de interesados (RF-18) y alertas de solicitudes de datos (Ley 1581)
+  workflow:
+    build: ./backend
+    container_name: ceninojesus-workflow
+    env_file: ./backend/.env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+    # Sin el entrypoint del backend: las migraciones ya las aplica el servicio backend
+    entrypoint: ["sh", "/app/workflow.sh"]
+    command: []
+    volumes:
+      - ./backend:/app
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # RNF-09: copia diaria de la base de datos y de los archivos subidos en ./backups
+  backup:
+    image: postgres:17-alpine
+    container_name: ceninojesus-backup
+    env_file: ./backend/.env
+    entrypoint: ["sh", "/scripts/respaldar.sh"]
+    volumes:
+      - ./docker/backup:/scripts:ro
+      - ./backups:/backups
+      - media_data:/media:ro
     depends_on:
       db:
         condition: service_healthy

@@ -17,3 +17,6 @@ Thumbs.db
 db.sqlite3
 media/
 staticfiles/
+
+# Copias de seguridad (RNF-09)
+backups/

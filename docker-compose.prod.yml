@@ -1,0 +1,92 @@
+# Producción: Caddy (HTTPS + frontend) + backend con gunicorn + PostgreSQL + workflow + copias de seguridad.
+#
+# Uso en el servidor (desde la raíz del repositorio):
+#   1. Compilar el frontend para que exista frontend/dist
+#   2. Crear backend/.env con los valores de producción (ver backend/.env.example)
+#   3. docker compose -f docker-compose.prod.yml up -d --build
+#
+# Solo Caddy queda expuesto (puertos 80 y 443). La base de datos no es accesible desde fuera.
+
+name: ceninojesus-prod
+
+x-django: &django
+  build: ./backend
+  env_file: ${ARCHIVO_ENV:-./backend/.env}
+  environment:
+    DJANGO_SETTINGS_MODULE: config.settings.prod
+    POSTGRES_HOST: db
+    POSTGRES_PORT: "5432"
+  volumes:
+    - media_data:/app/media
+  restart: unless-stopped
+
+services:
+  db:
+    image: postgres:17-alpine
+    env_file: ${ARCHIVO_ENV:-./backend/.env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    <<: *django
+    # Usa el CMD del Dockerfile: gunicorn
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/salud/')"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Recordatorios de interesados (RF-18) y alertas de solicitudes de datos (Ley 1581)
+  workflow:
+    <<: *django
+    entrypoint: ["sh", "/app/workflow.sh"]
+    command: []
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # RNF-09: copia diaria de la base de datos y de los archivos subidos
+  backup:
+    image: postgres:17-alpine
+    env_file: ${ARCHIVO_ENV:-./backend/.env}
+    entrypoint: ["sh", "/scripts/respaldar.sh"]
+    volumes:
+      - ./docker/backup:/scripts:ro
+      - ${DIRECTORIO_BACKUPS:-./backups}:/backups
+      - media_data:/media:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    env_file: ${ARCHIVO_ENV:-./backend/.env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ${FRONTEND_DIST:-./frontend/dist}:/srv/frontend:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  media_data:
+  caddy_data:
+  caddy_config:

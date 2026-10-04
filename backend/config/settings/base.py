@@ -6,6 +6,7 @@ entorno (archivo `.env` en la raíz de `backend/`, ver `.env.example`).
 """
 
 import os
+from datetime import timedelta
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -39,6 +40,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "rest_framework_simplejwt",
     "corsheaders",
 ]
 
@@ -46,7 +48,12 @@ THIRD_PARTY_APPS = [
 # migraciones) desde su capa de infraestructura.
 LOCAL_APPS = [
     "modules.usuarios.infrastructure.apps.UsuariosConfig",
+    "modules.notificaciones.infrastructure.apps.NotificacionesConfig",
+    "modules.institucional.infrastructure.apps.InstitucionalConfig",
+    "modules.grupos.infrastructure.apps.GruposConfig",
+    "modules.contenidos.infrastructure.apps.ContenidosConfig",
     "modules.interesados.infrastructure.apps.InteresadosConfig",
+    "modules.datos_personales.infrastructure.apps.DatosPersonalesConfig",
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -150,13 +157,62 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Django REST Framework
 
 REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
     "EXCEPTION_HANDLER": "shared.infrastructure.exception_handler.domain_exception_handler",
+    # Límite de envíos por IP en formularios públicos y autenticación (ver shared/infrastructure/throttling.py)
+    "DEFAULT_THROTTLE_RATES": {
+        "formularios": os.getenv("LIMITE_FORMULARIOS", "20/hour"),
+        "autenticacion": os.getenv("LIMITE_AUTENTICACION", "10/minute"),
+    },
+    # Proxies delante de Django (Caddy en producción): necesario para identificar la IP real
+    "NUM_PROXIES": int(os.getenv("NUM_PROXIES")) if os.getenv("NUM_PROXIES") else None,
+}
+
+# Caché compartida por todos los procesos (la usa el límite de envíos)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "cache_aplicacion",
+    }
+}
+
+# Autenticación JWT (RF-06): el frontend envía "Authorization: Bearer <access>"
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_ACCESS_MINUTOS", "60"))),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.getenv("JWT_REFRESH_DIAS", "7"))),
+    "USER_ID_CLAIM": "usuario_id",
 }
 
 
 # CORS (el frontend vive en otro origen)
 
 CORS_ALLOWED_ORIGINS = env_list("CORS_ALLOWED_ORIGINS")
+
+
+# Correo (notificaciones RF-08, RF-11, RF-18). En desarrollo se imprime en consola.
+
+EMAIL_BACKEND = os.getenv("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.getenv("EMAIL_HOST", "")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "true").lower() == "true"
+DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-responder@ceninojesus.edu.co")
+
+
+# Workflow de interesados (RF-18)
+
+INTERESADOS_DIAS_SIN_RESPUESTA = int(os.getenv("INTERESADOS_DIAS_SIN_RESPUESTA", "3"))
+
+
+# Recuperación de contraseña: el correo lleva un enlace al frontend
+# (FRONTEND_URL/restablecer-contrasena?uid=...&token=...) válido por 2 horas
+
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173").rstrip("/")
+PASSWORD_RESET_TIMEOUT = 60 * 60 * 2

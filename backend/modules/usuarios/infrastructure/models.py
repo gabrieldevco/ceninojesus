@@ -11,6 +11,15 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Group,
 from django.db import models
 from django.utils import timezone
 
+from shared.domain.actor import Rol
+
+ROLES = [
+    (Rol.ADMINISTRADOR, "Administrador"),
+    (Rol.ADMINISTRADOR_GRUPO, "Administrador de grupo"),
+    (Rol.ACUDIENTE, "Padre / acudiente"),
+    (Rol.ESTUDIANTE, "Estudiante"),
+]
+
 
 class UsuarioManager(BaseUserManager):
     use_in_migrations = True
@@ -31,6 +40,7 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, nombre_usuario, correo=None, password=None, **extra):
         extra.setdefault("is_staff", True)
         extra.setdefault("is_superuser", True)
+        extra.setdefault("rol", Rol.ADMINISTRADOR)
         if not extra["is_staff"] or not extra["is_superuser"]:
             raise ValueError("Un superusuario debe tener is_staff e is_superuser en True.")
         return self._crear(nombre_usuario, correo, password, **extra)
@@ -41,7 +51,12 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     correo = models.EmailField("correo electrónico", blank=True)
     nombres = models.CharField(max_length=150, blank=True)
     apellidos = models.CharField(max_length=150, blank=True)
+    telefono = models.CharField("teléfono", max_length=20, blank=True)
+    rol = models.CharField(max_length=30, choices=ROLES, default=Rol.ACUDIENTE)
     fecha_registro = models.DateTimeField("fecha de registro", default=timezone.now)
+    fecha_autorizacion_datos = models.DateTimeField(
+        "fecha de autorización de datos", null=True, blank=True, help_text="Prueba de la autorización (Ley 1581)."
+    )
 
     # Campos heredados de Django, con columna en español
     password = models.CharField("contraseña", max_length=128, db_column="contrasena")
@@ -95,3 +110,36 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 
     def get_short_name(self):
         return self.nombres
+
+
+class EstudianteModel(models.Model):
+    nombres = models.CharField(max_length=150)
+    apellidos = models.CharField(max_length=150)
+    documento_identidad = models.CharField("documento de identidad", max_length=30, blank=True)
+    fecha_nacimiento = models.DateField("fecha de nacimiento", null=True, blank=True)
+    grado = models.CharField(max_length=30, blank=True)
+    acudiente = models.ForeignKey(Usuario, on_delete=models.PROTECT, related_name="estudiantes_a_cargo")
+    usuario = models.OneToOneField(
+        Usuario,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="estudiante",
+        help_text="Usuario con el que el estudiante ingresa a la plataforma.",
+    )
+    fecha_registro = models.DateTimeField("fecha de registro", default=timezone.now)
+    fecha_autorizacion_datos = models.DateTimeField(
+        "fecha de autorización de datos",
+        null=True,
+        blank=True,
+        help_text="Autorización del acudiente en representación del menor (Ley 1581).",
+    )
+
+    class Meta:
+        db_table = "estudiantes"
+        verbose_name = "estudiante"
+        verbose_name_plural = "estudiantes"
+        ordering = ["apellidos", "nombres"]
+
+    def __str__(self):
+        return f"{self.nombres} {self.apellidos}"

@@ -1,0 +1,31 @@
+# Servidor web de producción.
+# - HTTPS automático (Let's Encrypt) para el dominio de la variable DOMINIO.
+#   Con DOMINIO=localhost usa un certificado local, útil para probar.
+# - /api, /admin y /static van al backend Django; todo lo demás es el frontend (dist).
+
+{$DOMINIO:localhost} {
+	encode zstd gzip
+
+	# Tamaño máximo de una petición (archivos de material y actividades)
+	request_body {
+		max_size 25MB
+	}
+
+	@backend path /api/* /admin/* /static/*
+	handle @backend {
+		reverse_proxy backend:8000
+	}
+
+	# Aplicación de una sola página: las rutas del frontend devuelven index.html
+	handle {
+		root * /srv/frontend
+		try_files {path} /index.html
+		file_server
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
