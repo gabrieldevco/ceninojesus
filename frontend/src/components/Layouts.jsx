@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Link, useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Logo, Ico } from './ui'
-import { useAuth } from '../store'
+import { useAuth, useToast } from '../store'
 import { LINKS } from '../data/links'
 
 const TABS = [['inicio', 'Inicio'], ['institucional', 'Institucional'], ['academico', 'Académico'], ['galeria', 'Vida escolar'], ['equipo', 'Equipo'], ['servicios', 'Servicios'], ['contacto', 'Contacto']]
@@ -95,7 +95,7 @@ const MENU = {
 }
 
 export function PortalLayout({ crumb }) {
-  const { user, logout } = useAuth(); const nav = useNavigate()
+  const { user, logout } = useAuth(); const { push } = useToast(); const nav = useNavigate()
   return (
     <div className="portal">
       <aside className="side">
@@ -103,16 +103,50 @@ export function PortalLayout({ crumb }) {
         <p className="side-kicker">PORTAL INSTITUCIONAL</p>
         <p className="side-role">{user.label}</p>
         <nav>
-          {MENU[user.role].map(([to, t, ico]) => (
-            <NavLink key={to} to={to} className={({ isActive }) => `side-link ${isActive ? 'active' : ''}`}>
-              <i>{ico}</i>{t}
-            </NavLink>
-          ))}
-          <a className="side-link" href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer"><i>🎓</i>Aula virtual ↗</a>
-          <a className="side-link muted" href="#" onClick={e => e.preventDefault()} title="Pendiente de conexión"><i>▦</i>Biblioteca</a>
+          {user.role === 'estudiante' ? (
+            <>
+              <NavLink to="/estudiante/espacio" className={({ isActive }) => `side-link ${isActive ? 'active' : ''}`}>
+                <i>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+                </i>
+                Mi espacio
+              </NavLink>
+              <NavLink to="/estudiante/aula" className={({ isActive }) => `side-link ${isActive ? 'active' : ''}`}>
+                <i>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+                </i>
+                Aula estudiante
+              </NavLink>
+              <a className="side-link" href="#" onClick={e => { e.preventDefault(); push('Módulo de biblioteca Control Academic en integración.', 'info') }} title="Biblioteca virtual">
+                <i>
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m16 6 4 14"/><path d="M12 6v14"/><path d="M8 8v12"/><path d="M4 4v16"/></svg>
+                </i>
+                Biblioteca
+              </a>
+            </>
+          ) : (
+            <>
+              {MENU[user.role]?.map(([to, t, ico]) => (
+                <NavLink key={to} to={to} className={({ isActive }) => `side-link ${isActive ? 'active' : ''}`}>
+                  <i>{ico}</i>{t}
+                </NavLink>
+              ))}
+              <a className="side-link" href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer"><i>🎓</i>Aula virtual ↗</a>
+              <a className="side-link muted" href="#" onClick={e => e.preventDefault()} title="Pendiente de conexión"><i>▦</i>Biblioteca</a>
+            </>
+          )}
         </nav>
-        <div className="side-note"><b>Acceso por permisos</b><p>Solo el alcance asignado a tu cuenta.</p></div>
-        <Link className="side-help" to="/">Volver al sitio web</Link>
+        <div className="side-note">
+          <div className="side-note-h">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <b>Acceso por permisos</b>
+          </div>
+          <p>{user.role === 'estudiante' ? 'Los grupos requieren aprobación previa.' : 'Solo el alcance asignado a tu cuenta.'}</p>
+        </div>
+        <div className="side-links-foot">
+          <a className="side-help" href="#" onClick={e => { e.preventDefault(); push('Canal de ayuda institucional: coordinacion@ceninojesus.edu.co · PBX: 334 4105', 'info') }}>Ayuda y contacto</a>
+          <Link className="side-help" to="/">Volver al sitio web</Link>
+        </div>
       </aside>
       <div className="portal-main">
         <header className="topbar">

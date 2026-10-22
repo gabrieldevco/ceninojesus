@@ -10,6 +10,7 @@ import Admisiones from './pages/Admisiones'
 import Matricula from './pages/Matricula'
 import Aula from './pages/Aula'
 import Solicitudes from './pages/Solicitudes'
+import Espacio from './pages/Espacio'
 
 /* Protege rutas por rol: sin sesión → /acceso; rol incorrecto → /acceso con aviso */
 function Guard({ roles, crumb }) {
@@ -29,7 +30,10 @@ function ScrollBar() {
 export default function App() {
   const loc = useLocation()
   useEffect(() => {
-    if (!loc.hash) return window.scrollTo(0, 0)
+    if (!loc.hash) {
+      window.scrollTo(0, 0)
+      return
+    }
     const t = setTimeout(() => document.getElementById(loc.hash.slice(1))?.scrollIntoView({ behavior: 'smooth' }), 350)
     return () => clearTimeout(t)
   }, [loc.pathname, loc.hash])
@@ -40,6 +44,7 @@ export default function App() {
           <Route path="/acceso" element={<Anim><Acceso /></Anim>} />
           <Route path="/admisiones" element={<Anim><Admisiones /></Anim>} />
           <Route element={<Guard roles={['padre']} crumb="Matrícula extracurricular" />}><Route path="/familias/matricula" element={<Anim><Matricula /></Anim>} /></Route>
+          <Route element={<Guard roles={['estudiante', 'padre']} crumb="Mi espacio" />}><Route path="/estudiante/espacio" element={<Anim><Espacio /></Anim>} /></Route>
           <Route element={<Guard roles={['estudiante', 'padre']} crumb="Aula estudiante" />}><Route path="/estudiante/aula" element={<Anim><Aula /></Anim>} /></Route>
           <Route element={<Guard roles={['admin']} crumb="Solicitudes" />}><Route path="/admin/solicitudes" element={<Anim><Solicitudes /></Anim>} /></Route>
           <Route path="*" element={<Navigate to="/" replace />} />

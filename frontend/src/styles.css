@@ -443,3 +443,61 @@ body{background:#fff}
 .ad-ok-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 @media(max-width:960px){.ad-hero{padding:40px 22px 100px}.ad-hero h1{font-size:34px}.ad-wrap{grid-template-columns:1fr;margin-top:-60px;padding:0 16px 48px}.ad-info{padding-top:0;order:2}}
 @media(max-width:560px){.ad-row{grid-template-columns:1fr}.ad-grades{grid-template-columns:1fr 1fr}.ad-form{padding:24px 20px}}
+
+/* ===== AULA ESTUDIANTE (FIGMA PROTOTYPE) ===== */
+.groups-card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:24px 28px;margin-bottom:24px;box-shadow:0 2px 6px rgba(0,0,0,.02)}
+.groups-card h3{font-size:19px;font-weight:700;color:#003380;margin:0 0 16px;font-family:Montserrat,Inter,sans-serif}
+.grid-groups{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:14px}
+.gtile-v2{display:flex;flex-direction:column;align-items:flex-start;gap:10px;padding:18px 20px;border-radius:12px;border:1.5px solid var(--line);background:#fbfdff;cursor:pointer;text-align:left;transition:all .2s ease;width:100%}
+.gtile-v2 strong{font-family:Montserrat,Inter,sans-serif;font-size:16.5px;font-weight:700;color:#1a2536}
+.gtile-v2.on{background:#eef5ff;border-color:#004aad;box-shadow:0 4px 16px rgba(0,74,173,.12)}
+.gtile-v2.on strong{color:#004aad}
+.gtile-v2.locked{background:#fcfbf8;border-color:#eceff3;cursor:not-allowed;opacity:.9}
+.gtile-v2.locked strong{color:#4a5568}
+
+.badge-pill{font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;display:inline-block;white-space:nowrap}
+.badge-pill.approved{background:#e8f6ee;color:#1e7a4d}
+.badge-pill.pending{background:#fff6df;color:#8a5a00}
+.badge-pill.activity{background:#fdecea;color:#f04a34}
+.badge-pill.resource{background:#eef5ff;color:#004aad}
+
+.aula-banner{display:flex;align-items:center;gap:20px;background:#004aad;color:#fff;border-radius:14px;padding:24px 28px;margin-bottom:20px}
+.aula-banner-ico{width:52px;height:52px;display:grid;place-items:center;color:#fff;flex:none}
+.aula-banner h2{color:#fff;font-size:24px;font-family:Montserrat,Inter,sans-serif;font-weight:700;margin:0}
+.aula-banner p{color:rgba(255,255,255,.92);font-size:14px;margin:6px 0 0;line-height:1.5}
+
+.aula-tabs{display:flex;gap:10px;margin:18px 0 24px}
+.tab-pill{border:1.5px solid var(--line);background:#fff;color:var(--muted);font-size:13px;font-weight:600;padding:8px 18px;border-radius:99px;cursor:pointer;transition:all .2s ease}
+.tab-pill:hover{border-color:#004aad;color:#004aad}
+.tab-pill.on{background:#004aad;border-color:#004aad;color:#fff}
+
+.mat-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:16px;display:flex;flex-direction:column;align-items:flex-start;gap:14px;transition:box-shadow .2s ease,transform .2s ease}
+.mat-card:hover{box-shadow:0 8px 24px rgba(0,74,173,.08);border-color:#b8d5ff}
+.mat-card-h{display:flex;align-items:center;gap:14px}
+.mat-icon-wrap{width:44px;height:44px;border-radius:10px;background:#eef5ff;color:#004aad;display:grid;place-items:center;flex:none;border:1px solid #dce8fa}
+.mat-card-h b{font-size:16px;font-weight:700;color:#1a2536;display:block}
+.mat-card-h small{font-size:12.5px;color:#627187;display:block;margin-top:3px}
+.btn-mat-action{border:1.5px solid #004aad;background:#fff;color:#004aad;font-weight:600;font-size:13px;padding:8px 18px;border-radius:8px;cursor:pointer;transition:all .2s ease}
+.btn-mat-action:hover{background:#004aad;color:#fff;box-shadow:0 4px 12px rgba(0,74,173,.25)}
+
+.act-featured-card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:24px 26px}
+.act-featured-title{font-size:22px;font-weight:800;font-family:Montserrat,Inter,sans-serif;color:#003380;margin:12px 0 6px}
+.act-meta-line{font-size:12.5px;color:#627187;margin-bottom:14px}
+.act-desc-text{font-size:14px;line-height:1.6;color:#202d42;margin-bottom:16px}
+.act-steps-title{font-size:14px;font-weight:700;color:#1a2536;margin:16px 0 8px;display:block}
+.act-steps-list{padding-left:18px;margin:0 0 20px;font-size:13.5px;line-height:1.65;color:#202d42}
+.act-info-notice{background:#eef5ff;border:1px solid #dce8fa;border-radius:12px;padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.act-info-notice svg{width:20px;height:20px;flex:none;color:#004aad;margin-top:1px}
+.act-info-notice b{font-size:13.5px;color:#004aad;display:block;margin-bottom:3px}
+.act-info-notice p{font-size:12.5px;color:#3b5a8f;margin:0;line-height:1.45}
+
+.modal-overlay{position:fixed;inset:0;z-index:100;background:rgba(0,20,60,.48);backdrop-filter:blur(4px);display:grid;place-items:center;padding:20px}
+.modal-dialog{background:#fff;border-radius:18px;max-width:580px;width:100%;padding:28px;box-shadow:0 24px 60px rgba(0,40,120,.25);border:1px solid var(--line);position:relative}
+.modal-close{position:absolute;top:18px;right:18px;background:var(--soft);border:0;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;display:grid;place-items:center;color:var(--muted);transition:.2s}
+.modal-close:hover{background:var(--line);color:var(--ink)}
+
+.side-links-foot{margin-top:auto;display:flex;flex-direction:column;gap:8px}
+.side-note-h{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.side-note-h svg{width:18px;height:18px;flex:none;color:var(--blue)}
+@media(max-width:960px){.grid-groups{grid-template-columns:1fr}}
+
