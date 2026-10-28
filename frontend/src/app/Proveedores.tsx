@@ -6,6 +6,7 @@ import { AlmacenamientoLocal, type Almacenamiento } from '@/shared/lib/almacenam
 import { ToastProvider } from '@/shared/ui/toast'
 import { AuthProvider, crearCasosDeUsoAuth, crearGestorDeSesion } from '@/modules/auth'
 import { AulaProvider, crearCasosDeUsoAula } from '@/modules/aula'
+import { crearCasosDeUsoEstudiantes, EstudiantesProvider } from '@/modules/estudiantes'
 import { crearCasosDeUsoGrupos, GruposProvider } from '@/modules/grupos'
 import { crearCasosDeUsoMatriculas, MatriculasProvider } from '@/modules/matriculas'
 
@@ -29,6 +30,7 @@ function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opcion
   const http = new FetchHttpClient(apiUrl, sesion, fetchImpl)
   return {
     auth: crearCasosDeUsoAuth({ almacenamiento, http, sesion, modoDemo }),
+    estudiantes: crearCasosDeUsoEstudiantes({ http, almacenamiento, modoDemo }),
     grupos: crearCasosDeUsoGrupos({ http, modoDemo }),
     matriculas: crearCasosDeUsoMatriculas({ http, almacenamiento, modoDemo }),
     aula: crearCasosDeUsoAula(),
@@ -53,9 +55,11 @@ export function Proveedores({
       <ToastProvider>
         <AuthProvider casosDeUso={casosDeUso.auth} modoDemo={modoDemo}>
           <GruposProvider casosDeUso={casosDeUso.grupos}>
-            <MatriculasProvider casosDeUso={casosDeUso.matriculas}>
-              <AulaProvider casosDeUso={casosDeUso.aula}>{children}</AulaProvider>
-            </MatriculasProvider>
+            <EstudiantesProvider casosDeUso={casosDeUso.estudiantes}>
+              <MatriculasProvider casosDeUso={casosDeUso.matriculas}>
+                <AulaProvider casosDeUso={casosDeUso.aula}>{children}</AulaProvider>
+              </MatriculasProvider>
+            </EstudiantesProvider>
           </GruposProvider>
         </AuthProvider>
       </ToastProvider>

@@ -1,7 +1,7 @@
 import type { HttpClient } from '@/shared/http/HttpClient'
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
-import { EnviarSolicitud, ListarEstudiantes, ListarSolicitudes, ResolverSolicitud } from './application/casosDeUso'
-import type { CatalogoMatricula, RepositorioSolicitudes } from './domain/puertos'
+import { EnviarSolicitud, ListarSolicitudes, ResolverSolicitud } from './application/casosDeUso'
+import type { RepositorioSolicitudes } from './domain/puertos'
 import { RepositorioSolicitudesDemo } from './infrastructure/RepositorioSolicitudesDemo'
 import { RepositorioSolicitudesHttp } from './infrastructure/RepositorioSolicitudesHttp'
 import type { CasosDeUsoMatriculas } from './presentation/MatriculasProvider'
@@ -20,13 +20,12 @@ export function crearCasosDeUsoMatriculas({
   almacenamiento: Almacenamiento
   modoDemo: boolean
 }): CasosDeUsoMatriculas {
-  const repositorio: RepositorioSolicitudes & CatalogoMatricula = modoDemo
+  const repositorio: RepositorioSolicitudes = modoDemo
     ? new RepositorioSolicitudesDemo(almacenamiento)
     : new RepositorioSolicitudesHttp(http)
   return {
     listarSolicitudes: new ListarSolicitudes(repositorio),
     enviarSolicitud: new EnviarSolicitud(repositorio),
     resolverSolicitud: new ResolverSolicitud(repositorio),
-    listarEstudiantes: new ListarEstudiantes(repositorio),
   }
 }

@@ -35,6 +35,24 @@ describe('aplicación en modo demostración', () => {
     expect(screen.getByText('Mis solicitudes')).toBeInTheDocument()
   })
 
+  it('un acudiente registra a un estudiante: exige la autorización y luego lo lista', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'padre')
+    const usuario = userEvent.setup()
+    renderizar('/familias/estudiantes', { modoDemo: true, almacenamiento })
+
+    const [nombres, apellidos] = await screen.findAllByRole('textbox')
+    await usuario.type(nombres as HTMLElement, 'Sofía')
+    await usuario.type(apellidos as HTMLElement, 'Ramos')
+    await usuario.click(screen.getByRole('button', { name: /registrar estudiante/i }))
+    expect(await screen.findByText(/debes autorizar el tratamiento/i)).toBeInTheDocument()
+
+    await usuario.click(screen.getByRole('checkbox'))
+    await usuario.click(screen.getByRole('button', { name: /registrar estudiante/i }))
+
+    expect(await screen.findByRole('cell', { name: 'Sofía Ramos' })).toBeInTheDocument()
+  })
+
   it('un estudiante no puede entrar a las solicitudes de administración', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'estudiante')

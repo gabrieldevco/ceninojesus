@@ -5,9 +5,10 @@ import { ErrorApi } from '@/shared/http/errores'
 import { formatearFecha } from '@/shared/lib/fecha'
 import { Alert, Stat, StatusBadge } from '@/shared/ui/ui'
 import { useToast } from '@/shared/ui/toast'
+import { useEstudiantes } from '@/modules/estudiantes'
 import { useGrupos } from '@/modules/grupos'
 import { contarPorEstado, SolicitudDuplicada } from '../domain/solicitud'
-import { useEnviarSolicitud, useEstudiantes, useSolicitudes } from './MatriculasProvider'
+import { useEnviarSolicitud, useSolicitudes } from './MatriculasProvider'
 
 function mensajeDeError(error: unknown): string {
   if (error instanceof SolicitudDuplicada) return error.message
@@ -67,7 +68,7 @@ export default function MatriculaPage() {
           <h3>Solicitar matrícula</h3>
           {estudiantes.length === 0 && (
             <Alert tone="info" title="Sin estudiantes vinculados">
-              Para solicitar una matrícula, primero la institución debe vincular a tus estudiantes a tu cuenta.
+              Para solicitar una matrícula, primero <Link className="go" to="/familias/estudiantes">registra a tu estudiante →</Link>
             </Alert>
           )}
           <div className="row2">

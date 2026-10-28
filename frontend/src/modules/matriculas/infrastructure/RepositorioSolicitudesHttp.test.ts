@@ -79,11 +79,6 @@ describe('RepositorioSolicitudesHttp', () => {
     expect(error).toMatchObject({ estado: 400, detalle: 'Ya existe una solicitud activa.' })
   })
 
-  it('arma el nombre completo de los estudiantes vinculados', async () => {
-    const { repo } = armar(() => respuesta(200, [{ id: 10, nombres: 'Luis', apellidos: 'Pérez' }]))
-    expect(await repo.estudiantes()).toEqual([{ id: 10, nombre: 'Luis Pérez' }])
-  })
-
   it('rechaza una respuesta que no tiene la forma esperada', async () => {
     const { repo } = armar(() => respuesta(200, [{ id: 'no-es-numero' }]))
     await expect(repo.listar()).rejects.toThrow()

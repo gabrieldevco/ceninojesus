@@ -1,11 +1,6 @@
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
-import type { CatalogoMatricula, RepositorioSolicitudes } from '../domain/puertos'
-import type {
-  EstadoSolicitud,
-  EstudianteVinculado,
-  NuevaSolicitud,
-  SolicitudMatricula,
-} from '../domain/solicitud'
+import type { RepositorioSolicitudes } from '../domain/puertos'
+import type { EstadoSolicitud, NuevaSolicitud, SolicitudMatricula } from '../domain/solicitud'
 
 const CLAVE = 'nj_requests_v4'
 
@@ -44,7 +39,7 @@ const SEMILLA: SolicitudMatricula[] = [
 ]
 
 /** Solicitudes de demostración guardadas en el navegador (modo sin backend). */
-export class RepositorioSolicitudesDemo implements RepositorioSolicitudes, CatalogoMatricula {
+export class RepositorioSolicitudesDemo implements RepositorioSolicitudes {
   constructor(private readonly almacenamiento: Almacenamiento) {}
 
   private leer(): SolicitudMatricula[] {
@@ -79,9 +74,5 @@ export class RepositorioSolicitudesDemo implements RepositorioSolicitudes, Catal
       actuales.map((s) => (s.id === id ? resuelta : s)),
     )
     return Promise.resolve(resuelta)
-  }
-
-  estudiantes(): Promise<EstudianteVinculado[]> {
-    return Promise.resolve(Object.entries(ESTUDIANTES).map(([id, nombre]) => ({ id: Number(id), nombre })))
   }
 }

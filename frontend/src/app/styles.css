@@ -443,3 +443,8 @@ body{background:#fff}
 .ad-ok-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 @media(max-width:960px){.ad-hero{padding:40px 22px 100px}.ad-hero h1{font-size:34px}.ad-wrap{grid-template-columns:1fr;margin-top:-60px;padding:0 16px 48px}.ad-info{padding-top:0;order:2}}
 @media(max-width:560px){.ad-row{grid-template-columns:1fr}.ad-grades{grid-template-columns:1fr 1fr}.ad-form{padding:24px 20px}}
+
+/* Formularios: error por campo y casilla de autorización */
+.field-err{color:#c0392b;font-size:.8rem;font-weight:500}
+label.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:.9rem;line-height:1.4}
+label.check input{margin-top:3px;flex:none;width:auto}

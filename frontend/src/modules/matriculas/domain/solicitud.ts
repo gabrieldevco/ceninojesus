@@ -20,12 +20,6 @@ export interface NuevaSolicitud {
   comentario?: string
 }
 
-/** Estudiante vinculado al acudiente, para elegirlo en el formulario. */
-export interface EstudianteVinculado {
-  id: number
-  nombre: string
-}
-
 export const MOTIVO_MINIMO_CARACTERES = 5
 
 export class SolicitudDuplicada extends Error {
