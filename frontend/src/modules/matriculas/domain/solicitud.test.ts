@@ -8,14 +8,15 @@ import {
 
 const base: SolicitudMatricula = {
   id: 1,
+  estudianteId: 10,
   estudiante: 'Ana',
-  acudiente: 'Marta',
-  correo: 'marta@example.com',
+  grupoId: 3,
   grupo: 'Ajedrez',
+  comentario: '',
   fecha: '2026-10-01',
   estado: 'pendiente',
 }
-const nueva = { estudiante: 'Ana', acudiente: 'Marta', correo: 'marta@example.com', grupo: 'Ajedrez' }
+const nueva = { estudianteId: 10, grupoId: 3 }
 
 describe('buscarDuplicada', () => {
   it('detecta una solicitud pendiente o aprobada del mismo estudiante y grupo', () => {
@@ -28,8 +29,8 @@ describe('buscarDuplicada', () => {
   })
 
   it('no confunde otro estudiante ni otro grupo', () => {
-    expect(buscarDuplicada([base], { ...nueva, estudiante: 'Luis' })).toBeUndefined()
-    expect(buscarDuplicada([base], { ...nueva, grupo: 'Robótica' })).toBeUndefined()
+    expect(buscarDuplicada([base], { ...nueva, estudianteId: 11 })).toBeUndefined()
+    expect(buscarDuplicada([base], { ...nueva, grupoId: 4 })).toBeUndefined()
   })
 })
 

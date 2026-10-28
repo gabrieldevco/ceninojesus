@@ -1,24 +1,49 @@
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
 import type { CatalogoMatricula, RepositorioSolicitudes } from '../domain/puertos'
-import type { EstadoSolicitud, NuevaSolicitud, SolicitudMatricula } from '../domain/solicitud'
+import type {
+  EstadoSolicitud,
+  EstudianteVinculado,
+  NuevaSolicitud,
+  SolicitudMatricula,
+} from '../domain/solicitud'
 
-const CLAVE = 'nj_requests_v3'
+const CLAVE = 'nj_requests_v4'
 
-const familia = (letra: string) => ({ acudiente: `Acudiente demo ${letra}`, correo: `familia.${letra.toLowerCase()}@example.com` })
+const GRUPOS: Record<number, string> = { 1: 'Ajedrez', 2: 'Robótica', 3: 'Danza y arte', 4: 'Música' }
+const ESTUDIANTES: Record<number, string> = { 1: 'Estudiante demo A', 2: 'Estudiante demo B' }
+
+const solicitud = (
+  id: number,
+  estudianteId: number,
+  grupoId: number,
+  fecha: string,
+  estado: EstadoSolicitud,
+  motivo?: string,
+): SolicitudMatricula => ({
+  id,
+  estudianteId,
+  estudiante: ESTUDIANTES[estudianteId] ?? `Estudiante demo ${estudianteId}`,
+  grupoId,
+  grupo: GRUPOS[grupoId] ?? '',
+  comentario: '',
+  fecha,
+  estado,
+  ...(motivo ? { motivo } : {}),
+})
 
 const SEMILLA: SolicitudMatricula[] = [
-  { id: 1, estudiante: 'Estudiante demo A', ...familia('A'), grupo: 'Robótica', fecha: '2026-10-03', estado: 'pendiente' },
-  { id: 2, estudiante: 'Estudiante demo A', ...familia('A'), grupo: 'Ajedrez', fecha: '2026-10-01', estado: 'aprobada' },
-  { id: 3, estudiante: 'Estudiante demo A', ...familia('A'), grupo: 'Danza y arte', fecha: '2026-10-01', estado: 'aprobada' },
-  { id: 4, estudiante: 'Estudiante demo B', ...familia('A'), grupo: 'Música', fecha: '2026-09-30', estado: 'rechazada', motivo: 'Cupo no disponible' },
-  { id: 5, estudiante: 'Estudiante demo B', ...familia('B'), grupo: 'Robótica', fecha: '2026-10-03', estado: 'pendiente' },
-  { id: 6, estudiante: 'Estudiante demo C', ...familia('C'), grupo: 'Robótica', fecha: '2026-10-02', estado: 'pendiente' },
-  { id: 7, estudiante: 'Estudiante demo D', ...familia('D'), grupo: 'Robótica', fecha: '2026-10-01', estado: 'aprobada' },
-  { id: 8, estudiante: 'Estudiante demo E', ...familia('E'), grupo: 'Robótica', fecha: '2026-10-01', estado: 'aprobada' },
-  { id: 9, estudiante: 'Estudiante demo F', ...familia('F'), grupo: 'Robótica', fecha: '2026-09-30', estado: 'rechazada', motivo: 'Cupo no disponible' },
+  solicitud(1, 1, 2, '2026-10-03', 'pendiente'),
+  solicitud(2, 1, 1, '2026-10-01', 'aprobada'),
+  solicitud(3, 1, 3, '2026-10-01', 'aprobada'),
+  solicitud(4, 2, 4, '2026-09-30', 'rechazada', 'Cupo no disponible'),
+  solicitud(5, 2, 2, '2026-10-03', 'pendiente'),
+  solicitud(6, 3, 2, '2026-10-02', 'pendiente'),
+  solicitud(7, 4, 2, '2026-10-01', 'aprobada'),
+  solicitud(8, 5, 2, '2026-10-01', 'aprobada'),
+  solicitud(9, 6, 2, '2026-09-30', 'rechazada', 'Cupo no disponible'),
 ]
 
-/** Solicitudes de demostración guardadas en el navegador; se reemplaza por el repositorio HTTP. */
+/** Solicitudes de demostración guardadas en el navegador (modo sin backend). */
 export class RepositorioSolicitudesDemo implements RepositorioSolicitudes, CatalogoMatricula {
   constructor(private readonly almacenamiento: Almacenamiento) {}
 
@@ -32,14 +57,14 @@ export class RepositorioSolicitudesDemo implements RepositorioSolicitudes, Catal
 
   crear(nueva: NuevaSolicitud): Promise<SolicitudMatricula> {
     const actuales = this.leer()
-    const solicitud: SolicitudMatricula = {
-      ...nueva,
-      id: Math.max(0, ...actuales.map((s) => s.id)) + 1,
-      fecha: new Date().toISOString().slice(0, 10),
-      estado: 'pendiente',
+    const id = Math.max(0, ...actuales.map((s) => s.id)) + 1
+    const hoy = new Date().toISOString().slice(0, 10)
+    const creada: SolicitudMatricula = {
+      ...solicitud(id, nueva.estudianteId, nueva.grupoId, hoy, 'pendiente'),
+      comentario: nueva.comentario ?? '',
     }
-    this.almacenamiento.guardar(CLAVE, [solicitud, ...actuales])
-    return Promise.resolve(solicitud)
+    this.almacenamiento.guardar(CLAVE, [creada, ...actuales])
+    return Promise.resolve(creada)
   }
 
   resolver(id: number, estado: Exclude<EstadoSolicitud, 'pendiente'>, motivo?: string): Promise<SolicitudMatricula> {
@@ -56,7 +81,7 @@ export class RepositorioSolicitudesDemo implements RepositorioSolicitudes, Catal
     return Promise.resolve(resuelta)
   }
 
-  estudiantes(): Promise<string[]> {
-    return Promise.resolve(['Estudiante demo A', 'Estudiante demo B'])
+  estudiantes(): Promise<EstudianteVinculado[]> {
+    return Promise.resolve(Object.entries(ESTUDIANTES).map(([id, nombre]) => ({ id: Number(id), nombre })))
   }
 }

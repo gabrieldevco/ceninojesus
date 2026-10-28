@@ -17,7 +17,16 @@ class RepositorioFalso implements RepositorioSolicitudes {
   }
 
   crear(nueva: NuevaSolicitud) {
-    const solicitud: SolicitudMatricula = { ...nueva, id: this.datos.length + 1, fecha: '2026-10-01', estado: 'pendiente' }
+    const solicitud: SolicitudMatricula = {
+      id: this.datos.length + 1,
+      estudianteId: nueva.estudianteId,
+      estudiante: 'Ana',
+      grupoId: nueva.grupoId,
+      grupo: 'Ajedrez',
+      comentario: nueva.comentario ?? '',
+      fecha: '2026-10-01',
+      estado: 'pendiente',
+    }
     this.datos = [solicitud, ...this.datos]
     return Promise.resolve(solicitud)
   }
@@ -31,7 +40,7 @@ class RepositorioFalso implements RepositorioSolicitudes {
   }
 }
 
-const nueva: NuevaSolicitud = { estudiante: 'Ana', acudiente: 'Marta', correo: 'm@example.com', grupo: 'Ajedrez' }
+const nueva: NuevaSolicitud = { estudianteId: 10, grupoId: 3 }
 
 describe('EnviarSolicitud', () => {
   it('crea la solicitud como pendiente', async () => {

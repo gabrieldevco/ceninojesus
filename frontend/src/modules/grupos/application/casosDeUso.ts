@@ -8,3 +8,11 @@ export class ListarGrupos {
     return this.repositorio.listar()
   }
 }
+
+export class ListarMisGrupos {
+  constructor(private readonly repositorio: RepositorioGrupos) {}
+
+  ejecutar(): Promise<Grupo[]> {
+    return this.repositorio.listarMios()
+  }
+}

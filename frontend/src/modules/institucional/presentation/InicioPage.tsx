@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Reveal, Ico } from '@/shared/ui/ui'
 import Carousel from '@/shared/ui/Carousel'
-import { useGrupos } from '@/modules/grupos'
+import { iconoDeGrupo, useGrupos } from '@/modules/grupos'
 
 const VALORES = [['Autonomía', 'Pensar y actuar con responsabilidad.', '🧭'], ['Liderazgo', 'Participar y aportar a la comunidad.', '🚀'], ['Pertenencia', 'Cuidar los vínculos y el entorno escolar.', '🤝'], ['Cuidado ambiental', 'Reconocer nuestra responsabilidad con la naturaleza.', '🌱']]
 const HORIZONTE = [['Historia', 'Propuesta: nuestra historia se construye en los vínculos entre estudiantes, docentes y familias, y en las experiencias compartidas de aprendizaje.'], ['Misión', 'Propuesta: acompañar la formación integral de personas críticas y autónomas, que construyan conocimiento, vivan sus valores y contribuyan al cuidado del medio ambiente.'], ['Visión', 'Propuesta: una comunidad de aprendizaje que impulse el liderazgo, la investigación, el arte y la participación responsable de sus estudiantes.']]
@@ -139,9 +139,9 @@ export default function Inicio() {
         <p className="muted-p">Las familias solicitan la matrícula desde el portal y el administrador de cada grupo aprueba el acceso.</p></Reveal>
         <div className="grid4">
           {grupos.map((g, i) => (
-            <Reveal key={g.nombre} delay={i * .08}>
+            <Reveal key={g.id} delay={i * .08}>
               <Link to="/familias/matricula" className={`card hover group-card g${i + 1}`}>
-                <span className="gicon">{g.icono}</span><h3>{g.nombre}</h3><p>Solicitar matrícula →</p>
+                <span className="gicon">{iconoDeGrupo(g.nombre, i)}</span><h3>{g.nombre}</h3><p>Solicitar matrícula →</p>
               </Link>
             </Reveal>
           ))}

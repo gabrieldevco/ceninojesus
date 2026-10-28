@@ -1,86 +1,72 @@
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { StatusBadge } from '@/shared/ui/ui'
 import { useToast } from '@/shared/ui/toast'
 import { useAuth } from '@/modules/auth'
-import { useGrupos } from '@/modules/grupos'
-import { useSolicitudes } from '@/modules/matriculas'
+import { iconoDeGrupo, useMisGrupos } from '@/modules/grupos'
 import type { TipoMaterial } from '../domain/material'
 import { useMateriales } from './AulaProvider'
 
 const ICONO: Record<TipoMaterial, string> = { doc: '📄', video: '▶', link: '🔗' }
-
-/** En la demostración un acudiente ve el aula del primer estudiante vinculado a su cuenta. */
-const ESTUDIANTE_DEMO = 'Estudiante demo A'
 
 type Pestana = 'material' | 'info'
 
 export default function AulaPage() {
   const { usuario } = useAuth()
   const { push } = useToast()
-  const { solicitudes } = useSolicitudes()
-  const { grupos } = useGrupos()
+  const { grupos, cargando } = useMisGrupos()
   const [params, setParams] = useSearchParams()
   const [pestana, setPestana] = useState<Pestana>('material')
 
-  const estudiante = usuario?.rol === 'estudiante' ? usuario.nombre : ESTUDIANTE_DEMO
-  const mias = solicitudes.filter((s) => s.estudiante === estudiante)
-  const aprobados = mias.filter((s) => s.estado === 'aprobada').map((s) => s.grupo)
-  const pedido = params.get('grupo')
-  const activo = pedido && aprobados.includes(pedido) ? pedido : aprobados[0]
-  const materiales = useMateriales(activo)
-  const infoActivo = grupos.find((g) => g.nombre === activo)
+  // Solo llegan los grupos con matrícula aprobada: no hay forma de abrir uno bloqueado
+  const pedido = Number(params.get('grupo'))
+  const activo = grupos.find((g) => g.id === pedido) ?? grupos[0]
+  const indiceActivo = activo ? grupos.indexOf(activo) : 0
+  const materiales = useMateriales(activo?.nombre)
 
   return (
     <>
       <p className="kicker">MI ESPACIO / AULA ESTUDIANTE</p>
       <h1 className="ptitle">Aprende, explora y participa</h1>
       <p className="sub">
-        {estudiante} · Contenido y fechas de ejemplo. Solo puedes acceder a los grupos con matrícula aprobada.
+        {usuario?.nombre} · Contenido y fechas de ejemplo. Solo puedes acceder a los grupos con matrícula aprobada.
       </p>
 
       <section className="card">
         <h3>Mis grupos</h3>
         <div className="grid3 groups">
-          {mias.map((s) => {
-            const habilitado = s.estado === 'aprobada'
-            return (
-              <motion.button
-                key={s.id}
-                className={`gtile ${habilitado ? '' : 'locked'} ${habilitado && activo === s.grupo ? 'on' : ''}`}
-                whileHover={habilitado ? { y: -4 } : {}}
-                whileTap={habilitado ? { scale: 0.97 } : {}}
-                onClick={() =>
-                  habilitado ? setParams({ grupo: s.grupo }) : push(`${s.grupo} está bloqueado: espera la aprobación`, 'warn')
-                }
-              >
-                <strong>
-                  {habilitado ? '' : '🔒 '}
-                  {s.grupo}
-                </strong>
-                <StatusBadge status={s.estado} />
-              </motion.button>
-            )
-          })}
+          {grupos.map((g) => (
+            <motion.button
+              key={g.id}
+              className={`gtile ${activo?.id === g.id ? 'on' : ''}`}
+              whileHover={{ y: -4 }}
+              whileTap={{ scale: 0.97 }}
+              onClick={() => setParams({ grupo: String(g.id) })}
+            >
+              <strong>{g.nombre}</strong>
+              <StatusBadge status="aprobada" />
+            </motion.button>
+          ))}
         </div>
-        {mias.some((s) => s.estado === 'pendiente') && (
-          <p className="muted-p">
-            Los grupos pendientes están bloqueados hasta su aprobación. El estado se consulta en Matrícula extracurricular.
-          </p>
-        )}
+        <p className="muted-p">
+          Aquí aparecen los grupos con matrícula aprobada. Las solicitudes pendientes se consultan en{' '}
+          {usuario?.rol === 'acudiente' ? <Link to="/familias/matricula">Matrícula extracurricular</Link> : 'Matrícula extracurricular'}.
+        </p>
       </section>
 
-      {!activo ? (
+      {cargando ? (
+        <p className="card">Cargando tus grupos…</p>
+      ) : !activo ? (
         <p className="card">Aún no tienes grupos aprobados.</p>
       ) : (
         <AnimatePresence mode="wait">
-          <motion.div key={activo} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+          <motion.div key={activo.id} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
             <div className="banner">
-              <span className="big-ico">{infoActivo?.icono}</span>
+              <span className="big-ico">{iconoDeGrupo(activo.nombre, indiceActivo)}</span>
               <div>
-                <h2>{activo} · Aula del grupo</h2>
-                <p>{infoActivo?.lema}</p>
+                <h2>{activo.nombre} · Aula del grupo</h2>
+                <p>{activo.descripcion}</p>
               </div>
             </div>
             <div className="tabs">
@@ -94,7 +80,8 @@ export default function AulaPage() {
             {pestana === 'info' ? (
               <div className="card">
                 <h3>Información del grupo</h3>
-                <p>Horarios, docente responsable y condiciones por confirmar con la institución.</p>
+                <p>{activo.horario ? `Horario: ${activo.horario}.` : 'Horario por confirmar con la institución.'}</p>
+                <p>Docente responsable y condiciones por confirmar con la institución.</p>
               </div>
             ) : (
               <div className="two lms">
