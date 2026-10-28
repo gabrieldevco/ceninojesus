@@ -41,4 +41,12 @@ export class RepositorioAutenticacionDemo implements RepositorioAutenticacion {
   solicitarRecuperacion(): Promise<void> {
     return Promise.resolve()
   }
+
+  registrarAcudiente(): Promise<void> {
+    return Promise.resolve()
+  }
+
+  restablecerClave(): Promise<void> {
+    return Promise.resolve()
+  }
 }

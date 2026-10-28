@@ -1,5 +1,13 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { CerrarSesion, IniciarSesion, ObtenerSesion, SolicitarRecuperacion } from '../application/casosDeUso'
+import type {
+  CerrarSesion,
+  IniciarSesion,
+  ObtenerSesion,
+  RegistrarAcudiente,
+  RestablecerClave,
+  SolicitarRecuperacion,
+} from '../application/casosDeUso'
+import type { NuevoAcudiente, RestablecimientoDeClave } from '../domain/registro'
 import type { Usuario } from '../domain/usuario'
 
 export interface CasosDeUsoAuth {
@@ -7,6 +15,8 @@ export interface CasosDeUsoAuth {
   obtenerSesion: ObtenerSesion
   cerrarSesion: CerrarSesion
   solicitarRecuperacion: SolicitarRecuperacion
+  registrarAcudiente: RegistrarAcudiente
+  restablecerClave: RestablecerClave
 }
 
 interface ContextoAuth {
@@ -16,6 +26,9 @@ interface ContextoAuth {
   iniciarSesion: (identificador: string, clave: string) => Promise<Usuario | null>
   cerrarSesion: () => Promise<void>
   solicitarRecuperacion: (identificador: string) => Promise<void>
+  /** Registro público de acudientes y restablecimiento con el enlace del correo: no requieren sesión. */
+  registrarAcudiente: (nuevo: NuevoAcudiente) => Promise<void>
+  restablecerClave: (datos: RestablecimientoDeClave) => Promise<void>
   /** true cuando la app corre con cuentas de demostración (sin backend) */
   modoDemo: boolean
 }
@@ -65,9 +78,12 @@ export function AuthProvider({
     [casosDeUso],
   )
 
+  const registrarAcudiente = useCallback((nuevo: NuevoAcudiente) => casosDeUso.registrarAcudiente.ejecutar(nuevo), [casosDeUso])
+  const restablecerClave = useCallback((datos: RestablecimientoDeClave) => casosDeUso.restablecerClave.ejecutar(datos), [casosDeUso])
+
   const valor = useMemo(
-    () => ({ usuario, cargando, iniciarSesion, cerrarSesion, solicitarRecuperacion, modoDemo }),
-    [usuario, cargando, iniciarSesion, cerrarSesion, solicitarRecuperacion, modoDemo],
+    () => ({ usuario, cargando, iniciarSesion, cerrarSesion, solicitarRecuperacion, registrarAcudiente, restablecerClave, modoDemo }),
+    [usuario, cargando, iniciarSesion, cerrarSesion, solicitarRecuperacion, registrarAcudiente, restablecerClave, modoDemo],
   )
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }
@@ -77,3 +93,4 @@ export function useAuth(): ContextoAuth {
   if (!contexto) throw new Error('useAuth requiere AuthProvider')
   return contexto
 }
+

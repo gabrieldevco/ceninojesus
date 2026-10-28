@@ -95,6 +95,53 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByRole('heading', { name: /gracias, marta/i })).toBeInTheDocument()
   })
 
+  it('un visitante crea su cuenta de acudiente: valida y lo lleva a iniciar sesión', async () => {
+    const usuario = userEvent.setup()
+    renderizar('/registro', { modoDemo: true })
+    const formulario = await screen.findByRole('form', { name: /crear cuenta/i })
+    const [nombres, apellidos, correo, , usuarioIngresado, clave, confirmacion] = Array.from(formulario.querySelectorAll('input'))
+
+    await usuario.type(nombres as HTMLElement, 'Ana')
+    await usuario.type(apellidos as HTMLElement, 'Gómez')
+    await usuario.type(correo as HTMLElement, 'ana@example.com')
+    await usuario.type(usuarioIngresado as HTMLElement, 'ana')
+    await usuario.type(clave as HTMLElement, 'Clave-segura-1')
+    await usuario.type(confirmacion as HTMLElement, 'Clave-segura-1')
+    await usuario.click(within(formulario).getByRole('button', { name: /crear cuenta/i }))
+    expect(await within(formulario).findByRole('alert')).toHaveTextContent(/autorizar el tratamiento/i)
+
+    await usuario.click(within(formulario).getByRole('checkbox'))
+    await usuario.click(within(formulario).getByRole('button', { name: /crear cuenta/i }))
+
+    expect(await screen.findByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument()
+  })
+
+  it('el enlace del correo lleva a crear una contraseña nueva', async () => {
+    const usuario = userEvent.setup()
+    renderizar('/restablecer-contrasena?uid=Mw&token=abc-123', { modoDemo: true })
+    const formulario = await screen.findByRole('form', { name: /restablecer contraseña/i })
+    const [clave, confirmacion] = Array.from(formulario.querySelectorAll('input'))
+
+    await usuario.type(clave as HTMLElement, 'corta')
+    await usuario.type(confirmacion as HTMLElement, 'corta')
+    await usuario.click(within(formulario).getByRole('button', { name: /cambiar contraseña/i }))
+    expect(await within(formulario).findByRole('alert')).toHaveTextContent(/8 caracteres/)
+
+    await usuario.clear(clave as HTMLElement)
+    await usuario.clear(confirmacion as HTMLElement)
+    await usuario.type(clave as HTMLElement, 'Clave-segura-1')
+    await usuario.type(confirmacion as HTMLElement, 'Clave-segura-1')
+    await usuario.click(within(formulario).getByRole('button', { name: /cambiar contraseña/i }))
+
+    expect(await screen.findByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument()
+  })
+
+  it('un enlace de restablecimiento incompleto avisa y ofrece volver', async () => {
+    renderizar('/restablecer-contrasena', { modoDemo: true })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/enlace está incompleto/i)
+    expect(screen.getByRole('link', { name: /volver a iniciar sesión/i })).toBeInTheDocument()
+  })
+
   it('el administrador general gestiona un interesado: registra un seguimiento y cambia su estado', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'general')
