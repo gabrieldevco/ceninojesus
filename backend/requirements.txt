@@ -10,7 +10,7 @@ click-plugins==1.1.1.2
 click-repl==0.4.1
 click==8.5.0
 django-cors-headers==4.9.0
-Django==6.1.1
+Django==6.1.2
 djangorestframework_simplejwt==5.5.1
 djangorestframework==3.18.2
 gunicorn==26.2.0
