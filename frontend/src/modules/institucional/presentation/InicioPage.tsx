@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Reveal, Ico } from '@/shared/ui/ui'
 import Carousel from '@/shared/ui/Carousel'
 import { iconoDeGrupo, useGrupos } from '@/modules/grupos'
+import FormularioContacto from './FormularioContacto'
 
 const VALORES = [['Autonomía', 'Pensar y actuar con responsabilidad.', '🧭'], ['Liderazgo', 'Participar y aportar a la comunidad.', '🚀'], ['Pertenencia', 'Cuidar los vínculos y el entorno escolar.', '🤝'], ['Cuidado ambiental', 'Reconocer nuestra responsabilidad con la naturaleza.', '🌱']]
 const HORIZONTE = [['Historia', 'Propuesta: nuestra historia se construye en los vínculos entre estudiantes, docentes y familias, y en las experiencias compartidas de aprendizaje.'], ['Misión', 'Propuesta: acompañar la formación integral de personas críticas y autónomas, que construyan conocimiento, vivan sus valores y contribuyan al cuidado del medio ambiente.'], ['Visión', 'Propuesta: una comunidad de aprendizaje que impulse el liderazgo, la investigación, el arte y la participación responsable de sus estudiantes.']]
@@ -165,6 +166,14 @@ export default function Inicio() {
               <li><span>{Ico.phone}</span><div><b>Teléfonos</b>334 4105 · 315 8230285</div></li>
               <li><span>{Ico.mail}</span><div><b>Correo</b>ce_nino@hotmail.com</div></li>
             </ul>
+          </div>
+        </Reveal>
+      </section>
+
+      <section className="sec" id="escribenos">
+        <Reveal>
+          <div style={{ maxWidth: 760, margin: '0 auto' }}>
+            <FormularioContacto />
           </div>
         </Reveal>
       </section>

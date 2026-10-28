@@ -6,7 +6,7 @@ import { AccesoPage, puedeAcceder, useAuth, type Rol } from '@/modules/auth'
 import { AulaPage, GestionContenidoPage } from '@/modules/aula'
 import { EstudiantesPage } from '@/modules/estudiantes'
 import { AdmisionesPage } from '@/modules/interesados'
-import { InicioPage } from '@/modules/institucional'
+import { InicioPage, PoliticaDatosPage } from '@/modules/institucional'
 import { MatriculaPage, SolicitudesPage } from '@/modules/matriculas'
 import { PortalLayout, PublicLayout } from './Layouts'
 
@@ -50,6 +50,7 @@ export default function App() {
           <Route path="/" element={<Anim><InicioPage /></Anim>} />
           <Route path="/acceso" element={<Anim><AccesoPage /></Anim>} />
           <Route path="/admisiones" element={<Anim><AdmisionesPage /></Anim>} />
+          <Route path="/politica-de-datos" element={<Anim><PoliticaDatosPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['acudiente']} crumb="Matrícula extracurricular" />}>
           <Route path="/familias/matricula" element={<Anim><MatriculaPage /></Anim>} />
