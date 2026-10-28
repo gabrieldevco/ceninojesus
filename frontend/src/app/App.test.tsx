@@ -95,6 +95,31 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByRole('heading', { name: /gracias, marta/i })).toBeInTheDocument()
   })
 
+  it('un visitante escribe desde el inicio: valida la autorización y luego agradece', async () => {
+    const usuario = userEvent.setup()
+    renderizar('/', { modoDemo: true })
+
+    const formulario = await screen.findByRole('form', { name: /formulario de contacto/i })
+    const dentro = within(formulario)
+    await usuario.type(dentro.getByLabelText(/nombre/i), 'Marta Gómez')
+    await usuario.type(dentro.getByLabelText(/correo/i), 'marta@example.com')
+    await usuario.type(dentro.getByLabelText(/asunto/i), 'Horarios')
+    await usuario.type(dentro.getByLabelText(/^mensaje/i), '¿Cuál es el horario?')
+    await usuario.click(dentro.getByRole('button', { name: /enviar mensaje/i }))
+    expect(await dentro.findByRole('alert')).toHaveTextContent(/autorizar el tratamiento/i)
+
+    await usuario.click(dentro.getByRole('checkbox'))
+    await usuario.click(dentro.getByRole('button', { name: /enviar mensaje/i }))
+
+    expect(await screen.findByRole('heading', { name: /gracias por escribirnos/i })).toBeInTheDocument()
+  })
+
+  it('la política de datos es pública', async () => {
+    renderizar('/politica-de-datos', { modoDemo: true })
+    expect(await screen.findByRole('heading', { name: /política de tratamiento de datos/i })).toBeInTheDocument()
+    expect(await screen.findByText(/de demostración/i)).toBeInTheDocument()
+  })
+
   it('un visitante crea su cuenta de acudiente: valida y lo lleva a iniciar sesión', async () => {
     const usuario = userEvent.setup()
     renderizar('/registro', { modoDemo: true })

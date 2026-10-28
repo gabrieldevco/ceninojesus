@@ -6,7 +6,7 @@ import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, 
 import { AulaPage, GestionContenidoPage } from '@/modules/aula'
 import { EstudiantesPage } from '@/modules/estudiantes'
 import { AdmisionesPage, GestionInteresadosPage } from '@/modules/interesados'
-import { InicioPage } from '@/modules/institucional'
+import { InicioPage, PoliticaDatosPage } from '@/modules/institucional'
 import { MatriculaPage, SolicitudesPage } from '@/modules/matriculas'
 import { PortalLayout, PublicLayout } from './Layouts'
 
@@ -52,6 +52,7 @@ export default function App() {
           <Route path="/registro" element={<Anim><RegistroPage /></Anim>} />
           <Route path="/restablecer-contrasena" element={<Anim><RestablecerClavePage /></Anim>} />
           <Route path="/admisiones" element={<Anim><AdmisionesPage /></Anim>} />
+          <Route path="/politica-de-datos" element={<Anim><PoliticaDatosPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['acudiente']} crumb="Matrícula extracurricular" />}>
           <Route path="/familias/matricula" element={<Anim><MatriculaPage /></Anim>} />

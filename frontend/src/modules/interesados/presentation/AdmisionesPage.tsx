@@ -266,7 +266,11 @@ export default function Admisiones() {
                   />
                   <span>
                     Autorizo el tratamiento de mis datos personales para que el colegio me contacte sobre admisiones (Ley 1581 de
-                    2012). *
+                    2012).{' '}
+                    <Link to="/politica-de-datos" target="_blank" rel="noopener noreferrer">
+                      Ver la política de datos
+                    </Link>
+                    . *
                   </span>
                 </label>
                 {mensaje('autorizaTratamientoDatos')}

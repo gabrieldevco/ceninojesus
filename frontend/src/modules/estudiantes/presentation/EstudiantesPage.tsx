@@ -131,7 +131,11 @@ export default function EstudiantesPage() {
             />
             <span>
               Como acudiente, autorizo el tratamiento de los datos personales del estudiante, un menor de edad, para la gestión de
-              grupos extracurriculares (Ley 1581 de 2012). *
+              grupos extracurriculares (Ley 1581 de 2012).{' '}
+              <Link to="/politica-de-datos" target="_blank" rel="noopener noreferrer">
+                Ver la política de datos
+              </Link>
+              . *
             </span>
           </label>
           {mensaje('autorizaTratamientoDatos')}

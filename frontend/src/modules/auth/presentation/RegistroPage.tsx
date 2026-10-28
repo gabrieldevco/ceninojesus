@@ -139,7 +139,11 @@ export default function RegistroPage() {
           />
           <span>
             Autorizo el tratamiento de mis datos personales para la gestión de la matrícula y los grupos extracurriculares (Ley 1581 de
-            2012). *
+            2012).{' '}
+            <Link to="/politica-de-datos" target="_blank" rel="noopener noreferrer">
+              Ver la política de datos
+            </Link>
+            . *
           </span>
         </label>
         {mensaje('autorizaTratamientoDatos')}
