@@ -57,7 +57,7 @@ export default function App() {
         <Route element={<Guard roles={['acudiente']} crumb="Mis estudiantes" />}>
           <Route path="/familias/estudiantes" element={<Anim><EstudiantesPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['estudiante', 'acudiente']} crumb="Aula estudiante" />}>
+        <Route element={<Guard roles={['estudiante']} crumb="Aula estudiante" />}>
           <Route path="/estudiante/aula" element={<Anim><AulaPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Solicitudes" />}>
