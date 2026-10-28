@@ -453,3 +453,13 @@ label.check input{margin-top:3px;flex:none;width:auto}
 .seguimientos{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
 .seguimientos li{border-left:3px solid #004aad;padding:2px 0 2px 12px}
 .seguimientos li p{margin:2px 0 0}
+
+/* Administración: tarjetas anidadas, listas editables y asignación de administradores */
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-top:14px}
+.card.inner{box-shadow:none;border:1px solid var(--line)}
+fieldset.admins{border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:10px 0}
+fieldset.card{border:1px solid var(--line);margin:0 0 16px}
+.lista-elementos{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:8px}
+.fila-elemento{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.fila-elemento .btns{display:flex;flex-wrap:wrap;gap:6px}
+.fila-elemento .btn{padding:6px 12px;font-size:13px}

@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { AlmacenamientoMemoria } from '@/shared/lib/almacenamiento'
+import { CONTENIDO_POR_DEFECTO } from '@/modules/institucional'
 import App from './App'
 import { Proveedores } from './Proveedores'
 
@@ -286,6 +287,173 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByText('Eliminamos sus datos de nuestros registros.')).toBeInTheDocument()
   })
 
+  it('la página de inicio muestra el contenido que administra la institución', async () => {
+    renderizar('/', { modoDemo: true })
+
+    expect(await screen.findByRole('heading', { name: /aprende y crece/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Cuerpo directivo' })).toBeInTheDocument()
+    expect(screen.getByText('Miryam Junco Martínez')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /actividades escolares/i })).toHaveAttribute('src', '/img/hero-colegio.jpg')
+    expect(screen.getAllByText(/334 4105/).length).toBeGreaterThan(0)
+  })
+
+  it('si el servidor no responde, la página de inicio sigue mostrando su contenido', async () => {
+    const fetchFalso = vi.fn(() => Promise.resolve(respuesta(500, { detail: 'error' })))
+    renderizar('/', { modoDemo: false, apiUrl: '/api', fetchImpl: fetchFalso as unknown as typeof fetch })
+
+    expect(await screen.findByRole('heading', { name: /aprende y crece/i })).toBeInTheDocument()
+    expect(screen.getByText('Miryam Junco Martínez')).toBeInTheDocument()
+  })
+
+  it('la página de inicio muestra lo que dice la API y oculta las secciones sin elementos', async () => {
+    const { informacion } = CONTENIDO_POR_DEFECTO
+    const api = {
+      nombre: informacion.nombre,
+      historia: '',
+      mision: 'Misión oficial del colegio.',
+      vision: '',
+      direccion: 'Carrera 5 # 6-7',
+      ciudad: 'Soledad',
+      telefonos: '300 123 4567',
+      correo: 'info@colegio.co',
+      horario_atencion: 'Lunes a viernes, 7 a. m.',
+      url_mapa: '',
+      url_facebook: '',
+      politica_tratamiento_datos: '',
+      portada_etiqueta: 'ETIQUETA NUEVA',
+      portada_titulo: 'Aprendemos',
+      portada_destacado: 'juntos todos los días.',
+      portada_texto: 'Texto nuevo.',
+      quienes_principal: 'Principal.',
+      quienes_secundario: 'Secundario.',
+      enfoque_titulo: 'Enfoque nuevo',
+      enfoque_texto: 'Texto del enfoque.',
+      enfoque_pasos: 'Uno, Dos',
+      enfoque_nota: 'Nota.',
+      horizonte_pendiente_validacion: false,
+      contacto_titulo: 'Escríbenos',
+      contacto_texto: 'Contacto.',
+      pie_descripcion: 'Pie nuevo.',
+    }
+    const valor = { id: 1, seccion: 'valor', titulo: 'Respeto', texto: 'Convivir', detalle: '', icono: '🙏', imagen: '', tiene_imagen_subida: false, orden: 0, activo: true }
+    const portada = { id: 2, seccion: 'imagen_portada', titulo: '', texto: 'Foto del colegio', detalle: '', icono: '', imagen: '/api/institucional/elementos/2/imagen/?v=1', tiene_imagen_subida: true, orden: 0, activo: true }
+    const fetchFalso = vi.fn((url: string) => {
+      if (url.endsWith('/institucional/')) return Promise.resolve(respuesta(200, api))
+      if (url.endsWith('/institucional/elementos/')) return Promise.resolve(respuesta(200, [valor, portada]))
+      return Promise.resolve(respuesta(404))
+    })
+    renderizar('/', { modoDemo: false, apiUrl: '/api', fetchImpl: fetchFalso as unknown as typeof fetch })
+
+    expect(await screen.findByRole('heading', { name: /juntos todos los días/i })).toBeInTheDocument()
+    expect(screen.getByText('Respeto')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Foto del colegio' })).toHaveAttribute('src', '/api/institucional/elementos/2/imagen/?v=1')
+    expect(screen.getAllByText('Carrera 5 # 6-7, Soledad').length).toBeGreaterThan(0)
+    expect(screen.getByText('Lunes a viernes, 7 a. m.')).toBeInTheDocument()
+    // Sin cuerpo directivo, ofertas ni galería, esas secciones no aparecen
+    expect(screen.queryByRole('heading', { name: 'Cuerpo directivo' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Lo que ofrecemos' })).not.toBeInTheDocument()
+    // Con la validación hecha, desaparece el aviso de textos propuestos; solo queda la misión
+    expect(screen.queryByText(/pendientes de validación/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Misión' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: 'Historia' })).not.toBeInTheDocument()
+  })
+
+  it('el administrador general cambia un texto y la página de inicio lo muestra', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/sitio', { modoDemo: true, almacenamiento })
+
+    const portada = within(await screen.findByRole('group', { name: 'Portada' }))
+    const titulo = portada.getByLabelText('Título')
+    await usuario.clear(titulo)
+    await usuario.type(titulo, 'Aprendemos siempre')
+    await usuario.click(screen.getByRole('button', { name: /guardar textos/i }))
+    expect(await screen.findByText(/textos guardados/i)).toBeInTheDocument()
+
+    await usuario.click(screen.getByRole('link', { name: /volver al sitio web/i }))
+    expect(await screen.findByRole('heading', { name: /aprendemos siempre aprende y crece/i })).toBeInTheDocument()
+  })
+
+  it('el administrador general agrega, oculta y elimina elementos de las listas', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/sitio', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('tab', { name: /listas y fotos/i }))
+    const valores = within(await screen.findByRole('region', { name: 'Valores' }))
+
+    await usuario.click(valores.getByRole('button', { name: 'Agregar' }))
+    const formulario = within(await screen.findByRole('form', { name: /agregar a valores/i }))
+    await usuario.click(formulario.getByRole('button', { name: 'Agregar' }))
+    expect(await formulario.findByRole('alert')).toHaveTextContent(/escribe: valor/i)
+
+    await usuario.type(formulario.getByLabelText(/^valor/i), 'Respeto')
+    await usuario.type(formulario.getByLabelText(/emoji/i), '🙏')
+    await usuario.click(formulario.getByRole('button', { name: 'Agregar' }))
+    const fila = await valores.findByRole('listitem', { name: 'Respeto' })
+
+    await usuario.click(within(valores.getByRole('listitem', { name: 'Liderazgo' })).getByRole('button', { name: 'Ocultar' }))
+    await usuario.click(within(valores.getByRole('listitem', { name: 'Autonomía' })).getByRole('button', { name: 'Eliminar' }))
+    await usuario.click(within(valores.getByRole('listitem', { name: 'Autonomía' })).getByRole('button', { name: /confirmar eliminación/i }))
+    await waitFor(() => expect(valores.queryByRole('listitem', { name: 'Autonomía' })).not.toBeInTheDocument())
+    expect(fila).toBeInTheDocument()
+
+    await usuario.click(screen.getByRole('link', { name: /volver al sitio web/i }))
+    const seccion = within((await screen.findByRole('heading', { name: 'Valores que se viven cada día' })).closest('section') as HTMLElement)
+    expect(await seccion.findByText('Respeto')).toBeInTheDocument()
+    expect(seccion.queryByText('Liderazgo')).not.toBeInTheDocument()
+    expect(seccion.queryByText('Autonomía')).not.toBeInTheDocument()
+  })
+
+  it('el administrador general cambia la foto de la portada; solo admite imágenes', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup({ applyAccept: false })
+    renderizar('/admin/sitio', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('tab', { name: /imágenes principales/i }))
+    const entrada = await screen.findByLabelText('Archivo para Foto de la portada')
+
+    await usuario.upload(entrada, new File(['%PDF'], 'doc.pdf', { type: 'application/pdf' }))
+    expect(await screen.findByText(/debe ser jpg o png/i)).toBeInTheDocument()
+
+    await usuario.upload(entrada, new File([new Uint8Array([1])], 'foto.png', { type: 'image/png' }))
+    expect(await screen.findByText(/imagen actualizada/i)).toBeInTheDocument()
+    expect(await screen.findByRole('button', { name: /volver a la original/i })).toBeInTheDocument()
+  })
+
+  it('el administrador general administra los enlaces del portal: rechaza direcciones inseguras', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/sitio', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('tab', { name: /^enlaces$/i }))
+    await usuario.click(await screen.findByRole('button', { name: /agregar enlace/i }))
+    const formulario = within(await screen.findByRole('form', { name: /agregar enlace/i }))
+
+    await usuario.type(formulario.getByLabelText(/^nombre/i), 'Notas')
+    await usuario.type(formulario.getByLabelText(/dirección/i), 'javascript:alert(1)')
+    await usuario.click(formulario.getByRole('button', { name: /guardar enlace/i }))
+    expect(await formulario.findByRole('alert')).toHaveTextContent(/https/i)
+
+    await usuario.clear(formulario.getByLabelText(/dirección/i))
+    await usuario.type(formulario.getByLabelText(/dirección/i), 'https://notas.colegio.co')
+    await usuario.click(formulario.getByRole('button', { name: /guardar enlace/i }))
+    expect(await screen.findByRole('listitem', { name: 'Notas' })).toBeInTheDocument()
+  })
+
+  it('un acudiente no entra al editor del sitio', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'padre')
+    renderizar('/admin/sitio', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByRole('heading', { name: /nuevo espacio para sus talentos/i })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /contenido de la página de inicio/i })).not.toBeInTheDocument()
+  })
+
   it('un administrador de grupo no entra a la gestión de interesados', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'admin')
@@ -399,7 +567,7 @@ describe('aplicación contra la API', () => {
   })
 
   it('muestra un mensaje cuando las credenciales son incorrectas', async () => {
-    const fetchFalso = vi.fn().mockResolvedValue(respuesta(401, { detail: 'No active account' }))
+    const fetchFalso = vi.fn(() => Promise.resolve(respuesta(401, { detail: 'No active account' })))
     const usuario = userEvent.setup()
     renderizar('/acceso', { modoDemo: false, fetchImpl: fetchFalso as unknown as typeof fetch })
 
@@ -411,7 +579,7 @@ describe('aplicación contra la API', () => {
   })
 
   it('avisa del bloqueo temporal tras demasiados intentos', async () => {
-    const fetchFalso = vi.fn().mockResolvedValue(respuesta(429, { detail: 'bloqueado' }))
+    const fetchFalso = vi.fn(() => Promise.resolve(respuesta(429, { detail: 'bloqueado' })))
     const usuario = userEvent.setup()
     renderizar('/acceso', { modoDemo: false, fetchImpl: fetchFalso as unknown as typeof fetch })
 
