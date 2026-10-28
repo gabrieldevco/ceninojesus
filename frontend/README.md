@@ -28,7 +28,7 @@ src/
 Las dependencias apuntan hacia adentro (`presentation → application → domain`, `infrastructure → application → domain`) y un módulo solo usa a otro por su `index.ts`. ESLint (`eslint-plugin-boundaries`) rompe el build si se viola. Para conectar la API se escribe un repositorio HTTP que implemente el puerto del módulo y se cambia en `app/Proveedores.tsx`.
 
 ## Conexión con la API
-Por defecto el frontend habla con el backend de Django: en desarrollo Vite reenvía `/api` a http://localhost:8000 (levantar el backend primero) y en producción lo hace Caddy. Hoy están conectados el **formulario público de admisiones** (con la autorización de datos del interesado), el **inicio de sesión** (JWT con renovación automática, cierre de sesión que revoca el token y recuperación de contraseña), los **grupos**, el **registro de estudiantes** por el acudiente (con la autorización de datos de la Ley 1581), que también les **crea el acceso** con el que cada estudiante entra al aula y les cambia la contraseña y las **matrículas** (solicitud del acudiente, aprobación o rechazo del administrador de grupo). El **aula** del estudiante muestra el material y las actividades reales del grupo (los archivos se descargan con la sesión del usuario, no con un enlace público). El **administrador de grupo** publica material y actividades (con archivo, enlace o ambos; como borrador o publicados) y las elimina desde `/admin/contenido`.
+Por defecto el frontend habla con el backend de Django: en desarrollo Vite reenvía `/api` a http://localhost:8000 (levantar el backend primero) y en producción lo hace Caddy. Hoy están conectados el **formulario público de admisiones** (con la autorización de datos del interesado) y su **gestión por el administrador general** en `/admin/interesados` (listado por estado, seguimientos y cambio de estado), el **inicio de sesión** (JWT con renovación automática, cierre de sesión que revoca el token y recuperación de contraseña), los **grupos**, el **registro de estudiantes** por el acudiente (con la autorización de datos de la Ley 1581), que también les **crea el acceso** con el que cada estudiante entra al aula y les cambia la contraseña y las **matrículas** (solicitud del acudiente, aprobación o rechazo del administrador de grupo). El **aula** del estudiante muestra el material y las actividades reales del grupo (los archivos se descargan con la sesión del usuario, no con un enlace público). El **administrador de grupo** publica material y actividades (con archivo, enlace o ambos; como borrador o publicados) y las elimina desde `/admin/contenido`.
 
 Para trabajar sin backend, crear `.env.local` con `VITE_MODO_DEMO=true` (ver `.env.example`).
 
@@ -38,6 +38,7 @@ Para trabajar sin backend, crear `.env.local` con `VITE_MODO_DEMO=true` (ver `.e
 | Padre / acudiente | padre | /familias/matricula |
 | Estudiante | estudiante | /estudiante/aula |
 | Admin de grupo (Robótica) | admin | /admin/solicitudes |
+| Administrador general | general | /admin/solicitudes |
 
 ## Pantallas
 `/` Inicio · `/acceso` Portal de acceso · `/admisiones` Interesados · `/familias/estudiantes` · `/familias/matricula` · `/estudiante/aula` · `/admin/solicitudes` · `/admin/contenido`
