@@ -189,6 +189,55 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByText(/este estado es final/i)).toBeInTheDocument()
   })
 
+  it('el administrador general gestiona cuentas: crea una, cambia su rol y anonimiza; la suya no se toca', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/usuarios', { modoDemo: true, almacenamiento })
+
+    // Su propia cuenta no se puede desactivar ni cambiar de rol
+    const propia = (await screen.findByText('general')).closest('tr') as HTMLElement
+    expect(within(propia).getByRole('combobox')).toBeDisabled()
+    expect(within(propia).getByRole('button', { name: /desactivar/i })).toBeDisabled()
+
+    const formulario = screen.getByRole('form', { name: /crear cuenta/i })
+    await usuario.click(within(formulario).getByRole('button', { name: /crear cuenta/i }))
+    expect(await within(formulario).findAllByRole('alert')).toHaveLength(2)
+
+    await usuario.type(within(formulario).getByLabelText(/^usuario/i), 'profe.nuevo')
+    await usuario.type(within(formulario).getByLabelText(/contraseña inicial/i), 'clave-segura-123')
+    await usuario.click(within(formulario).getByRole('button', { name: /crear cuenta/i }))
+    const fila = (await screen.findByText('profe.nuevo')).closest('tr') as HTMLElement
+
+    await usuario.selectOptions(within(fila).getByRole('combobox'), 'acudiente')
+    await waitFor(() => expect(within(fila).getByRole('combobox')).toHaveValue('acudiente'))
+
+    await usuario.click(within(fila).getByRole('button', { name: /anonimizar/i }))
+    await usuario.click(within(fila).getByRole('button', { name: /confirmar/i }))
+    expect(await screen.findByText('anonimo-100')).toBeInTheDocument()
+  })
+
+  it('el administrador general crea un grupo y asigna a quien lo administra', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/usuarios', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('tab', { name: /grupos/i }))
+    const formulario = await screen.findByRole('form', { name: /crear grupo/i })
+    await usuario.type(within(formulario).getByLabelText(/cupo máximo/i), '0')
+    await usuario.click(within(formulario).getByRole('button', { name: /crear grupo/i }))
+    expect((await within(formulario).findAllByRole('alert')).length).toBeGreaterThan(0)
+
+    await usuario.type(within(formulario).getByLabelText(/^nombre/i), 'Danza')
+    await usuario.clear(within(formulario).getByLabelText(/cupo máximo/i))
+    await usuario.click(within(formulario).getByRole('button', { name: /crear grupo/i }))
+
+    const tarjeta = await screen.findByRole('article', { name: 'Grupo Danza' })
+    await usuario.click(await within(tarjeta).findByRole('checkbox', { name: /admin robótica/i }))
+    await waitFor(() => expect(within(tarjeta).getByRole('checkbox', { name: /admin robótica/i })).toBeChecked())
+  })
+
   it('un administrador de grupo no entra a la gestión de interesados', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'admin')

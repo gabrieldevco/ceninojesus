@@ -185,7 +185,7 @@ class AnonimizarUsuarioView(APIView):
     permission_classes = [EsAdministrador]
 
     def post(self, request, usuario_id):
-        usuario = dependencies.anonimizar_usuario().execute(usuario_id)
+        usuario = dependencies.anonimizar_usuario().execute(actor_desde_request(request), usuario_id)
         return Response(s.UsuarioSerializer(usuario).data)
 
 

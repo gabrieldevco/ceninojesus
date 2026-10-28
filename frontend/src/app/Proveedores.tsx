@@ -4,6 +4,7 @@ import { entorno } from '@/shared/config/entorno'
 import { FetchHttpClient } from '@/shared/http/FetchHttpClient'
 import { AlmacenamientoLocal, type Almacenamiento } from '@/shared/lib/almacenamiento'
 import { ToastProvider } from '@/shared/ui/toast'
+import { AdministracionProvider, crearCasosDeUsoAdministracion } from '@/modules/administracion'
 import { AuthProvider, crearCasosDeUsoAuth, crearGestorDeSesion } from '@/modules/auth'
 import { AulaProvider, crearCasosDeUsoAula } from '@/modules/aula'
 import { crearCasosDeUsoEstudiantes, EstudiantesProvider } from '@/modules/estudiantes'
@@ -38,6 +39,7 @@ function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opcion
     matriculas: crearCasosDeUsoMatriculas({ http, almacenamiento, modoDemo }),
     aula: crearCasosDeUsoAula({ http, modoDemo }),
     institucional: crearCasosDeUsoInstitucional({ http, modoDemo }),
+    administracion: crearCasosDeUsoAdministracion({ http, modoDemo }),
   }
 }
 
@@ -63,7 +65,9 @@ export function Proveedores({
               <MatriculasProvider casosDeUso={casosDeUso.matriculas}>
                 <InteresadosProvider casosDeUso={casosDeUso.interesados}>
                   <AulaProvider casosDeUso={casosDeUso.aula}>
-                    <InstitucionalProvider casosDeUso={casosDeUso.institucional}>{children}</InstitucionalProvider>
+                    <InstitucionalProvider casosDeUso={casosDeUso.institucional}>
+                      <AdministracionProvider casosDeUso={casosDeUso.administracion}>{children}</AdministracionProvider>
+                    </InstitucionalProvider>
                   </AulaProvider>
                 </InteresadosProvider>
               </MatriculasProvider>
