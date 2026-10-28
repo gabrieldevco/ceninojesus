@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { HttpClient } from '@/shared/http/HttpClient'
-import type { CatalogoMatricula, RepositorioSolicitudes } from '../domain/puertos'
-import type { EstadoSolicitud, EstudianteVinculado, NuevaSolicitud, SolicitudMatricula } from '../domain/solicitud'
+import type { RepositorioSolicitudes } from '../domain/puertos'
+import type { EstadoSolicitud, NuevaSolicitud, SolicitudMatricula } from '../domain/solicitud'
 
 /** Forma de las respuestas de la API: se valida en el borde antes de convertirlas en entidades. */
 const SolicitudDto = z.object({
@@ -15,7 +15,6 @@ const SolicitudDto = z.object({
   respuesta: z.string().default(''),
   fecha_solicitud: z.string(),
 })
-const EstudianteDto = z.object({ id: z.number(), nombres: z.string(), apellidos: z.string() })
 
 function aEntidad(dto: z.infer<typeof SolicitudDto>): SolicitudMatricula {
   return {
@@ -32,7 +31,7 @@ function aEntidad(dto: z.infer<typeof SolicitudDto>): SolicitudMatricula {
   }
 }
 
-export class RepositorioSolicitudesHttp implements RepositorioSolicitudes, CatalogoMatricula {
+export class RepositorioSolicitudesHttp implements RepositorioSolicitudes {
   constructor(private readonly http: HttpClient) {}
 
   async listar(): Promise<SolicitudMatricula[]> {
@@ -60,13 +59,5 @@ export class RepositorioSolicitudesHttp implements RepositorioSolicitudes, Catal
         : { metodo: 'POST', ruta: `/matriculas/${id}/rechazar/`, cuerpo: { motivo: motivo ?? '' } },
     )
     return aEntidad(SolicitudDto.parse(datos))
-  }
-
-  async estudiantes(): Promise<EstudianteVinculado[]> {
-    const datos = await this.http.enviar({ metodo: 'GET', ruta: '/estudiantes/' })
-    return z
-      .array(EstudianteDto)
-      .parse(datos)
-      .map((e) => ({ id: e.id, nombre: `${e.nombres} ${e.apellidos}`.trim() }))
   }
 }

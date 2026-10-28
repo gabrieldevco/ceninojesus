@@ -1,14 +1,13 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/modules/auth'
-import type { EnviarSolicitud, ListarEstudiantes, ListarSolicitudes, ResolverSolicitud } from '../application/casosDeUso'
-import type { EstudianteVinculado, NuevaSolicitud, SolicitudMatricula } from '../domain/solicitud'
+import type { EnviarSolicitud, ListarSolicitudes, ResolverSolicitud } from '../application/casosDeUso'
+import type { NuevaSolicitud, SolicitudMatricula } from '../domain/solicitud'
 
 export interface CasosDeUsoMatriculas {
   listarSolicitudes: ListarSolicitudes
   enviarSolicitud: EnviarSolicitud
   resolverSolicitud: ResolverSolicitud
-  listarEstudiantes: ListarEstudiantes
 }
 
 const Contexto = createContext<CasosDeUsoMatriculas | null>(null)
@@ -29,7 +28,6 @@ function useClaves() {
   return {
     habilitado: Boolean(usuario),
     solicitudes: ['solicitudes', usuario?.id] as const,
-    estudiantes: ['estudiantes', usuario?.id] as const,
   }
 }
 
@@ -42,17 +40,6 @@ export function useSolicitudes(): { solicitudes: SolicitudMatricula[]; cargando:
     enabled: claves.habilitado,
   })
   return { solicitudes: data ?? [], cargando: claves.habilitado && isPending }
-}
-
-export function useEstudiantes(): { estudiantes: EstudianteVinculado[]; cargando: boolean } {
-  const { listarEstudiantes } = useCasosDeUso()
-  const claves = useClaves()
-  const { data, isPending } = useQuery({
-    queryKey: claves.estudiantes,
-    queryFn: () => listarEstudiantes.ejecutar(),
-    enabled: claves.habilitado,
-  })
-  return { estudiantes: data ?? [], cargando: claves.habilitado && isPending }
 }
 
 export function useEnviarSolicitud() {

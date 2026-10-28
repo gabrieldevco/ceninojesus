@@ -4,6 +4,7 @@ import { motion, useScroll, useSpring } from 'framer-motion'
 import { Toasts } from '@/shared/ui/toast'
 import { AccesoPage, puedeAcceder, useAuth, type Rol } from '@/modules/auth'
 import { AulaPage } from '@/modules/aula'
+import { EstudiantesPage } from '@/modules/estudiantes'
 import { AdmisionesPage } from '@/modules/interesados'
 import { InicioPage } from '@/modules/institucional'
 import { MatriculaPage, SolicitudesPage } from '@/modules/matriculas'
@@ -52,6 +53,9 @@ export default function App() {
         </Route>
         <Route element={<Guard roles={['acudiente']} crumb="Matrícula extracurricular" />}>
           <Route path="/familias/matricula" element={<Anim><MatriculaPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['acudiente']} crumb="Mis estudiantes" />}>
+          <Route path="/familias/estudiantes" element={<Anim><EstudiantesPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['estudiante', 'acudiente']} crumb="Aula estudiante" />}>
           <Route path="/estudiante/aula" element={<Anim><AulaPage /></Anim>} />

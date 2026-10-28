@@ -1,9 +1,8 @@
-import type { CatalogoMatricula, RepositorioSolicitudes } from '../domain/puertos'
+import type { RepositorioSolicitudes } from '../domain/puertos'
 import {
   buscarDuplicada,
   SolicitudDuplicada,
   validarMotivoRechazo,
-  type EstudianteVinculado,
   type NuevaSolicitud,
   type SolicitudMatricula,
 } from '../domain/solicitud'
@@ -38,13 +37,5 @@ export class ResolverSolicitud {
 
   async rechazar(id: number, motivo: string): Promise<SolicitudMatricula> {
     return this.repositorio.resolver(id, 'rechazada', validarMotivoRechazo(motivo))
-  }
-}
-
-export class ListarEstudiantes {
-  constructor(private readonly catalogo: CatalogoMatricula) {}
-
-  ejecutar(): Promise<EstudianteVinculado[]> {
-    return this.catalogo.estudiantes()
   }
 }

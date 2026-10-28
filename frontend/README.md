@@ -15,7 +15,7 @@ npm run build        # tipos + compilación
 
 ```
 src/
-├─ modules/<modulo>/        auth, grupos, matriculas, aula, interesados, institucional
+├─ modules/<modulo>/        auth, grupos, estudiantes, matriculas, aula, interesados, institucional
 │  ├─ domain/               entidades, reglas puras y puertos (interfaces)
 │  ├─ application/          casos de uso
 │  ├─ infrastructure/       adaptadores de los puertos (hoy: demostración en localStorage)
@@ -28,7 +28,7 @@ src/
 Las dependencias apuntan hacia adentro (`presentation → application → domain`, `infrastructure → application → domain`) y un módulo solo usa a otro por su `index.ts`. ESLint (`eslint-plugin-boundaries`) rompe el build si se viola. Para conectar la API se escribe un repositorio HTTP que implemente el puerto del módulo y se cambia en `app/Proveedores.tsx`.
 
 ## Conexión con la API
-Por defecto el frontend habla con el backend de Django: en desarrollo Vite reenvía `/api` a http://localhost:8000 (levantar el backend primero) y en producción lo hace Caddy. Hoy están conectados el **inicio de sesión** (JWT con renovación automática, cierre de sesión que revoca el token y recuperación de contraseña), los **grupos** y las **matrículas** (solicitud del acudiente, aprobación o rechazo del administrador de grupo). El material del aula sigue en datos de demostración hasta su PR.
+Por defecto el frontend habla con el backend de Django: en desarrollo Vite reenvía `/api` a http://localhost:8000 (levantar el backend primero) y en producción lo hace Caddy. Hoy están conectados el **inicio de sesión** (JWT con renovación automática, cierre de sesión que revoca el token y recuperación de contraseña), los **grupos**, el **registro de estudiantes** por el acudiente (con la autorización de datos de la Ley 1581) y las **matrículas** (solicitud del acudiente, aprobación o rechazo del administrador de grupo). El material del aula sigue en datos de demostración hasta su PR.
 
 Para trabajar sin backend, crear `.env.local` con `VITE_MODO_DEMO=true` (ver `.env.example`).
 
@@ -40,7 +40,7 @@ Para trabajar sin backend, crear `.env.local` con `VITE_MODO_DEMO=true` (ver `.e
 | Admin de grupo (Robótica) | admin | /admin/solicitudes |
 
 ## Pantallas
-`/` Inicio · `/acceso` Portal de acceso · `/admisiones` Interesados · `/familias/matricula` · `/estudiante/aula` · `/admin/solicitudes`
+`/` Inicio · `/acceso` Portal de acceso · `/admisiones` Interesados · `/familias/estudiantes` · `/familias/matricula` · `/estudiante/aula` · `/admin/solicitudes`
 
 El estado (solicitudes, sesión) vive en localStorage: lo que el padre solicita lo ve el admin, y lo que el admin aprueba habilita el aula. Esos repositorios de demostración se reemplazan por la API Django al conectar el backend.
 
