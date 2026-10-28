@@ -56,7 +56,7 @@ class ContenidoApiTests(APITestCase):
         return self.client.post(self.url, datos, format="multipart")
 
     def test_administrador_publica_material_con_archivo(self):
-        archivo = SimpleUploadedFile("guia.pdf", b"%PDF contenido", content_type="application/pdf")
+        archivo = SimpleUploadedFile("guia.pdf", b"%PDF-1.4 contenido", content_type="application/pdf")
         response = self.publicar(titulo="Guía 1", tipo="documento", archivo=archivo)
         self.assertEqual(response.status_code, 201)
         self.assertIn("/archivo/", response.data["archivo_url"])
@@ -65,7 +65,7 @@ class ContenidoApiTests(APITestCase):
         self.assertEqual(self.publicar(titulo="Vacío", tipo="documento").status_code, 400)
 
     def test_estudiante_aprobado_ve_y_descarga(self):
-        archivo = SimpleUploadedFile("guia.pdf", b"%PDF contenido", content_type="application/pdf")
+        archivo = SimpleUploadedFile("guia.pdf", b"%PDF-1.4 contenido", content_type="application/pdf")
         material_id = self.publicar(titulo="Guía 1", tipo="documento", archivo=archivo).data["id"]
         self.publicar(titulo="Borrador", tipo="enlace", url="https://example.com", publicado=False)
 
@@ -75,10 +75,10 @@ class ContenidoApiTests(APITestCase):
 
         descarga = self.client.get(f"{self.url}{material_id}/archivo/")
         self.assertEqual(descarga.status_code, 200)
-        self.assertEqual(b"".join(descarga.streaming_content), b"%PDF contenido")
+        self.assertEqual(b"".join(descarga.streaming_content), b"%PDF-1.4 contenido")
 
     def test_estudiante_no_inscrito_no_accede(self):
-        archivo = SimpleUploadedFile("guia.pdf", b"%PDF", content_type="application/pdf")
+        archivo = SimpleUploadedFile("guia.pdf", b"%PDF-1.4", content_type="application/pdf")
         material_id = self.publicar(titulo="Guía 1", tipo="documento", archivo=archivo).data["id"]
 
         self.client.force_authenticate(self.no_inscrito)
@@ -100,3 +100,23 @@ class ContenidoApiTests(APITestCase):
 
         self.client.force_authenticate(self.estudiante)
         self.assertEqual(len(self.client.get(url).data), 1)
+
+    def subir(self, nombre, contenido, **extra):
+        return self.publicar(titulo="Archivo", tipo="documento", archivo=SimpleUploadedFile(nombre, contenido), **extra)
+
+    def test_rechaza_extension_no_permitida(self):
+        self.assertEqual(self.subir("virus.exe", b"MZ").status_code, 400)
+        self.assertEqual(self.subir("pagina.html", b"<script>alert(1)</script>").status_code, 400)
+
+    def test_rechaza_contenido_que_no_corresponde_a_la_extension(self):
+        self.assertEqual(self.subir("falso.pdf", b"<script>alert(1)</script>").status_code, 400)
+
+    def test_rechaza_archivo_demasiado_grande(self):
+        with self.settings(ARCHIVO_MAX_MB=1):
+            self.assertEqual(self.subir("grande.pdf", b"%PDF-" + b"0" * (1024 * 1024)).status_code, 400)
+
+    def test_la_descarga_siempre_es_adjunto(self):
+        material_id = self.subir("guia.pdf", b"%PDF-1.4 contenido").data["id"]
+        descarga = self.client.get(f"{self.url}{material_id}/archivo/")
+        self.assertEqual(descarga.status_code, 200)
+        self.assertTrue(descarga["Content-Disposition"].startswith("attachment"))

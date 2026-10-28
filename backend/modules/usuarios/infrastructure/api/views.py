@@ -1,7 +1,12 @@
+import contextlib
+
 from rest_framework import status
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from modules.grupos.infrastructure import dependencies as grupos
@@ -9,6 +14,7 @@ from modules.grupos.infrastructure.api.serializers import SolicitudSerializer
 from modules.usuarios.application.use_cases import DatosEstudiante, DatosUsuario
 from modules.usuarios.infrastructure import dependencies
 from shared.domain.actor import Rol
+from shared.infrastructure.bloqueo import BloqueoPorIntentos
 from shared.infrastructure.permissions import EsAdministrador, actor_desde_request, roles_permitidos
 from shared.infrastructure.throttling import LimiteEnvios
 
@@ -28,7 +34,41 @@ class _Autenticacion:
 
 
 class IniciarSesionView(_Autenticacion, TokenObtainPairView):
-    pass
+    """Inicio de sesión con bloqueo temporal tras demasiados intentos fallidos de la misma cuenta."""
+
+    def post(self, request, *args, **kwargs):
+        bloqueo = BloqueoPorIntentos(str(request.data.get("nombre_usuario", "")), self.get_client_ip(request))
+        if bloqueo.bloqueado:
+            return Response(
+                {"detail": "Demasiados intentos fallidos. Intente de nuevo en unos minutos."},
+                status=status.HTTP_429_TOO_MANY_REQUESTS,
+            )
+        try:
+            respuesta = super().post(request, *args, **kwargs)
+        except AuthenticationFailed:
+            bloqueo.registrar_fallo()
+            raise
+        bloqueo.reiniciar()
+        return respuesta
+
+    @staticmethod
+    def get_client_ip(request) -> str:
+        # Con NUM_PROXIES configurado, DRF resuelve la IP real detrás de Caddy
+        return LimiteEnvios().get_ident(request)
+
+
+class CerrarSesionView(APIView):
+    """Revoca el refresh token: deja de poder renovar la sesión."""
+
+    permission_classes = [AllowAny]  # el propio refresh es la credencial; el access puede haber vencido
+
+    def post(self, request):
+        refresh = request.data.get("refresh")
+        if not refresh:
+            return Response({"refresh": ["Este campo es obligatorio."]}, status=status.HTTP_400_BAD_REQUEST)
+        with contextlib.suppress(TokenError):  # ya vencido o revocado: el resultado es el mismo
+            RefreshToken(refresh).blacklist()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RegistroAcudienteView(APIView):

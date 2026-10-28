@@ -41,6 +41,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
 ]
 
@@ -204,10 +205,26 @@ CELERY_BEAT_SCHEDULE = {
 
 # Autenticación JWT (RF-06): el frontend envía "Authorization: Bearer <access>"
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_ACCESS_MINUTOS", "60"))),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_ACCESS_MINUTOS", "15"))),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.getenv("JWT_REFRESH_DIAS", "7"))),
     "USER_ID_CLAIM": "usuario_id",
+    # Cada refresh entrega uno nuevo e invalida el anterior: un refresh robado deja de servir al usarse
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
+
+# Contraseñas: Argon2 para las nuevas; las antiguas (PBKDF2) se actualizan solas al iniciar sesión
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+]
+
+# Bloqueo temporal tras varios inicios de sesión fallidos de una misma cuenta desde una misma IP
+LOGIN_MAX_INTENTOS = int(os.getenv("LOGIN_MAX_INTENTOS", "5"))
+LOGIN_SEGUNDOS_BLOQUEO = int(os.getenv("LOGIN_SEGUNDOS_BLOQUEO", "900"))
+
+# Archivos subidos por los administradores de grupo (ver shared/infrastructure/archivos.py)
+ARCHIVO_MAX_MB = int(os.getenv("ARCHIVO_MAX_MB", "20"))
 
 
 # CORS (el frontend vive en otro origen)

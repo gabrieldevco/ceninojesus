@@ -25,7 +25,14 @@
 
 	header {
 		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
 		Referrer-Policy strict-origin-when-cross-origin
+		Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		Cross-Origin-Opener-Policy same-origin
+		# Solo recursos propios, más las fuentes de Google; sin scripts en línea ni de terceros.
+		# style-src admite 'unsafe-inline' por los estilos que inyectan React y framer-motion.
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 }

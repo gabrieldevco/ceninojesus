@@ -67,5 +67,6 @@ class ContenidoArchivoView(_ContenidoView):
         return FileResponse(
             default_storage.open(ruta, "rb"),
             filename=ruta.rsplit("/", 1)[-1],
+            as_attachment=True,  # nunca se muestra en línea: evita ejecutar HTML o scripts subidos
             content_type=content_type or "application/octet-stream",
         )
