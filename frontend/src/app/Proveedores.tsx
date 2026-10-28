@@ -21,7 +21,7 @@ interface Opciones {
 /**
  * Composición de dependencias (composition root): único lugar donde se eligen las
  * implementaciones concretas de cada puerto.
- * Pendiente de conectar a la API (sigue con datos de demostración): el material del aula.
+ * Todos los módulos usan la API; con VITE_MODO_DEMO=true cada uno usa su repositorio de demostración.
  */
 function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opciones) {
   // El gestor de sesión renueva el token con un cliente sin sesión; el cliente principal usa al gestor.
@@ -33,7 +33,7 @@ function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opcion
     estudiantes: crearCasosDeUsoEstudiantes({ http, almacenamiento, modoDemo }),
     grupos: crearCasosDeUsoGrupos({ http, modoDemo }),
     matriculas: crearCasosDeUsoMatriculas({ http, almacenamiento, modoDemo }),
-    aula: crearCasosDeUsoAula(),
+    aula: crearCasosDeUsoAula({ http, modoDemo }),
   }
 }
 

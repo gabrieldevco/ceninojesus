@@ -1,5 +1,5 @@
 import { ErrorDeRed, NoAutorizado, errorDesdeRespuesta } from './errores'
-import type { HttpClient, PeticionHttp, ProveedorDeToken } from './HttpClient'
+import type { ArchivoDescargado, HttpClient, PeticionHttp, ProveedorDeToken } from './HttpClient'
 
 type Fetch = typeof fetch
 
@@ -14,6 +14,17 @@ export class FetchHttpClient implements HttpClient {
   ) {}
 
   async enviar<T = unknown>(peticion: PeticionHttp): Promise<T> {
+    return this.interpretar<T>(await this.responder(peticion))
+  }
+
+  async descargar(peticion: Pick<PeticionHttp, 'ruta'>): Promise<ArchivoDescargado> {
+    const respuesta = await this.responder({ metodo: 'GET', ruta: peticion.ruta })
+    if (!respuesta.ok) await this.interpretar(respuesta)
+    return { contenido: await respuesta.blob(), nombre: nombreDeArchivo(respuesta.headers.get('Content-Disposition')) }
+  }
+
+  /** Envía la petición con el token y, si la sesión venció (401), la repite una vez tras renovarla. */
+  private async responder(peticion: PeticionHttp): Promise<Response> {
     const autenticada = peticion.autenticada ?? true
     const token = autenticada ? this.proveedorDeToken?.tokenDeAcceso() ?? null : null
     const respuesta = await this.llamar(peticion, token)
@@ -21,9 +32,9 @@ export class FetchHttpClient implements HttpClient {
     if (respuesta.status === 401 && autenticada && this.proveedorDeToken) {
       const nuevoToken = await this.renovar()
       if (!nuevoToken) throw new NoAutorizado()
-      return this.interpretar<T>(await this.llamar(peticion, nuevoToken))
+      return this.llamar(peticion, nuevoToken)
     }
-    return this.interpretar<T>(respuesta)
+    return respuesta
   }
 
   private renovar(): Promise<string | null> {
@@ -59,4 +70,18 @@ export class FetchHttpClient implements HttpClient {
     if (!respuesta.ok) throw respuesta.status === 401 ? new NoAutorizado() : errorDesdeRespuesta(respuesta.status, cuerpo)
     return cuerpo as T
   }
+}
+
+/** Extrae el nombre de `attachment; filename="guia.pdf"` (también la forma filename*=UTF-8''guia.pdf). */
+function nombreDeArchivo(cabecera: string | null): string {
+  if (!cabecera) return ''
+  const codificado = /filename\*=(?:UTF-8'')?([^;]+)/i.exec(cabecera)?.[1]
+  if (codificado) {
+    try {
+      return decodeURIComponent(codificado.trim())
+    } catch {
+      return codificado.trim()
+    }
+  }
+  return /filename="?([^";]+)"?/i.exec(cabecera)?.[1]?.trim() ?? ''
 }

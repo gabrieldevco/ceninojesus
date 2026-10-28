@@ -1,20 +1,59 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ErrorApi } from '@/shared/http/errores'
+import { formatearFecha } from '@/shared/lib/fecha'
 import { StatusBadge } from '@/shared/ui/ui'
 import { useToast } from '@/shared/ui/toast'
 import { useAuth } from '@/modules/auth'
 import { iconoDeGrupo, useMisGrupos } from '@/modules/grupos'
-import type { TipoMaterial } from '../domain/material'
-import { useMateriales } from './AulaProvider'
+import { accionDeContenido, esEnlaceSeguro, type Contenido, type TipoContenido, type TipoMaterial } from '../domain/contenido'
+import { useActividades, useDescargarArchivo, useMateriales } from './AulaProvider'
 
-const ICONO: Record<TipoMaterial, string> = { doc: '📄', video: '▶', link: '🔗' }
+const ICONO: Record<TipoMaterial, string> = { documento: '📄', video: '▶', enlace: '🔗' }
+const ETIQUETA: Record<TipoMaterial, string> = { documento: 'Documento', video: 'Video', enlace: 'Enlace' }
 
 type Pestana = 'material' | 'info'
 
+function mensajeDeError(error: unknown): string {
+  if (error instanceof ErrorApi) return error.detalle
+  return 'No se pudo descargar el archivo. Intenta de nuevo.'
+}
+
+/** Botón de acción de un material o actividad: descarga el archivo o abre el enlace. */
+function AccionDeContenido({ contenido, tipo, etiqueta }: { contenido: Contenido; tipo: TipoContenido; etiqueta: string }) {
+  const { push } = useToast()
+  const descargar = useDescargarArchivo()
+  const accion = accionDeContenido(contenido)
+
+  if (accion === 'descargar') {
+    return (
+      <button
+        className="btn outline"
+        disabled={descargar.isPending}
+        onClick={() =>
+          descargar.mutate(
+            { tipo, grupoId: contenido.grupoId, contenidoId: contenido.id, nombreSugerido: contenido.titulo },
+            { onError: (error) => push(mensajeDeError(error), 'warn') },
+          )
+        }
+      >
+        {descargar.isPending ? 'Descargando…' : `Descargar ${etiqueta}`}
+      </button>
+    )
+  }
+  if (accion === 'abrir-enlace' && esEnlaceSeguro(contenido.url)) {
+    return (
+      <a className="btn outline" href={contenido.url} target="_blank" rel="noopener noreferrer">
+        Abrir enlace ↗
+      </a>
+    )
+  }
+  return <span className="muted-p">Sin archivo ni enlace por ahora.</span>
+}
+
 export default function AulaPage() {
   const { usuario } = useAuth()
-  const { push } = useToast()
   const { grupos, cargando } = useMisGrupos()
   const [params, setParams] = useSearchParams()
   const [pestana, setPestana] = useState<Pestana>('material')
@@ -23,15 +62,14 @@ export default function AulaPage() {
   const pedido = Number(params.get('grupo'))
   const activo = grupos.find((g) => g.id === pedido) ?? grupos[0]
   const indiceActivo = activo ? grupos.indexOf(activo) : 0
-  const materiales = useMateriales(activo?.nombre)
+  const materiales = useMateriales(activo?.id)
+  const actividades = useActividades(activo?.id)
 
   return (
     <>
       <p className="kicker">MI ESPACIO / AULA ESTUDIANTE</p>
       <h1 className="ptitle">Aprende, explora y participa</h1>
-      <p className="sub">
-        {usuario?.nombre} · Contenido y fechas de ejemplo. Solo puedes acceder a los grupos con matrícula aprobada.
-      </p>
+      <p className="sub">{usuario?.nombre} · Solo puedes acceder a los grupos con matrícula aprobada.</p>
 
       <section className="card">
         <h3>Mis grupos</h3>
@@ -49,10 +87,7 @@ export default function AulaPage() {
             </motion.button>
           ))}
         </div>
-        <p className="muted-p">
-          Aquí aparecen los grupos con matrícula aprobada. Las solicitudes pendientes se consultan en{' '}
-          {usuario?.rol === 'acudiente' ? <Link to="/familias/matricula">Matrícula extracurricular</Link> : 'Matrícula extracurricular'}.
-        </p>
+        <p className="muted-p">Aquí aparecen los grupos con matrícula aprobada.</p>
       </section>
 
       {cargando ? (
@@ -87,7 +122,9 @@ export default function AulaPage() {
               <div className="two lms">
                 <div>
                   <h3 className="sech">Material del grupo</h3>
-                  {materiales.map((m, i) => (
+                  {materiales.cargando && <p className="muted-p">Cargando material…</p>}
+                  {materiales.error && <p className="muted-p">No pudimos cargar el material. Intenta de nuevo más tarde.</p>}
+                  {materiales.items.map((m, i) => (
                     <motion.article
                       key={m.id}
                       className="card mat"
@@ -100,34 +137,38 @@ export default function AulaPage() {
                         <span className="mat-ico">{ICONO[m.tipo]}</span>
                         <div>
                           <b>{m.titulo}</b>
-                          <small>{m.detalle}</small>
+                          <small>
+                            {ETIQUETA[m.tipo]} · Publicado: {formatearFecha(m.fechaPublicacion)}
+                          </small>
                         </div>
                       </div>
-                      <span className="tag">{m.etiqueta} · Demostración</span>
-                      <button className="btn outline" onClick={() => push('Archivos y enlaces pendientes de cargar', 'info')}>
-                        {m.accion}
-                      </button>
+                      {m.descripcion && <p>{m.descripcion}</p>}
+                      <AccionDeContenido contenido={m} tipo="materiales" etiqueta={ETIQUETA[m.tipo].toLowerCase()} />
                     </motion.article>
                   ))}
-                  <p className="muted-p">Archivos, videos y enlaces pendientes de cargar; no se incluyen URLs inventadas.</p>
+                  {!materiales.cargando && !materiales.error && materiales.items.length === 0 && (
+                    <p className="muted-p">El administrador del grupo aún no ha publicado material.</p>
+                  )}
                 </div>
                 <div>
-                  <h3 className="sech">Actividad destacada</h3>
-                  <div className="card">
-                    <span className="badge coral">Actividad · Ejemplo</span>
-                    <h3 className="act">Piensa tu próxima jugada</h3>
-                    <p className="muted-p">Publicación: 03 oct 2026 · Fecha de ejemplo para la sesión: 08 oct 2026.</p>
-                    <p>
-                      Observa una posición del tablero y compara dos movimientos posibles. Explica cuál elegirías y qué pieza
-                      necesitas proteger.
-                    </p>
-                    <b>Antes de la sesión</b>
-                    <ol>
-                      <li>Revisa la guía de piezas.</li>
-                      <li>Identifica una amenaza.</li>
-                      <li>Prepara una idea para compartir con el grupo.</li>
-                    </ol>
-                  </div>
+                  <h3 className="sech">Actividades</h3>
+                  {actividades.cargando && <p className="muted-p">Cargando actividades…</p>}
+                  {actividades.error && <p className="muted-p">No pudimos cargar las actividades. Intenta de nuevo más tarde.</p>}
+                  {actividades.items.map((a) => (
+                    <div className="card" key={a.id}>
+                      <span className="badge coral">Actividad</span>
+                      <h3 className="act">{a.titulo}</h3>
+                      <p className="muted-p">
+                        Publicada: {formatearFecha(a.fechaPublicacion)}
+                        {a.fechaEntrega && <> · Entrega: {formatearFecha(a.fechaEntrega)}</>}
+                      </p>
+                      {a.descripcion && <p>{a.descripcion}</p>}
+                      <AccionDeContenido contenido={a} tipo="actividades" etiqueta="adjunto" />
+                    </div>
+                  ))}
+                  {!actividades.cargando && !actividades.error && actividades.items.length === 0 && (
+                    <p className="muted-p">No hay actividades publicadas por ahora.</p>
+                  )}
                 </div>
               </div>
             )}

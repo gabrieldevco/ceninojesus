@@ -53,6 +53,23 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByRole('cell', { name: 'Sofía Ramos' })).toBeInTheDocument()
   })
 
+  it('el aula es del estudiante: un acudiente que la abre vuelve a su matrícula', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'padre')
+    renderizar('/estudiante/aula', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByRole('heading', { name: /nuevo espacio para sus talentos/i })).toBeInTheDocument()
+  })
+
+  it('un estudiante ve el material de su grupo aprobado', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'estudiante')
+    renderizar('/estudiante/aula', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByText('Guía: el tablero y las piezas')).toBeInTheDocument()
+    expect(screen.getByText('Piensa tu próxima jugada')).toBeInTheDocument()
+  })
+
   it('un estudiante no puede entrar a las solicitudes de administración', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'estudiante')

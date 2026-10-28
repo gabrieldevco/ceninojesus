@@ -159,9 +159,7 @@ export default function MatriculaPage() {
                     </td>
                     <td>
                       {s.estado === 'aprobada' ? (
-                        <Link className="go" to={`/estudiante/aula?grupo=${s.grupoId}`}>
-                          Abrir grupo →
-                        </Link>
+                        'Aprobada · el estudiante accede con su cuenta'
                       ) : s.estado === 'pendiente' ? (
                         'Bloqueado · En revisión'
                       ) : (
