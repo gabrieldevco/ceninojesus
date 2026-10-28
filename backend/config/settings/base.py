@@ -174,12 +174,32 @@ REST_FRAMEWORK = {
     "NUM_PROXIES": int(os.getenv("NUM_PROXIES")) if os.getenv("NUM_PROXIES") else None,
 }
 
-# Caché compartida por todos los procesos (la usa el límite de envíos)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "cache_aplicacion",
-    }
+# Redis: caché, límite de envíos y cola de Celery. Sin REDIS_URL (desarrollo local sin Docker)
+# se usa la caché en base de datos y las tareas se ejecutan en el mismo proceso.
+REDIS_URL = os.getenv("REDIS_URL", "")
+
+if REDIS_URL:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": REDIS_URL}}
+else:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "cache_aplicacion"}}
+
+# Celery (tareas en segundo plano)
+CELERY_BROKER_URL = REDIS_URL or "memory://"
+CELERY_TASK_ALWAYS_EAGER = not REDIS_URL
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_TIME_LIMIT = 300
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "recordatorios-interesados": {
+        "task": "interesados.enviar_recordatorios",
+        "schedule": int(os.getenv("WORKFLOW_INTERVALO_SEGUNDOS", "3600")),
+    },
+    "alertas-solicitudes-datos": {
+        "task": "datos_personales.alertar_por_vencer",
+        "schedule": int(os.getenv("WORKFLOW_INTERVALO_SEGUNDOS", "3600")),
+    },
 }
 
 # Autenticación JWT (RF-06): el frontend envía "Authorization: Bearer <access>"
