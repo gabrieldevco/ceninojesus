@@ -2,4 +2,4 @@
 ruff==0.15.12
 import-linter==2.11
 coverage==7.14.1
-pip-audit==2.10.0
+pip-audit==2.10.1
