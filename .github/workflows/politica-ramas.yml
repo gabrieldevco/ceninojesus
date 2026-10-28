@@ -68,6 +68,8 @@ jobs:
           [ "$HEAD" = "develop" ] && exit 0
 
           prefijo="${HEAD%%/*}"
+          # Dependabot usa chore(deps) para pip/npm y ci(deps) para GitHub Actions
+          [ "$prefijo" = "dependabot" ] && { [ "$tipo" = "chore" ] || [ "$tipo" = "ci" ]; } && exit 0
           case "$prefijo" in
             dependabot) esperado="chore" ;;
             feature)  esperado="feat" ;;
