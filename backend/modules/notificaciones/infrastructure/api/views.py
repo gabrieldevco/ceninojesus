@@ -10,9 +10,7 @@ from .serializers import NotificacionSerializer
 class MisNotificacionesView(APIView):
     def get(self, request):
         solo_no_leidas = request.query_params.get("no_leidas") in ("1", "true")
-        notificaciones = dependencies.listar_mis_notificaciones().execute(
-            actor_desde_request(request), solo_no_leidas
-        )
+        notificaciones = dependencies.listar_mis_notificaciones().execute(actor_desde_request(request), solo_no_leidas)
         return Response(NotificacionSerializer(notificaciones, many=True).data)
 
 

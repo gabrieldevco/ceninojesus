@@ -43,6 +43,9 @@ class SeguimientoInteresadoModel(models.Model):
         verbose_name_plural = "seguimientos"
         ordering = ["-fecha"]
 
+    def __str__(self):
+        return f"Seguimiento de {self.interesado} ({self.fecha:%Y-%m-%d})"
+
 
 class RecordatorioInteresadoModel(models.Model):
     interesado = models.ForeignKey(InteresadoModel, on_delete=models.CASCADE, related_name="recordatorios")
@@ -53,3 +56,6 @@ class RecordatorioInteresadoModel(models.Model):
         verbose_name = "recordatorio"
         verbose_name_plural = "recordatorios"
         ordering = ["-fecha_envio"]
+
+    def __str__(self):
+        return f"Recordatorio a {self.interesado} ({self.fecha_envio:%Y-%m-%d})"
