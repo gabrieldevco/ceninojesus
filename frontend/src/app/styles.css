@@ -448,3 +448,8 @@ body{background:#fff}
 .field-err{color:#c0392b;font-size:.8rem;font-weight:500}
 label.check{display:flex;gap:10px;align-items:flex-start;font-weight:400;font-size:.9rem;line-height:1.4}
 label.check input{margin-top:3px;flex:none;width:auto}
+
+/* Seguimiento de interesados */
+.seguimientos{list-style:none;margin:14px 0 0;padding:0;display:grid;gap:10px}
+.seguimientos li{border-left:3px solid #004aad;padding:2px 0 2px 12px}
+.seguimientos li p{margin:2px 0 0}

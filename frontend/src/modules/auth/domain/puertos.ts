@@ -1,3 +1,4 @@
+import type { NuevoAcudiente, RestablecimientoDeClave } from './registro'
 import type { Usuario } from './usuario'
 
 /** Se superó el máximo de intentos fallidos: la cuenta queda bloqueada un rato. */
@@ -16,4 +17,8 @@ export interface RepositorioAutenticacion {
   cerrarSesion(): Promise<void>
   /** Pide el enlace de recuperación. Responde igual exista o no la cuenta. */
   solicitarRecuperacion(identificador: string): Promise<void>
+  /** Registro público de padres y acudientes; no inicia sesión. */
+  registrarAcudiente(nuevo: NuevoAcudiente): Promise<void>
+  /** Cambia la contraseña con el enlace que llegó por correo. */
+  restablecerClave(datos: RestablecimientoDeClave): Promise<void>
 }

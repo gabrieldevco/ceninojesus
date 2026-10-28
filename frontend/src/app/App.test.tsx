@@ -95,6 +95,108 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByRole('heading', { name: /gracias, marta/i })).toBeInTheDocument()
   })
 
+  it('un visitante escribe desde el inicio: valida la autorización y luego agradece', async () => {
+    const usuario = userEvent.setup()
+    renderizar('/', { modoDemo: true })
+
+    const formulario = await screen.findByRole('form', { name: /formulario de contacto/i })
+    const dentro = within(formulario)
+    await usuario.type(dentro.getByLabelText(/nombre/i), 'Marta Gómez')
+    await usuario.type(dentro.getByLabelText(/correo/i), 'marta@example.com')
+    await usuario.type(dentro.getByLabelText(/asunto/i), 'Horarios')
+    await usuario.type(dentro.getByLabelText(/^mensaje/i), '¿Cuál es el horario?')
+    await usuario.click(dentro.getByRole('button', { name: /enviar mensaje/i }))
+    expect(await dentro.findByRole('alert')).toHaveTextContent(/autorizar el tratamiento/i)
+
+    await usuario.click(dentro.getByRole('checkbox'))
+    await usuario.click(dentro.getByRole('button', { name: /enviar mensaje/i }))
+
+    expect(await screen.findByRole('heading', { name: /gracias por escribirnos/i })).toBeInTheDocument()
+  })
+
+  it('la política de datos es pública', async () => {
+    renderizar('/politica-de-datos', { modoDemo: true })
+    expect(await screen.findByRole('heading', { name: /política de tratamiento de datos/i })).toBeInTheDocument()
+    expect(await screen.findByText(/de demostración/i)).toBeInTheDocument()
+  })
+
+  it('un visitante crea su cuenta de acudiente: valida y lo lleva a iniciar sesión', async () => {
+    const usuario = userEvent.setup()
+    renderizar('/registro', { modoDemo: true })
+    const formulario = await screen.findByRole('form', { name: /crear cuenta/i })
+    const [nombres, apellidos, correo, , usuarioIngresado, clave, confirmacion] = Array.from(formulario.querySelectorAll('input'))
+
+    await usuario.type(nombres as HTMLElement, 'Ana')
+    await usuario.type(apellidos as HTMLElement, 'Gómez')
+    await usuario.type(correo as HTMLElement, 'ana@example.com')
+    await usuario.type(usuarioIngresado as HTMLElement, 'ana')
+    await usuario.type(clave as HTMLElement, 'Clave-segura-1')
+    await usuario.type(confirmacion as HTMLElement, 'Clave-segura-1')
+    await usuario.click(within(formulario).getByRole('button', { name: /crear cuenta/i }))
+    expect(await within(formulario).findByRole('alert')).toHaveTextContent(/autorizar el tratamiento/i)
+
+    await usuario.click(within(formulario).getByRole('checkbox'))
+    await usuario.click(within(formulario).getByRole('button', { name: /crear cuenta/i }))
+
+    expect(await screen.findByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument()
+  })
+
+  it('el enlace del correo lleva a crear una contraseña nueva', async () => {
+    const usuario = userEvent.setup()
+    renderizar('/restablecer-contrasena?uid=Mw&token=abc-123', { modoDemo: true })
+    const formulario = await screen.findByRole('form', { name: /restablecer contraseña/i })
+    const [clave, confirmacion] = Array.from(formulario.querySelectorAll('input'))
+
+    await usuario.type(clave as HTMLElement, 'corta')
+    await usuario.type(confirmacion as HTMLElement, 'corta')
+    await usuario.click(within(formulario).getByRole('button', { name: /cambiar contraseña/i }))
+    expect(await within(formulario).findByRole('alert')).toHaveTextContent(/8 caracteres/)
+
+    await usuario.clear(clave as HTMLElement)
+    await usuario.clear(confirmacion as HTMLElement)
+    await usuario.type(clave as HTMLElement, 'Clave-segura-1')
+    await usuario.type(confirmacion as HTMLElement, 'Clave-segura-1')
+    await usuario.click(within(formulario).getByRole('button', { name: /cambiar contraseña/i }))
+
+    expect(await screen.findByRole('heading', { name: /iniciar sesión/i })).toBeInTheDocument()
+  })
+
+  it('un enlace de restablecimiento incompleto avisa y ofrece volver', async () => {
+    renderizar('/restablecer-contrasena', { modoDemo: true })
+    expect(await screen.findByRole('alert')).toHaveTextContent(/enlace está incompleto/i)
+    expect(screen.getByRole('link', { name: /volver a iniciar sesión/i })).toBeInTheDocument()
+  })
+
+  it('el administrador general gestiona un interesado: registra un seguimiento y cambia su estado', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/interesados', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('cell', { name: 'Laura Pérez' }))
+    expect(await screen.findByRole('heading', { name: 'Seguimiento' })).toBeInTheDocument()
+
+    await usuario.click(screen.getByRole('button', { name: /registrar seguimiento/i }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/qué se habló/i)
+
+    await usuario.type(screen.getByPlaceholderText(/qué se habló y qué sigue/i), 'Se llamó y pidió informes de costos')
+    await usuario.click(screen.getByRole('button', { name: /registrar seguimiento/i }))
+    expect(await screen.findByText('Se llamó y pidió informes de costos')).toBeInTheDocument()
+
+    // Registrar un contacto pasa al interesado de "nuevo" a "en seguimiento": ya no se ofrece ese cambio
+    await waitFor(() => expect(screen.queryByRole('button', { name: /pasar a en seguimiento/i })).not.toBeInTheDocument())
+    await usuario.click(screen.getByRole('button', { name: /pasar a matriculado/i }))
+    expect(await screen.findByText(/este estado es final/i)).toBeInTheDocument()
+  })
+
+  it('un administrador de grupo no entra a la gestión de interesados', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'admin')
+    renderizar('/admin/interesados', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByRole('heading', { name: /revisar solicitudes de matrícula/i })).toBeInTheDocument()
+  })
+
   it('el aula es del estudiante: un acudiente que la abre vuelve a su matrícula', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'padre')

@@ -8,6 +8,7 @@ import { AuthProvider, crearCasosDeUsoAuth, crearGestorDeSesion } from '@/module
 import { AulaProvider, crearCasosDeUsoAula } from '@/modules/aula'
 import { crearCasosDeUsoEstudiantes, EstudiantesProvider } from '@/modules/estudiantes'
 import { crearCasosDeUsoGrupos, GruposProvider } from '@/modules/grupos'
+import { crearCasosDeUsoInstitucional, InstitucionalProvider } from '@/modules/institucional'
 import { crearCasosDeUsoInteresados, InteresadosProvider } from '@/modules/interesados'
 import { crearCasosDeUsoMatriculas, MatriculasProvider } from '@/modules/matriculas'
 
@@ -36,6 +37,7 @@ function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opcion
     interesados: crearCasosDeUsoInteresados({ http, modoDemo }),
     matriculas: crearCasosDeUsoMatriculas({ http, almacenamiento, modoDemo }),
     aula: crearCasosDeUsoAula({ http, modoDemo }),
+    institucional: crearCasosDeUsoInstitucional({ http, modoDemo }),
   }
 }
 
@@ -60,7 +62,9 @@ export function Proveedores({
             <EstudiantesProvider casosDeUso={casosDeUso.estudiantes}>
               <MatriculasProvider casosDeUso={casosDeUso.matriculas}>
                 <InteresadosProvider casosDeUso={casosDeUso.interesados}>
-                  <AulaProvider casosDeUso={casosDeUso.aula}>{children}</AulaProvider>
+                  <AulaProvider casosDeUso={casosDeUso.aula}>
+                    <InstitucionalProvider casosDeUso={casosDeUso.institucional}>{children}</InstitucionalProvider>
+                  </AulaProvider>
                 </InteresadosProvider>
               </MatriculasProvider>
             </EstudiantesProvider>
