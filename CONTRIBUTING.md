@@ -46,7 +46,7 @@ Un PR solo se puede fusionar si pasan, y si la rama está actualizada con su des
 | `branch-policy` | Origen y destino permitidos y nombre de rama válido |
 | `pr-title` | Formato del título y coherencia con la rama |
 | `backend-tests` | Ruff (lint y formato), import-linter (capas), `makemigrations --check`, `manage.py check` y pruebas con cobertura mínima de 85 % |
-| `frontend-build` | `npm ci` y `npm run build` |
+| `frontend-build` | ESLint (incluye las reglas de capas), Vitest, TypeScript estricto y `npm run build` |
 
 Antes de abrir el PR, corre localmente lo mismo:
 
@@ -56,7 +56,7 @@ pip install -r requirements-dev.txt
 ruff check . && ruff format --check . && lint-imports
 coverage run manage.py test && coverage report
 
-cd ../frontend && npm run build
+cd ../frontend && npm run lint && npm test && npm run build
 ```
 
 También corren `backend-audit` (pip-audit) y `npm audit` sobre las dependencias, y Dependabot propone actualizaciones cada semana.
