@@ -29,7 +29,7 @@ function ScrollBar() {
 export default function App() {
   const loc = useLocation()
   useEffect(() => {
-    if (!loc.hash) return window.scrollTo(0, 0)
+    if (!loc.hash) { window.scrollTo(0, 0); return undefined }
     const t = setTimeout(() => document.getElementById(loc.hash.slice(1))?.scrollIntoView({ behavior: 'smooth' }), 350)
     return () => clearTimeout(t)
   }, [loc.pathname, loc.hash])
