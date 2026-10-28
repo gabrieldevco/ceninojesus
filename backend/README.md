@@ -177,12 +177,13 @@ Las migraciones crean datos iniciales: la información pública del colegio y lo
 
 ## API
 
-**Autenticación:** el frontend obtiene los tokens con `POST /api/auth/token/` (`nombre_usuario`, `password`) y envía `Authorization: Bearer <access>` en cada petición. El token `access` dura 60 minutos; para renovarlo se usa `POST /api/auth/token/refresh/` con el `refresh`. Sin token, la API responde `401`; con un rol sin permiso, `403`.
+**Autenticación:** el frontend obtiene los tokens con `POST /api/auth/token/` (`nombre_usuario`, `password`) y envía `Authorization: Bearer <access>` en cada petición. El token `access` dura 15 minutos; para renovarlo se usa `POST /api/auth/token/refresh/` con el `refresh`, que **rota**: cada renovación devuelve un `refresh` nuevo y el anterior queda invalidado. `POST /api/auth/logout/` revoca el `refresh`. Tras 5 inicios de sesión fallidos de la misma cuenta desde la misma IP, el login responde `429` durante 15 minutos. Las contraseñas se guardan con Argon2. Sin token, la API responde `401`; con un rol sin permiso, `403`.
 
 | Método | Ruta | Quién | Descripción |
 |---|---|---|---|
 | `POST` | `/api/auth/token/` | Público | Inicio de sesión (JWT) |
-| `POST` | `/api/auth/token/refresh/` | Público | Renovar el token |
+| `POST` | `/api/auth/token/refresh/` | Público | Renovar el token (rota el `refresh`) |
+| `POST` | `/api/auth/logout/` | Público (con el `refresh`) | Revocar el `refresh` |
 | `POST` | `/api/auth/registro/` | Público | Registro de padres/acudientes (exige `autoriza_tratamiento_datos`) |
 | `POST` | `/api/auth/recuperar/` | Público | Envía un enlace para restablecer la contraseña (`identificador`: usuario o correo) |
 | `POST` | `/api/auth/recuperar/confirmar/` | Público | Nueva contraseña con el `uid` y el `token` del enlace |
