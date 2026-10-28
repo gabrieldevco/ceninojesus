@@ -238,6 +238,54 @@ describe('aplicación en modo demostración', () => {
     await waitFor(() => expect(within(tarjeta).getByRole('checkbox', { name: /admin robótica/i })).toBeChecked())
   })
 
+  it('en modo demostración el portal lo avisa y ofrece la biblioteca de ejemplo', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'padre')
+    renderizar('/familias/matricula', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByText('Demostración')).toBeInTheDocument()
+    expect(await screen.findByRole('link', { name: /biblioteca/i })).toHaveAttribute('href', 'https://biblioteca.example.com')
+  })
+
+  it('un titular radica una solicitud sobre sus datos: valida y luego confirma', async () => {
+    const usuario = userEvent.setup()
+    renderizar('/solicitud-de-datos', { modoDemo: true })
+
+    const formulario = await screen.findByRole('form', { name: /solicitud sobre datos personales/i })
+    const dentro = within(formulario)
+    await usuario.click(dentro.getByRole('button', { name: /radicar solicitud/i }))
+    expect((await dentro.findAllByRole('alert')).length).toBe(3)
+
+    await usuario.selectOptions(dentro.getByRole('combobox'), 'supresion')
+    await usuario.type(dentro.getByLabelText(/^nombre/i), 'Marta Gómez')
+    await usuario.type(dentro.getByLabelText(/correo/i), 'marta@example.com')
+    await usuario.type(dentro.getByLabelText(/cuéntanos/i), 'Quiero que borren mis datos')
+    await usuario.click(dentro.getByRole('button', { name: /radicar solicitud/i }))
+
+    expect(await screen.findByRole('heading', { name: /recibimos tu solicitud/i })).toBeInTheDocument()
+  })
+
+  it('el administrador general atiende una solicitud de datos: la marca en trámite y la responde', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/datos-personales', { modoDemo: true, almacenamiento })
+
+    // Las vencidas se señalan
+    expect(await screen.findByText('Vencida')).toBeInTheDocument()
+
+    await usuario.click(await screen.findByRole('cell', { name: /laura pérez/i }))
+    await usuario.click(await screen.findByRole('button', { name: /marcar en trámite/i }))
+    await waitFor(() => expect(screen.queryByRole('button', { name: /marcar en trámite/i })).not.toBeInTheDocument())
+
+    await usuario.click(screen.getByRole('button', { name: /responder y cerrar/i }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/escribe la respuesta/i)
+
+    await usuario.type(screen.getByPlaceholderText(/se le enviará por correo/i), 'Eliminamos sus datos de nuestros registros.')
+    await usuario.click(screen.getByRole('button', { name: /responder y cerrar/i }))
+    expect(await screen.findByText('Eliminamos sus datos de nuestros registros.')).toBeInTheDocument()
+  })
+
   it('un administrador de grupo no entra a la gestión de interesados', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'admin')
@@ -309,6 +357,45 @@ describe('aplicación contra la API', () => {
 
     expect(await screen.findByRole('heading', { name: /nuevo espacio para sus talentos/i })).toBeInTheDocument()
     expect(screen.getAllByText(/María López|Padre \/ acudiente/).length).toBeGreaterThan(0)
+  })
+
+  it('el portal muestra la biblioteca que define la institución y no rotula la sesión como demostración', async () => {
+    const enlace = { id: 1, nombre: 'Biblioteca', url: 'https://biblioteca.colegio.co', tipo: 'biblioteca', descripcion: '' }
+    const fetchFalso = vi.fn((url: string) => {
+      if (url.endsWith('/auth/token/')) return Promise.resolve(respuesta(200, { access: 'A', refresh: 'R' }))
+      if (url.endsWith('/auth/perfil/')) return Promise.resolve(respuesta(200, perfil))
+      if (url.endsWith('/institucional/enlaces/')) return Promise.resolve(respuesta(200, [enlace]))
+      return Promise.resolve(respuesta(404))
+    })
+    const usuario = userEvent.setup()
+    renderizar('/acceso', { modoDemo: false, apiUrl: '/api', fetchImpl: fetchFalso as unknown as typeof fetch })
+
+    await usuario.type(await screen.findByPlaceholderText(/tu nombre de usuario/i), 'maria')
+    await usuario.type(screen.getByPlaceholderText(/ingresa tu contraseña/i), 'clave-segura-123')
+    await usuario.click(screen.getByRole('button', { name: /ingresar al portal/i }))
+
+    const biblioteca = await screen.findByRole('link', { name: /biblioteca/i })
+    expect(biblioteca).toHaveAttribute('href', 'https://biblioteca.colegio.co')
+    expect(screen.queryByText('Demostración')).not.toBeInTheDocument()
+  })
+
+  it('sin biblioteca configurada, el portal no ofrece un enlace muerto', async () => {
+    const fetchFalso = vi.fn((url: string) => {
+      if (url.endsWith('/auth/token/')) return Promise.resolve(respuesta(200, { access: 'A', refresh: 'R' }))
+      if (url.endsWith('/auth/perfil/')) return Promise.resolve(respuesta(200, perfil))
+      if (url.endsWith('/institucional/enlaces/')) return Promise.resolve(respuesta(200, []))
+      return Promise.resolve(respuesta(404))
+    })
+    const usuario = userEvent.setup()
+    renderizar('/acceso', { modoDemo: false, apiUrl: '/api', fetchImpl: fetchFalso as unknown as typeof fetch })
+
+    await usuario.type(await screen.findByPlaceholderText(/tu nombre de usuario/i), 'maria')
+    await usuario.type(screen.getByPlaceholderText(/ingresa tu contraseña/i), 'clave-segura-123')
+    await usuario.click(screen.getByRole('button', { name: /ingresar al portal/i }))
+
+    await screen.findByRole('heading', { name: /nuevo espacio para sus talentos/i })
+    await waitFor(() => expect(fetchFalso).toHaveBeenCalledWith(expect.stringContaining('/institucional/enlaces/'), expect.anything()))
+    expect(screen.queryByRole('link', { name: /biblioteca/i })).not.toBeInTheDocument()
   })
 
   it('muestra un mensaje cuando las credenciales son incorrectas', async () => {

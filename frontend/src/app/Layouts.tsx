@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LINKS } from '@/shared/config/links'
 import { Ico, Logo } from '@/shared/ui/ui'
 import { useAuth, type Rol } from '@/modules/auth'
+import { useEnlaces } from '@/modules/institucional'
 
 const TABS: ReadonlyArray<readonly [string, string]> = [['inicio', 'Inicio'], ['institucional', 'Institucional'], ['academico', 'Académico'], ['galeria', 'Vida escolar'], ['equipo', 'Equipo'], ['servicios', 'Servicios'], ['contacto', 'Contacto']]
 
@@ -101,11 +102,13 @@ const MENU: Record<Rol, [string, string, string][]> = {
   acudiente: [['/familias/estudiantes', 'Mis estudiantes', '☺'], ['/familias/matricula', 'Matrícula extracurricular', '▤']],
   estudiante: [['/estudiante/aula', 'Aula estudiante', '▥']],
   administrador_grupo: SOLICITUDES,
-  administrador: [...SOLICITUDES, ['/admin/interesados', 'Interesados', '☎'], ['/admin/usuarios', 'Usuarios y grupos', '⚙']],
+  administrador: [...SOLICITUDES, ['/admin/interesados', 'Interesados', '☎'], ['/admin/usuarios', 'Usuarios y grupos', '⚙'], ['/admin/datos-personales', 'Datos personales', '⚖']],
 }
 
 export function PortalLayout({ crumb }: { crumb: string }) {
-  const { usuario, cerrarSesion } = useAuth(); const nav = useNavigate()
+  const { usuario, cerrarSesion, modoDemo } = useAuth(); const nav = useNavigate()
+  const { enlaces } = useEnlaces()
+  const biblioteca = enlaces.find(e => e.tipo === 'biblioteca')
   if (!usuario) return null
   return (
     <div className="portal">
@@ -120,7 +123,7 @@ export function PortalLayout({ crumb }: { crumb: string }) {
             </NavLink>
           ))}
           <a className="side-link" href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer"><i>🎓</i>Aula virtual ↗</a>
-          <a className="side-link muted" href="#" onClick={e => e.preventDefault()} title="Pendiente de conexión"><i>▦</i>Biblioteca</a>
+          {biblioteca && <a className="side-link" href={biblioteca.url} target="_blank" rel="noopener noreferrer"><i>▦</i>{biblioteca.nombre} ↗</a>}
         </nav>
         <div className="side-note"><b>Acceso por permisos</b><p>Solo el alcance asignado a tu cuenta.</p></div>
         <Link className="side-help" to="/">Volver al sitio web</Link>
@@ -130,12 +133,12 @@ export function PortalLayout({ crumb }: { crumb: string }) {
           <span>Centro Educativo El Niño Jesús / {crumb}</span>
           <div className="top-right">
             <span className="bell" title="Notificaciones">🔔<em /></span>
-            <span className="demo-pill">Demostración</span>
+            {modoDemo && <span className="demo-pill">Demostración</span>}
             <button className="linkbtn" onClick={() => void cerrarSesion().then(() => nav('/'))}>Cerrar sesión</button>
           </div>
         </header>
         <main className="portal-content"><Outlet /></main>
-        <p className="portal-foot">Vista de diseño · Datos de demostración · Autenticación, notificaciones e integraciones requieren implementación.</p>
+        {modoDemo && <p className="portal-foot">Modo demostración · Los datos son de ejemplo y no se guardan en el servidor.</p>}
       </div>
     </div>
   )

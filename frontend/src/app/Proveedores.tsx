@@ -7,6 +7,7 @@ import { ToastProvider } from '@/shared/ui/toast'
 import { AdministracionProvider, crearCasosDeUsoAdministracion } from '@/modules/administracion'
 import { AuthProvider, crearCasosDeUsoAuth, crearGestorDeSesion } from '@/modules/auth'
 import { AulaProvider, crearCasosDeUsoAula } from '@/modules/aula'
+import { crearCasosDeUsoDatosPersonales, DatosPersonalesProvider } from '@/modules/datosPersonales'
 import { crearCasosDeUsoEstudiantes, EstudiantesProvider } from '@/modules/estudiantes'
 import { crearCasosDeUsoGrupos, GruposProvider } from '@/modules/grupos'
 import { crearCasosDeUsoInstitucional, InstitucionalProvider } from '@/modules/institucional'
@@ -40,6 +41,7 @@ function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opcion
     aula: crearCasosDeUsoAula({ http, modoDemo }),
     institucional: crearCasosDeUsoInstitucional({ http, modoDemo }),
     administracion: crearCasosDeUsoAdministracion({ http, modoDemo }),
+    datosPersonales: crearCasosDeUsoDatosPersonales({ http, modoDemo }),
   }
 }
 
@@ -66,7 +68,9 @@ export function Proveedores({
                 <InteresadosProvider casosDeUso={casosDeUso.interesados}>
                   <AulaProvider casosDeUso={casosDeUso.aula}>
                     <InstitucionalProvider casosDeUso={casosDeUso.institucional}>
-                      <AdministracionProvider casosDeUso={casosDeUso.administracion}>{children}</AdministracionProvider>
+                      <AdministracionProvider casosDeUso={casosDeUso.administracion}>
+                        <DatosPersonalesProvider casosDeUso={casosDeUso.datosPersonales}>{children}</DatosPersonalesProvider>
+                      </AdministracionProvider>
                     </InstitucionalProvider>
                   </AulaProvider>
                 </InteresadosProvider>
