@@ -1,11 +1,13 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import type { EnviarMensajeDeContacto, ObtenerPoliticaDeDatos } from '../application/casosDeUso'
-import type { NuevoMensaje, PoliticaDeDatos } from '../domain/contacto'
+import { useAuth } from '@/modules/auth'
+import type { EnviarMensajeDeContacto, ListarEnlaces, ObtenerPoliticaDeDatos } from '../application/casosDeUso'
+import type { Enlace, NuevoMensaje, PoliticaDeDatos } from '../domain/contacto'
 
 export interface CasosDeUsoInstitucional {
   enviarMensaje: EnviarMensajeDeContacto
   obtenerPolitica: ObtenerPoliticaDeDatos
+  listarEnlaces: ListarEnlaces
 }
 
 const Contexto = createContext<CasosDeUsoInstitucional | null>(null)
@@ -33,4 +35,18 @@ export function usePoliticaDeDatos(): { politica: PoliticaDeDatos | undefined; c
     staleTime: 5 * 60_000,
   })
   return { politica: data, cargando: isPending, error: isError }
+}
+
+/** Enlaces que administra la institución. La clave incluye al usuario: los enlaces restringidos dependen de la sesión. */
+export function useEnlaces(): { enlaces: Enlace[]; cargando: boolean } {
+  const { listarEnlaces } = useCasosDeUso()
+  const { usuario } = useAuth()
+  const habilitado = Boolean(usuario)
+  const { data, isPending } = useQuery({
+    queryKey: ['enlaces', usuario?.id],
+    queryFn: () => listarEnlaces.ejecutar(),
+    enabled: habilitado,
+    staleTime: 5 * 60_000,
+  })
+  return { enlaces: data ?? [], cargando: habilitado && isPending }
 }

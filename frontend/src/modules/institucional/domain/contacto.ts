@@ -17,6 +17,15 @@ export class MensajeInvalido extends Error {
   }
 }
 
+/** RF-04 / RF-05: acceso a un sistema externo (aula, biblioteca...) que administra la institución. */
+export interface Enlace {
+  id: number
+  nombre: string
+  url: string
+  tipo: 'sistema_administrativo' | 'biblioteca' | 'otro'
+  descripcion: string
+}
+
 export interface PoliticaDeDatos {
   /** Texto de la política de tratamiento de datos personales */
   texto: string

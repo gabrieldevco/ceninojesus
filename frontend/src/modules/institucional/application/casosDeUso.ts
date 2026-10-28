@@ -1,4 +1,4 @@
-import { validarNuevoMensaje, type NuevoMensaje, type PoliticaDeDatos } from '../domain/contacto'
+import { validarNuevoMensaje, type Enlace, type NuevoMensaje, type PoliticaDeDatos } from '../domain/contacto'
 import type { RepositorioInstitucional } from '../domain/puertos'
 
 /** RF-03: cualquier visitante le escribe al colegio. */
@@ -15,5 +15,13 @@ export class ObtenerPoliticaDeDatos {
 
   ejecutar(): Promise<PoliticaDeDatos> {
     return this.repositorio.politicaDeDatos()
+  }
+}
+
+export class ListarEnlaces {
+  constructor(private readonly repositorio: RepositorioInstitucional) {}
+
+  ejecutar(): Promise<Enlace[]> {
+    return this.repositorio.listarEnlaces()
   }
 }
