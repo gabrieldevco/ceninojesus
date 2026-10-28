@@ -3,6 +3,7 @@ import {
   buscarDuplicada,
   SolicitudDuplicada,
   validarMotivoRechazo,
+  type EstudianteVinculado,
   type NuevaSolicitud,
   type SolicitudMatricula,
 } from '../domain/solicitud'
@@ -43,7 +44,7 @@ export class ResolverSolicitud {
 export class ListarEstudiantes {
   constructor(private readonly catalogo: CatalogoMatricula) {}
 
-  ejecutar(): Promise<string[]> {
+  ejecutar(): Promise<EstudianteVinculado[]> {
     return this.catalogo.estudiantes()
   }
 }

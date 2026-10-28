@@ -2,11 +2,12 @@ export type EstadoSolicitud = 'pendiente' | 'aprobada' | 'rechazada'
 
 export interface SolicitudMatricula {
   id: number
+  estudianteId: number
   estudiante: string
-  acudiente: string
-  correo: string
+  grupoId: number
   grupo: string
-  /** Fecha ISO (AAAA-MM-DD) */
+  comentario: string
+  /** Fecha ISO (AAAA-MM-DD) en que se hizo la solicitud */
   fecha: string
   estado: EstadoSolicitud
   /** Motivo del rechazo; solo existe si la solicitud fue rechazada */
@@ -14,10 +15,15 @@ export interface SolicitudMatricula {
 }
 
 export interface NuevaSolicitud {
-  estudiante: string
-  acudiente: string
-  correo: string
-  grupo: string
+  estudianteId: number
+  grupoId: number
+  comentario?: string
+}
+
+/** Estudiante vinculado al acudiente, para elegirlo en el formulario. */
+export interface EstudianteVinculado {
+  id: number
+  nombre: string
 }
 
 export const MOTIVO_MINIMO_CARACTERES = 5
@@ -42,7 +48,7 @@ export function buscarDuplicada(
   nueva: NuevaSolicitud,
 ): SolicitudMatricula | undefined {
   return existentes.find(
-    (s) => s.estudiante === nueva.estudiante && s.grupo === nueva.grupo && s.estado !== 'rechazada',
+    (s) => s.estudianteId === nueva.estudianteId && s.grupoId === nueva.grupoId && s.estado !== 'rechazada',
   )
 }
 

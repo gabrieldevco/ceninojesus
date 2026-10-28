@@ -1,13 +1,11 @@
 import { useMemo, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ErrorApi } from '@/shared/http/errores'
 import { formatearFecha } from '@/shared/lib/fecha'
 import { Alert, Stat, StatusBadge } from '@/shared/ui/ui'
 import { useToast } from '@/shared/ui/toast'
 import { contarPorEstado, MOTIVO_MINIMO_CARACTERES, MotivoRequerido, type EstadoSolicitud } from '../domain/solicitud'
 import { useResolverSolicitud, useSolicitudes } from './MatriculasProvider'
-
-/** En la demostración el administrador tiene asignado un único grupo. */
-const GRUPO_ASIGNADO = 'Robótica'
 
 type Filtro = 'todas' | EstadoSolicitud
 type Accion = 'aprobar' | 'rechazar'
@@ -22,7 +20,9 @@ export default function SolicitudesPage() {
   const { push } = useToast()
   const { solicitudes } = useSolicitudes()
   const resolver = useResolverSolicitud()
-  const lista = useMemo(() => solicitudes.filter((s) => s.grupo === GRUPO_ASIGNADO), [solicitudes])
+  // La API ya devuelve solo las solicitudes de los grupos que administra el usuario
+  const lista = solicitudes
+  const gruposAsignados = useMemo(() => [...new Set(lista.map((s) => s.grupo))].join(", "), [lista])
 
   const [filtro, setFiltro] = useState<Filtro>('todas')
   const [busqueda, setBusqueda] = useState('')
@@ -33,7 +33,7 @@ export default function SolicitudesPage() {
 
   const elegida = lista.find((s) => s.id === (elegidaId ?? lista.find((x) => x.estado === 'pendiente')?.id))
   const visibles = lista.filter(
-    (s) => (filtro === 'todas' || s.estado === filtro) && (s.estudiante + s.acudiente).toLowerCase().includes(busqueda.toLowerCase()),
+    (s) => (filtro === 'todas' || s.estado === filtro) && (s.estudiante + s.grupo + s.comentario).toLowerCase().includes(busqueda.toLowerCase()),
   )
   const pendientes = contarPorEstado(lista, 'pendiente')
 
@@ -63,14 +63,15 @@ export default function SolicitudesPage() {
           setAccion(null)
           setMotivo('')
         },
-        onError: (error) => push(error instanceof MotivoRequerido ? error.message : 'No se pudo guardar el resultado', 'warn'),
+        onError: (error) =>
+          push(error instanceof MotivoRequerido ? error.message : error instanceof ErrorApi ? error.detalle : 'No se pudo guardar el resultado', 'warn'),
       },
     )
   }
 
   return (
     <>
-      <p className="kicker">GRUPO ASIGNADO / ROBÓTICA / SOLICITUDES</p>
+      <p className="kicker">GRUPOS ASIGNADOS / SOLICITUDES</p>
       <h1 className="ptitle">Revisar solicitudes de matrícula</h1>
       <p className="sub">
         Gestiona únicamente las solicitudes del grupo asignado. La aprobación habilita el acceso; el rechazo requiere un motivo
@@ -78,7 +79,7 @@ export default function SolicitudesPage() {
       </p>
       {pendientes > 0 && (
         <Alert tone="info" title="Nueva solicitud · Notificación de ejemplo">
-          Hay {pendientes} solicitudes pendientes de revisión en Robótica.
+          Hay {pendientes} solicitudes pendientes de revisión en tus grupos.
         </Alert>
       )}
       <div className="stats">
@@ -91,11 +92,11 @@ export default function SolicitudesPage() {
         <div className="row2">
           <label>
             Buscar solicitud
-            <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Estudiante o acudiente" />
+            <input value={busqueda} onChange={(e) => setBusqueda(e.target.value)} placeholder="Estudiante, grupo o comentario" />
           </label>
           <label>
-            Grupo asignado
-            <input readOnly value="Robótica · Solo lectura" />
+            Grupos asignados
+            <input readOnly value={gruposAsignados ? gruposAsignados + " · Solo lectura" : "Sin grupos asignados"} />
           </label>
         </div>
         <div className="ftabs">
@@ -110,7 +111,7 @@ export default function SolicitudesPage() {
             <thead>
               <tr>
                 <th>Estudiante</th>
-                <th>Acudiente</th>
+                <th>Grupo</th>
                 <th>Fecha</th>
                 <th>Estado</th>
                 <th>Acción</th>
@@ -131,7 +132,7 @@ export default function SolicitudesPage() {
                     <td>
                       <b className="blue">{s.estudiante}</b>
                     </td>
-                    <td>{s.acudiente}</td>
+                    <td>{s.grupo}</td>
                     <td>{formatearFecha(s.fecha)}</td>
                     <td>
                       <StatusBadge status={s.estado} />
@@ -167,8 +168,7 @@ export default function SolicitudesPage() {
               <h3>Detalle · {elegida.estudiante}</h3>
               <StatusBadge status={elegida.estado} />
               <p>
-                Grupo: {elegida.grupo} · Solicitado el {formatearFecha(elegida.fecha)}. Acudiente: {elegida.acudiente} ·{' '}
-                {elegida.correo}.
+                Grupo: {elegida.grupo} · Solicitado el {formatearFecha(elegida.fecha)}.{elegida.comentario && <> Comentario del acudiente: {elegida.comentario}</>}
               </p>
               {elegida.estado === 'pendiente' ? (
                 <>
@@ -202,7 +202,7 @@ export default function SolicitudesPage() {
                   </h4>
                   <p>
                     {accion === 'aprobar'
-                      ? `Se habilitará el acceso de ${elegida.estudiante} a Robótica y se notificará el resultado al acudiente.`
+                      ? `Se habilitará el acceso de ${elegida.estudiante} a ${elegida.grupo} y se notificará el resultado al acudiente.`
                       : `Motivo: ${motivo}. El acudiente recibirá el resultado y el acceso seguirá bloqueado.`}
                   </p>
                   <div className="btns">

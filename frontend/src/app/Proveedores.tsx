@@ -20,7 +20,7 @@ interface Opciones {
 /**
  * Composición de dependencias (composition root): único lugar donde se eligen las
  * implementaciones concretas de cada puerto.
- * Pendiente de conectar a la API (siguen en modo demostración): grupos, matrículas y aula.
+ * Pendiente de conectar a la API (sigue con datos de demostración): el material del aula.
  */
 function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opciones) {
   // El gestor de sesión renueva el token con un cliente sin sesión; el cliente principal usa al gestor.
@@ -29,8 +29,8 @@ function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opcion
   const http = new FetchHttpClient(apiUrl, sesion, fetchImpl)
   return {
     auth: crearCasosDeUsoAuth({ almacenamiento, http, sesion, modoDemo }),
-    grupos: crearCasosDeUsoGrupos(),
-    matriculas: crearCasosDeUsoMatriculas(almacenamiento),
+    grupos: crearCasosDeUsoGrupos({ http, modoDemo }),
+    matriculas: crearCasosDeUsoMatriculas({ http, almacenamiento, modoDemo }),
     aula: crearCasosDeUsoAula(),
   }
 }

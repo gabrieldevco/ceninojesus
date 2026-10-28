@@ -3,22 +3,30 @@ import type { RepositorioGrupos } from '../domain/puertos'
 
 const GRUPOS_DEMO: Grupo[] = [
   {
+    id: 1,
     nombre: 'Ajedrez',
-    lema: 'Piensa antes de mover. Recursos de demostración para explorar estrategias y aprender las reglas del juego.',
-    icono: '♞',
+    descripcion: 'Piensa antes de mover. Recursos de demostración para explorar estrategias y aprender las reglas del juego.',
+    horario: '',
+    cupoMaximo: null,
   },
-  { nombre: 'Robótica', lema: 'Construye, programa y prueba. Material de demostración del grupo.', icono: '⚙' },
+  { id: 2, nombre: 'Robótica', descripcion: 'Construye, programa y prueba. Material de demostración del grupo.', horario: '', cupoMaximo: null },
   {
+    id: 3,
     nombre: 'Danza y arte',
-    lema: 'Expresión, ritmo y creatividad. Material de demostración para cada sesión.',
-    icono: '✺',
+    descripcion: 'Expresión, ritmo y creatividad. Material de demostración para cada sesión.',
+    horario: '',
+    cupoMaximo: null,
   },
-  { nombre: 'Música', lema: 'Escucha, practica y comparte. Material de demostración del grupo.', icono: '♪' },
+  { id: 4, nombre: 'Música', descripcion: 'Escucha, practica y comparte. Material de demostración del grupo.', horario: '', cupoMaximo: null },
 ]
 
-/** Datos de demostración; se reemplaza por el repositorio HTTP cuando se conecte la API. */
+/** Grupos de demostración (modo sin backend). En la demo, "mis grupos" son los que tienen matrícula aprobada. */
 export class RepositorioGruposDemo implements RepositorioGrupos {
   listar(): Promise<Grupo[]> {
     return Promise.resolve(GRUPOS_DEMO)
+  }
+
+  listarMios(): Promise<Grupo[]> {
+    return Promise.resolve(GRUPOS_DEMO.filter((g) => ['Ajedrez', 'Danza y arte'].includes(g.nombre)))
   }
 }

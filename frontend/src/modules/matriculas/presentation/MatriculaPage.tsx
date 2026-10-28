@@ -1,54 +1,50 @@
-import { useState, type ChangeEvent, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
+import { ErrorApi } from '@/shared/http/errores'
 import { formatearFecha } from '@/shared/lib/fecha'
 import { Alert, Stat, StatusBadge } from '@/shared/ui/ui'
 import { useToast } from '@/shared/ui/toast'
-import { useAuth } from '@/modules/auth'
 import { useGrupos } from '@/modules/grupos'
 import { contarPorEstado, SolicitudDuplicada } from '../domain/solicitud'
 import { useEnviarSolicitud, useEstudiantes, useSolicitudes } from './MatriculasProvider'
 
-interface Formulario {
-  estudiante: string
-  grupo: string
-  acudiente: string
-  correo: string
-  telefono: string
+function mensajeDeError(error: unknown): string {
+  if (error instanceof SolicitudDuplicada) return error.message
+  if (error instanceof ErrorApi) return error.detalle
+  return 'No se pudo enviar la solicitud. Intenta de nuevo.'
 }
 
 export default function MatriculaPage() {
-  const { usuario } = useAuth()
   const { push } = useToast()
-  const { solicitudes } = useSolicitudes()
+  const { solicitudes: mias } = useSolicitudes()
   const { grupos } = useGrupos()
-  const estudiantes = useEstudiantes()
+  const { estudiantes } = useEstudiantes()
   const enviar = useEnviarSolicitud()
 
-  const mias = solicitudes.filter((s) => s.acudiente === usuario?.nombre)
-  const [campos, setCampos] = useState<Formulario>({
-    estudiante: '',
-    grupo: 'Robótica',
-    acudiente: usuario?.nombre ?? '',
-    correo: 'familia.a@example.com',
-    telefono: '',
-  })
+  // Elegidos por el usuario; mientras no elija, se propone el primero de cada lista
+  const [estudianteElegido, setEstudianteElegido] = useState<number | null>(null)
+  const [grupoElegido, setGrupoElegido] = useState<number | null>(null)
+  const [comentario, setComentario] = useState('')
   const [enviada, setEnviada] = useState<string | null>(null)
-  const cambiar = (campo: keyof Formulario) => (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setCampos({ ...campos, [campo]: e.target.value })
-  const estudiante = campos.estudiante || estudiantes[0] || ''
+
+  const estudianteId = estudianteElegido ?? estudiantes[0]?.id
+  const grupoId = grupoElegido ?? grupos[0]?.id
 
   const enviarSolicitud = (e: FormEvent) => {
     e.preventDefault()
+    if (estudianteId === undefined || grupoId === undefined) return
+    const estudiante = estudiantes.find((x) => x.id === estudianteId)?.nombre ?? ''
+    const grupo = grupos.find((x) => x.id === grupoId)?.nombre ?? ''
     enviar.mutate(
-      { estudiante, grupo: campos.grupo, acudiente: campos.acudiente, correo: campos.correo },
+      { estudianteId, grupoId, comentario: comentario.trim() },
       {
         onSuccess: () => {
-          setEnviada(`${campos.grupo} · ${estudiante}`)
+          setEnviada(`${grupo} · ${estudiante}`)
+          setComentario('')
           push('Solicitud enviada: queda pendiente de revisión')
         },
-        onError: (error) =>
-          push(error instanceof SolicitudDuplicada ? error.message : 'No se pudo enviar la solicitud', 'warn'),
+        onError: (error) => push(mensajeDeError(error), 'warn'),
       },
     )
   }
@@ -69,43 +65,46 @@ export default function MatriculaPage() {
       <div className="two">
         <form className="card form" onSubmit={enviarSolicitud}>
           <h3>Solicitar matrícula</h3>
+          {estudiantes.length === 0 && (
+            <Alert tone="info" title="Sin estudiantes vinculados">
+              Para solicitar una matrícula, primero la institución debe vincular a tus estudiantes a tu cuenta.
+            </Alert>
+          )}
           <div className="row2">
             <label>
               Estudiante *
-              <select value={estudiante} onChange={cambiar('estudiante')}>
+              <select value={estudianteId ?? ''} onChange={(e) => setEstudianteElegido(Number(e.target.value))} required>
                 {estudiantes.map((s) => (
-                  <option key={s}>{s}</option>
+                  <option key={s.id} value={s.id}>
+                    {s.nombre}
+                  </option>
                 ))}
               </select>
               <small>Solo estudiantes vinculados a tu cuenta.</small>
             </label>
             <label>
               Grupo solicitado *
-              <select value={campos.grupo} onChange={cambiar('grupo')}>
+              <select value={grupoId ?? ''} onChange={(e) => setGrupoElegido(Number(e.target.value))} required>
                 {grupos.map((g) => (
-                  <option key={g.nombre}>{g.nombre}</option>
+                  <option key={g.id} value={g.id}>
+                    {g.nombre}
+                  </option>
                 ))}
               </select>
               <small>Oferta, cupos y condiciones por confirmar.</small>
             </label>
           </div>
-          <h4>Datos del acudiente</h4>
           <label>
-            Nombre del acudiente *
-            <input required value={campos.acudiente} onChange={cambiar('acudiente')} />
+            Comentario
+            <textarea
+              rows={3}
+              maxLength={500}
+              value={comentario}
+              onChange={(e) => setComentario(e.target.value)}
+              placeholder="Opcional: algo que el administrador del grupo deba saber"
+            />
           </label>
-          <div className="row2">
-            <label>
-              Correo para el resultado *
-              <input type="email" required value={campos.correo} onChange={cambiar('correo')} />
-            </label>
-            <label>
-              Teléfono de contacto
-              <input value={campos.telefono} onChange={cambiar('telefono')} placeholder="Escribe aquí" />
-              <small>Opcional, si requiere llamada.</small>
-            </label>
-          </div>
-          <button className="btn" disabled={enviar.isPending}>
+          <button className="btn" disabled={enviar.isPending || estudianteId === undefined || grupoId === undefined}>
             Enviar solicitud de matrícula
           </button>
           <AnimatePresence>
@@ -128,7 +127,6 @@ export default function MatriculaPage() {
       </div>
       <section className="card">
         <h3>Mis solicitudes</h3>
-        <p className="muted-p">Estados y fechas de demostración; no representan matrículas reales.</p>
         <div className="tablewrap">
           <table>
             <thead>
@@ -160,7 +158,7 @@ export default function MatriculaPage() {
                     </td>
                     <td>
                       {s.estado === 'aprobada' ? (
-                        <Link className="go" to={`/estudiante/aula?grupo=${encodeURIComponent(s.grupo)}`}>
+                        <Link className="go" to={`/estudiante/aula?grupo=${s.grupoId}`}>
                           Abrir grupo →
                         </Link>
                       ) : s.estado === 'pendiente' ? (
@@ -172,6 +170,13 @@ export default function MatriculaPage() {
                   </motion.tr>
                 ))}
               </AnimatePresence>
+              {mias.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="empty">
+                    Aún no has enviado solicitudes
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
