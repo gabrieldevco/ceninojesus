@@ -10,6 +10,7 @@ export const CUENTAS_DEMO: Record<string, { id: number; rol: Rol; nombres: strin
   padre: { id: 1, rol: 'acudiente', nombres: 'Acudiente demo', apellidos: 'A' },
   estudiante: { id: 2, rol: 'estudiante', nombres: 'Estudiante demo', apellidos: 'A' },
   admin: { id: 3, rol: 'administrador_grupo', nombres: 'Admin', apellidos: 'Robótica' },
+  general: { id: 4, rol: 'administrador', nombres: 'Administrador', apellidos: 'General' },
 }
 
 function usuarioDemo(identificador: string): Usuario | null {
@@ -38,6 +39,14 @@ export class RepositorioAutenticacionDemo implements RepositorioAutenticacion {
   }
 
   solicitarRecuperacion(): Promise<void> {
+    return Promise.resolve()
+  }
+
+  registrarAcudiente(): Promise<void> {
+    return Promise.resolve()
+  }
+
+  restablecerClave(): Promise<void> {
     return Promise.resolve()
   }
 }

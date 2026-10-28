@@ -1,6 +1,13 @@
 import type { HttpClient } from '@/shared/http/HttpClient'
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
-import { CerrarSesion, IniciarSesion, ObtenerSesion, SolicitarRecuperacion } from './application/casosDeUso'
+import {
+  CerrarSesion,
+  IniciarSesion,
+  ObtenerSesion,
+  RegistrarAcudiente,
+  RestablecerClave,
+  SolicitarRecuperacion,
+} from './application/casosDeUso'
 import type { RepositorioAutenticacion } from './domain/puertos'
 import { GestorDeSesion } from './infrastructure/GestorDeSesion'
 import { RepositorioAutenticacionDemo } from './infrastructure/RepositorioAutenticacionDemo'
@@ -12,6 +19,8 @@ export { puedeAcceder } from './domain/usuario'
 export { DemasiadosIntentos } from './domain/puertos'
 export { AuthProvider, useAuth } from './presentation/AuthProvider'
 export { default as AccesoPage } from './presentation/AccesoPage'
+export { default as RegistroPage } from './presentation/RegistroPage'
+export { default as RestablecerClavePage } from './presentation/RestablecerClavePage'
 
 /** Crea el gestor de sesión que el cliente HTTP usa para enviar y renovar el token. */
 export function crearGestorDeSesion(almacenamiento: Almacenamiento, http: HttpClient): GestorDeSesion {
@@ -35,5 +44,7 @@ export function crearCasosDeUsoAuth({ almacenamiento, http, sesion, modoDemo }: 
     obtenerSesion: new ObtenerSesion(repositorio),
     cerrarSesion: new CerrarSesion(repositorio),
     solicitarRecuperacion: new SolicitarRecuperacion(repositorio),
+    registrarAcudiente: new RegistrarAcudiente(repositorio),
+    restablecerClave: new RestablecerClave(repositorio),
   }
 }

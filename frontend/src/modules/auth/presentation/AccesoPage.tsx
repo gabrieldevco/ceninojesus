@@ -311,6 +311,14 @@ export default function Acceso() {
           </div>
           <Link to="/admisiones">Admisiones →</Link>
         </motion.div>
+        <motion.div className="ac-new" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55, duration: 0.6 }}>
+          <span className="ico">🧑‍🧒</span>
+          <div>
+            <b>¿Eres padre, madre o acudiente?</b>
+            <small>Crea tu cuenta para registrar a tus estudiantes y pedir su matrícula.</small>
+          </div>
+          <Link to="/registro">Crear cuenta →</Link>
+        </motion.div>
       </section>
     </div>
   )

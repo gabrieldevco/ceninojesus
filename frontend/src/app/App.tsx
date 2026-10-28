@@ -2,10 +2,10 @@ import { useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { motion, useScroll, useSpring } from 'framer-motion'
 import { Toasts } from '@/shared/ui/toast'
-import { AccesoPage, puedeAcceder, useAuth, type Rol } from '@/modules/auth'
+import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, type Rol } from '@/modules/auth'
 import { AulaPage, GestionContenidoPage } from '@/modules/aula'
 import { EstudiantesPage } from '@/modules/estudiantes'
-import { AdmisionesPage } from '@/modules/interesados'
+import { AdmisionesPage, GestionInteresadosPage } from '@/modules/interesados'
 import { InicioPage, PoliticaDatosPage } from '@/modules/institucional'
 import { MatriculaPage, SolicitudesPage } from '@/modules/matriculas'
 import { PortalLayout, PublicLayout } from './Layouts'
@@ -49,6 +49,8 @@ export default function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Anim><InicioPage /></Anim>} />
           <Route path="/acceso" element={<Anim><AccesoPage /></Anim>} />
+          <Route path="/registro" element={<Anim><RegistroPage /></Anim>} />
+          <Route path="/restablecer-contrasena" element={<Anim><RestablecerClavePage /></Anim>} />
           <Route path="/admisiones" element={<Anim><AdmisionesPage /></Anim>} />
           <Route path="/politica-de-datos" element={<Anim><PoliticaDatosPage /></Anim>} />
         </Route>
@@ -66,6 +68,9 @@ export default function App() {
         </Route>
         <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Contenido del grupo" />}>
           <Route path="/admin/contenido" element={<Anim><GestionContenidoPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['administrador']} crumb="Interesados" />}>
+          <Route path="/admin/interesados" element={<Anim><GestionInteresadosPage /></Anim>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
