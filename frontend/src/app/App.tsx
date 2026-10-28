@@ -14,7 +14,7 @@ function Guard({ roles, crumb }: { roles: readonly Rol[]; crumb: string }) {
   const { usuario, cargando } = useAuth()
   const ubicacion = useLocation()
   if (cargando) return null
-  if (!usuario) return <Navigate to="/acceso" replace state={{ from: ubicacion.pathname, role: roles[0] }} />
+  if (!usuario) return <Navigate to="/acceso" replace state={{ from: ubicacion.pathname, roles }} />
   if (!puedeAcceder(usuario, roles)) return <Navigate to={usuario.inicio} replace />
   return <PortalLayout crumb={crumb} />
 }
@@ -50,13 +50,13 @@ export default function App() {
           <Route path="/acceso" element={<Anim><AccesoPage /></Anim>} />
           <Route path="/admisiones" element={<Anim><AdmisionesPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['padre']} crumb="Matrícula extracurricular" />}>
+        <Route element={<Guard roles={['acudiente']} crumb="Matrícula extracurricular" />}>
           <Route path="/familias/matricula" element={<Anim><MatriculaPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['estudiante', 'padre']} crumb="Aula estudiante" />}>
+        <Route element={<Guard roles={['estudiante', 'acudiente']} crumb="Aula estudiante" />}>
           <Route path="/estudiante/aula" element={<Anim><AulaPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['admin']} crumb="Solicitudes" />}>
+        <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Solicitudes" />}>
           <Route path="/admin/solicitudes" element={<Anim><SolicitudesPage /></Anim>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

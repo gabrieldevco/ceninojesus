@@ -4,8 +4,8 @@ import type { Usuario } from '../domain/usuario'
 export class IniciarSesion {
   constructor(private readonly repositorio: RepositorioAutenticacion) {}
 
-  ejecutar(correo: string, clave: string): Promise<Usuario | null> {
-    return this.repositorio.iniciarSesion(correo.trim().toLowerCase(), clave)
+  ejecutar(identificador: string, clave: string): Promise<Usuario | null> {
+    return this.repositorio.iniciarSesion(identificador.trim(), clave)
   }
 }
 
@@ -22,5 +22,13 @@ export class CerrarSesion {
 
   ejecutar(): Promise<void> {
     return this.repositorio.cerrarSesion()
+  }
+}
+
+export class SolicitarRecuperacion {
+  constructor(private readonly repositorio: RepositorioAutenticacion) {}
+
+  ejecutar(identificador: string): Promise<void> {
+    return this.repositorio.solicitarRecuperacion(identificador.trim())
   }
 }

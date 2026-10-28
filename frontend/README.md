@@ -27,12 +27,17 @@ src/
 
 Las dependencias apuntan hacia adentro (`presentation → application → domain`, `infrastructure → application → domain`) y un módulo solo usa a otro por su `index.ts`. ESLint (`eslint-plugin-boundaries`) rompe el build si se viola. Para conectar la API se escribe un repositorio HTTP que implemente el puerto del módulo y se cambia en `app/Proveedores.tsx`.
 
-## Cuentas de demostración (clave: `demo1234`)
-| Rol | Correo | Redirige a |
+## Conexión con la API
+Por defecto el frontend habla con el backend de Django: en desarrollo Vite reenvía `/api` a http://localhost:8000 (levantar el backend primero) y en producción lo hace Caddy. Hoy está conectado el **inicio de sesión** (JWT con renovación automática, cierre de sesión que revoca el token y recuperación de contraseña); matrículas, aula y grupos siguen en datos de demostración hasta sus PR.
+
+Para trabajar sin backend, crear `.env.local` con `VITE_MODO_DEMO=true` (ver `.env.example`).
+
+## Cuentas de demostración (solo con `VITE_MODO_DEMO=true`, clave: `demo1234`)
+| Rol | Usuario | Redirige a |
 |---|---|---|
-| Padre / acudiente | padre@demo.com | /familias/matricula |
-| Estudiante | estudiante@demo.com | /estudiante/aula |
-| Admin de grupo (Robótica) | admin@demo.com | /admin/solicitudes |
+| Padre / acudiente | padre | /familias/matricula |
+| Estudiante | estudiante | /estudiante/aula |
+| Admin de grupo (Robótica) | admin | /admin/solicitudes |
 
 ## Pantallas
 `/` Inicio · `/acceso` Portal de acceso · `/admisiones` Interesados · `/familias/matricula` · `/estudiante/aula` · `/admin/solicitudes`

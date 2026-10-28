@@ -4,6 +4,8 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   plugins: [react()],
+  // En desarrollo /api se reenvía al backend de Django (en producción lo hace Caddy)
+  server: { proxy: { '/api': 'http://localhost:8000' } },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
   test: {
     environment: 'jsdom',
