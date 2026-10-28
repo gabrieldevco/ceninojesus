@@ -39,6 +39,37 @@ class MatriculaApiTests(APITestCase):
         nombres = [g["nombre"] for g in self.client.get("/api/grupos/").data]
         self.assertIn("Ajedrez avanzado", nombres)
 
+    def test_no_permite_dos_grupos_con_el_mismo_nombre(self):
+        self.client.force_authenticate(self.admin)
+        repetido = self.client.post("/api/grupos/", {"nombre": "ajedrez AVANZADO"}, format="json")
+        self.assertEqual(repetido.status_code, 400)
+        self.assertIn("Ya existe un grupo", repetido.data["detail"])
+
+        otro = self.client.post("/api/grupos/", {"nombre": "Dibujo artístico"}, format="json")
+        self.assertEqual(otro.status_code, 201)
+        renombrar = self.client.patch(f"/api/grupos/{otro.data['id']}/", {"nombre": "Ajedrez avanzado"}, format="json")
+        self.assertEqual(renombrar.status_code, 400)
+        # Conservar su propio nombre al editar otros campos sí se permite
+        conservar = self.client.patch(
+            f"/api/grupos/{otro.data['id']}/", {"nombre": "Dibujo artístico", "horario": "Lunes"}, format="json"
+        )
+        self.assertEqual(conservar.status_code, 200)
+
+    def test_el_administrador_ve_tambien_los_grupos_inactivos(self):
+        self.client.force_authenticate(self.admin)
+        self.client.patch(f"/api/grupos/{self.grupo_id}/", {"activo": False}, format="json")
+
+        publico = [g["id"] for g in self.client.get("/api/grupos/").data]
+        todos = [g["id"] for g in self.client.get("/api/grupos/?todos=true").data]
+        self.assertNotIn(self.grupo_id, publico)
+        self.assertIn(self.grupo_id, todos)
+
+        # Nadie más puede pedir los inactivos
+        self.client.force_authenticate(self.acudiente)
+        self.assertNotIn(self.grupo_id, [g["id"] for g in self.client.get("/api/grupos/?todos=true").data])
+        self.client.force_authenticate(None)
+        self.assertNotIn(self.grupo_id, [g["id"] for g in self.client.get("/api/grupos/?todos=true").data])
+
     def test_solicitud_notifica_al_administrador_del_grupo(self):
         response = self.solicitar()
         self.assertEqual(response.status_code, 201)

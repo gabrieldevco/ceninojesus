@@ -109,6 +109,12 @@ class ActualizarUsuario:
             raise PermisoDenegado()
         if set(cambios) - permitidos:
             raise PermisoDenegado(f"No puede modificar: {', '.join(sorted(set(cambios) - permitidos))}.")
+        se_quita_el_acceso = cambios.get("activo") is False or (
+            "rol" in cambios and cambios["rol"] != Rol.ADMINISTRADOR
+        )
+        if actor.es_administrador and actor.id == usuario_id and se_quita_el_acceso:
+            # Evita que el sistema se quede sin administradores
+            raise PermisoDenegado("No puede desactivar su cuenta ni quitarse el rol de administrador.")
         usuario = ObtenerUsuario(self.repository).execute(usuario_id)
         return self.repository.actualizar(replace(usuario, **cambios))
 
@@ -299,7 +305,9 @@ class AnonimizarUsuario:
         self.repository = repository
         self.estudiantes = estudiantes
 
-    def execute(self, usuario_id: int) -> Usuario:
+    def execute(self, actor: Actor, usuario_id: int) -> Usuario:
+        if actor.id == usuario_id:
+            raise PermisoDenegado("No puede anonimizar su propia cuenta.")
         usuario = ObtenerUsuario(self.repository).execute(usuario_id)
         for estudiante in self.estudiantes.listar(acudiente_id=usuario_id):
             estudiante.anonimizar()

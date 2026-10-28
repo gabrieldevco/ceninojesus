@@ -25,7 +25,7 @@ Infraestructura: Docker Compose de desarrollo y producción (Caddy + HTTPS), ser
 ### 1. Integración frontend ↔ backend (lo más grande)
 - Cliente HTTP, manejo de JWT (login, refresh, logout) y recuperación de contraseña, reemplazando `store.jsx` y `data/demo.js`.
 - Conectar cada pantalla a su endpoint: matrícula, aula (material/actividades), solicitudes, admisiones (interesados), contacto.
-- Pantallas que no existen: panel de administración general (RF-20), administración de contenido por grupo (RF-12, RF-13), gestión de interesados (RF-19), solicitudes de datos personales, política de tratamiento de datos, consentimiento en formularios.
+- Pantallas que no existen: solicitudes de datos personales (el panel de administración general, RF-20, ya existe en `/admin/usuarios`).
 - Rutas de `Guard` por los 5 roles reales del sistema (hoy solo 3 de demostración).
 
 ### 2. Calidad y profesionalización

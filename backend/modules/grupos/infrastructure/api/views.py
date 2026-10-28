@@ -24,7 +24,10 @@ class GrupoListCreateView(APIView):
         return [AllowAny()] if self.request.method == "GET" else [EsAdministrador()]
 
     def get(self, request):
-        grupos = dependencies.listar_grupos().execute(solo_activos=True)
+        # El administrador puede pedir también los grupos inactivos (`?todos=true`) para gestionarlos
+        es_administrador = request.user.is_authenticated and actor_desde_request(request).es_administrador
+        solo_activos = not (es_administrador and request.query_params.get("todos") == "true")
+        grupos = dependencies.listar_grupos().execute(solo_activos=solo_activos)
         return Response(s.GrupoSerializer(grupos, many=True).data)
 
     def post(self, request):

@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { motion, useScroll, useSpring } from 'framer-motion'
 import { Toasts } from '@/shared/ui/toast'
+import { PanelAdministracionPage } from '@/modules/administracion'
 import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, type Rol } from '@/modules/auth'
 import { AulaPage, GestionContenidoPage } from '@/modules/aula'
 import { EstudiantesPage } from '@/modules/estudiantes'
@@ -71,6 +72,9 @@ export default function App() {
         </Route>
         <Route element={<Guard roles={['administrador']} crumb="Interesados" />}>
           <Route path="/admin/interesados" element={<Anim><GestionInteresadosPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['administrador']} crumb="Usuarios y grupos" />}>
+          <Route path="/admin/usuarios" element={<Anim><PanelAdministracionPage /></Anim>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

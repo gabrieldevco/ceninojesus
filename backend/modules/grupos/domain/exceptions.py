@@ -11,6 +11,11 @@ class SolicitudNoEncontrada(NotFoundError):
         super().__init__(f"No existe la solicitud con id {solicitud_id}.")
 
 
+class GrupoDuplicado(DomainError):
+    def __init__(self, nombre):
+        super().__init__(f"Ya existe un grupo llamado «{nombre}».")
+
+
 class GrupoInactivo(DomainError):
     def __init__(self):
         super().__init__("El grupo no está recibiendo matrículas.")
