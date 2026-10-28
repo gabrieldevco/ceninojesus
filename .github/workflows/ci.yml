@@ -20,9 +20,28 @@ jobs:
     defaults:
       run:
         working-directory: backend
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: ceninojesus
+          POSTGRES_USER: ceninojesus
+          POSTGRES_PASSWORD: ci-solo-para-pruebas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ceninojesus -d ceninojesus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       DJANGO_SECRET_KEY: ci-solo-para-pruebas
+      POSTGRES_DB: ceninojesus
+      POSTGRES_USER: ceninojesus
+      POSTGRES_PASSWORD: ci-solo-para-pruebas
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: "5432"
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
