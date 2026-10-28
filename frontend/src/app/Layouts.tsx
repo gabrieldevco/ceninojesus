@@ -96,10 +96,12 @@ export function Footer() {
   )
 }
 
+const SOLICITUDES: [string, string, string][] = [['/admin/solicitudes', 'Solicitudes', '▤']]
 const MENU: Record<Rol, [string, string, string][]> = {
-  padre: [['/familias/matricula', 'Matrícula extracurricular', '▤'], ['/estudiante/aula', 'Aula del estudiante', '▥']],
+  acudiente: [['/familias/matricula', 'Matrícula extracurricular', '▤'], ['/estudiante/aula', 'Aula del estudiante', '▥']],
   estudiante: [['/estudiante/aula', 'Aula estudiante', '▥']],
-  admin: [['/admin/solicitudes', 'Solicitudes', '▤']],
+  administrador_grupo: SOLICITUDES,
+  administrador: SOLICITUDES,
 }
 
 export function PortalLayout({ crumb }: { crumb: string }) {

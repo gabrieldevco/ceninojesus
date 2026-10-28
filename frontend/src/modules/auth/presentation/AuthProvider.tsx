@@ -1,24 +1,36 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import type { CerrarSesion, IniciarSesion, ObtenerSesion } from '../application/casosDeUso'
+import type { CerrarSesion, IniciarSesion, ObtenerSesion, SolicitarRecuperacion } from '../application/casosDeUso'
 import type { Usuario } from '../domain/usuario'
 
 export interface CasosDeUsoAuth {
   iniciarSesion: IniciarSesion
   obtenerSesion: ObtenerSesion
   cerrarSesion: CerrarSesion
+  solicitarRecuperacion: SolicitarRecuperacion
 }
 
 interface ContextoAuth {
   usuario: Usuario | null
   /** true mientras se recupera la sesión guardada al abrir la aplicación */
   cargando: boolean
-  iniciarSesion: (correo: string, clave: string) => Promise<Usuario | null>
+  iniciarSesion: (identificador: string, clave: string) => Promise<Usuario | null>
   cerrarSesion: () => Promise<void>
+  solicitarRecuperacion: (identificador: string) => Promise<void>
+  /** true cuando la app corre con cuentas de demostración (sin backend) */
+  modoDemo: boolean
 }
 
 const Contexto = createContext<ContextoAuth | null>(null)
 
-export function AuthProvider({ casosDeUso, children }: { casosDeUso: CasosDeUsoAuth; children: ReactNode }) {
+export function AuthProvider({
+  casosDeUso,
+  modoDemo = false,
+  children,
+}: {
+  casosDeUso: CasosDeUsoAuth
+  modoDemo?: boolean
+  children: ReactNode
+}) {
   const [usuario, setUsuario] = useState<Usuario | null>(null)
   const [cargando, setCargando] = useState(true)
 
@@ -35,8 +47,8 @@ export function AuthProvider({ casosDeUso, children }: { casosDeUso: CasosDeUsoA
   }, [casosDeUso])
 
   const iniciarSesion = useCallback(
-    async (correo: string, clave: string) => {
-      const u = await casosDeUso.iniciarSesion.ejecutar(correo, clave)
+    async (identificador: string, clave: string) => {
+      const u = await casosDeUso.iniciarSesion.ejecutar(identificador, clave)
       if (u) setUsuario(u)
       return u
     },
@@ -48,9 +60,14 @@ export function AuthProvider({ casosDeUso, children }: { casosDeUso: CasosDeUsoA
     setUsuario(null)
   }, [casosDeUso])
 
+  const solicitarRecuperacion = useCallback(
+    (identificador: string) => casosDeUso.solicitarRecuperacion.ejecutar(identificador),
+    [casosDeUso],
+  )
+
   const valor = useMemo(
-    () => ({ usuario, cargando, iniciarSesion, cerrarSesion }),
-    [usuario, cargando, iniciarSesion, cerrarSesion],
+    () => ({ usuario, cargando, iniciarSesion, cerrarSesion, solicitarRecuperacion, modoDemo }),
+    [usuario, cargando, iniciarSesion, cerrarSesion, solicitarRecuperacion, modoDemo],
   )
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>
 }
