@@ -1,16 +1,27 @@
+import mimetypes
 from dataclasses import asdict
 
-from rest_framework import status
+from django.core.files.storage import default_storage
+from django.http import FileResponse
+from rest_framework import serializers, status
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from modules.institucional.application.use_cases import DatosEnlace, DatosMensaje
+from modules.institucional.application.use_cases import DatosElemento, DatosEnlace, DatosMensaje
+from modules.institucional.domain.entities import SECCIONES_DE_IMAGEN_UNICA, SeccionLanding
 from modules.institucional.infrastructure import dependencies
 from shared.infrastructure.permissions import EsAdministrador, actor_desde_request
 from shared.infrastructure.throttling import LimiteEnvios
 
-from .serializers import EnlaceSerializer, InformacionSerializer, MensajeContactoSerializer
+from .serializers import (
+    ElementoLandingSerializer,
+    EnlaceSerializer,
+    ImagenSerializer,
+    InformacionSerializer,
+    MensajeContactoSerializer,
+)
 
 
 def _es_administrador(request):
@@ -103,3 +114,89 @@ class MarcarMensajeLeidoView(APIView):
     def post(self, request, mensaje_id):
         mensaje = dependencies.marcar_mensaje_leido().execute(mensaje_id)
         return Response(MensajeContactoSerializer(mensaje).data)
+
+
+def _seccion_de(valor):
+    if valor in (None, ""):
+        return None
+    try:
+        return SeccionLanding(valor)
+    except ValueError:
+        raise serializers.ValidationError({"seccion": "Sección no válida."}) from None
+
+
+class ElementoLandingListCreateView(APIView):
+    """Contenido repetible de la página de inicio: lectura pública, edición del administrador."""
+
+    def get_permissions(self):
+        return [AllowAny()] if self.request.method == "GET" else [EsAdministrador()]
+
+    def get(self, request):
+        incluir_inactivos = _es_administrador(request) and request.query_params.get("todos") in ("1", "true")
+        elementos = dependencies.listar_elementos().execute(
+            _seccion_de(request.query_params.get("seccion")), incluir_inactivos
+        )
+        return Response(ElementoLandingSerializer(elementos, many=True).data)
+
+    def post(self, request):
+        serializer = ElementoLandingSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        elemento = dependencies.crear_elemento().execute(DatosElemento(**serializer.validated_data))
+        return Response(ElementoLandingSerializer(elemento).data, status=status.HTTP_201_CREATED)
+
+
+class ElementoLandingDetailView(APIView):
+    permission_classes = [EsAdministrador]
+
+    def patch(self, request, elemento_id):
+        serializer = ElementoLandingSerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        elemento = dependencies.actualizar_elemento().execute(elemento_id, serializer.validated_data)
+        return Response(ElementoLandingSerializer(elemento).data)
+
+    def delete(self, request, elemento_id):
+        dependencies.eliminar_elemento().execute(elemento_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ElementoLandingImagenView(APIView):
+    """GET público (las imágenes de la página son públicas); subir o quitar, solo el administrador."""
+
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get_permissions(self):
+        return [AllowAny()] if self.request.method == "GET" else [EsAdministrador()]
+
+    def get(self, request, elemento_id):
+        ruta = dependencies.obtener_ruta_imagen().execute(elemento_id, _es_administrador(request))
+        content_type, _ = mimetypes.guess_type(ruta)
+        respuesta = FileResponse(default_storage.open(ruta, "rb"), content_type=content_type or "image/jpeg")
+        # La URL lleva la versión de la imagen, así que puede guardarse en caché mucho tiempo
+        respuesta["Cache-Control"] = "public, max-age=31536000, immutable"
+        return respuesta
+
+    def post(self, request, elemento_id):
+        serializer = ImagenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        elemento = dependencies.subir_imagen_elemento().execute(elemento_id, serializer.validated_data["imagen"])
+        return Response(ElementoLandingSerializer(elemento).data)
+
+    def delete(self, request, elemento_id):
+        elemento = dependencies.quitar_imagen_elemento().execute(elemento_id)
+        return Response(ElementoLandingSerializer(elemento).data)
+
+
+class ImagenUnicaView(APIView):
+    """Imagen de la portada, de "quiénes somos" o del enfoque."""
+
+    permission_classes = [EsAdministrador]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def put(self, request, seccion):
+        clave = _seccion_de(seccion)
+        if clave not in SECCIONES_DE_IMAGEN_UNICA:
+            raise serializers.ValidationError({"seccion": "Esta sección no es una imagen única."})
+        serializer = ImagenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        elemento = dependencies.reemplazar_imagen_unica().execute(clave, serializer.validated_data["imagen"])
+        return Response(ElementoLandingSerializer(elemento).data)

@@ -2,9 +2,26 @@
 
 from dataclasses import dataclass, replace
 
-from modules.institucional.domain.entities import EnlacePortal, InformacionInstitucional, MensajeContacto, TipoEnlace
-from modules.institucional.domain.exceptions import EnlaceNoEncontrado, MensajeNoEncontrado
-from modules.institucional.domain.ports import EnlaceRepository, InformacionRepository, MensajeContactoRepository
+from modules.institucional.domain.entities import (
+    ElementoLanding,
+    EnlacePortal,
+    InformacionInstitucional,
+    MensajeContacto,
+    SeccionLanding,
+    TipoEnlace,
+)
+from modules.institucional.domain.exceptions import (
+    ElementoNoEncontrado,
+    ElementoSinImagen,
+    EnlaceNoEncontrado,
+    MensajeNoEncontrado,
+)
+from modules.institucional.domain.ports import (
+    ElementoLandingRepository,
+    EnlaceRepository,
+    InformacionRepository,
+    MensajeContactoRepository,
+)
 from shared.domain.notificaciones import Notificador
 
 
@@ -121,3 +138,113 @@ class MarcarMensajeLeido:
             raise MensajeNoEncontrado(mensaje_id)
         mensaje.leido = True
         return self.repository.guardar(mensaje)
+
+
+# --- Contenido de la página de inicio ---
+
+
+@dataclass(frozen=True)
+class DatosElemento:
+    seccion: SeccionLanding
+    titulo: str = ""
+    texto: str = ""
+    detalle: str = ""
+    icono: str = ""
+    orden: int = 0
+    activo: bool = True
+
+
+def _obtener_elemento(repository: ElementoLandingRepository, elemento_id: int) -> ElementoLanding:
+    elemento = repository.obtener_por_id(elemento_id)
+    if elemento is None:
+        raise ElementoNoEncontrado(elemento_id)
+    return elemento
+
+
+class ListarElementos:
+    """Lectura pública: solo los elementos activos. El administrador puede pedir también los ocultos."""
+
+    def __init__(self, repository: ElementoLandingRepository):
+        self.repository = repository
+
+    def execute(self, seccion: SeccionLanding | None = None, incluir_inactivos: bool = False) -> list[ElementoLanding]:
+        elementos = self.repository.listar(seccion)
+        return elementos if incluir_inactivos else [e for e in elementos if e.activo]
+
+
+class CrearElemento:
+    def __init__(self, repository: ElementoLandingRepository):
+        self.repository = repository
+
+    def execute(self, datos: DatosElemento) -> ElementoLanding:
+        elemento = ElementoLanding(**datos.__dict__)
+        if elemento.es_de_imagen_unica:
+            # Una sección de imagen única nunca tiene más de un elemento
+            existente = self.repository.obtener_unico(elemento.seccion)
+            if existente is not None:
+                return existente
+        return self.repository.guardar(elemento)
+
+
+class ActualizarElemento:
+    def __init__(self, repository: ElementoLandingRepository):
+        self.repository = repository
+
+    def execute(self, elemento_id: int, cambios: dict) -> ElementoLanding:
+        elemento = _obtener_elemento(self.repository, elemento_id)
+        # La sección no se cambia: un valor no puede volverse una imagen de portada
+        return self.repository.guardar(replace(elemento, **{k: v for k, v in cambios.items() if k != "seccion"}))
+
+
+class EliminarElemento:
+    def __init__(self, repository: ElementoLandingRepository):
+        self.repository = repository
+
+    def execute(self, elemento_id: int) -> None:
+        _obtener_elemento(self.repository, elemento_id)
+        self.repository.eliminar(elemento_id)
+
+
+class SubirImagenElemento:
+    def __init__(self, repository: ElementoLandingRepository):
+        self.repository = repository
+
+    def execute(self, elemento_id: int, archivo) -> ElementoLanding:
+        _obtener_elemento(self.repository, elemento_id)
+        return self.repository.guardar_imagen(elemento_id, archivo)
+
+
+class ReemplazarImagenUnica:
+    """Cambia la imagen de la portada, de "quiénes somos" o del enfoque; crea el elemento si aún no existe."""
+
+    def __init__(self, repository: ElementoLandingRepository):
+        self.repository = repository
+
+    def execute(self, seccion: SeccionLanding, archivo) -> ElementoLanding:
+        elemento = self.repository.obtener_unico(seccion) or self.repository.guardar(ElementoLanding(seccion=seccion))
+        return self.repository.guardar_imagen(elemento.id, archivo)
+
+
+class QuitarImagenElemento:
+    """Quita la imagen subida: el elemento vuelve a mostrar la imagen incluida con el sitio, si la tiene."""
+
+    def __init__(self, repository: ElementoLandingRepository):
+        self.repository = repository
+
+    def execute(self, elemento_id: int) -> ElementoLanding:
+        _obtener_elemento(self.repository, elemento_id)
+        return self.repository.quitar_imagen(elemento_id)
+
+
+class ObtenerRutaImagen:
+    """Ruta de la imagen subida de un elemento visible (o de cualquiera, para el administrador)."""
+
+    def __init__(self, repository: ElementoLandingRepository):
+        self.repository = repository
+
+    def execute(self, elemento_id: int, es_administrador: bool = False) -> str:
+        elemento = _obtener_elemento(self.repository, elemento_id)
+        ruta = self.repository.ruta_imagen(elemento_id)
+        if ruta is None or not (elemento.activo or es_administrador):
+            raise ElementoSinImagen()
+        return ruta

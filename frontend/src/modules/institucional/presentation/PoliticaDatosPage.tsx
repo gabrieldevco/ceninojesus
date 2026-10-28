@@ -23,6 +23,9 @@ export default function PoliticaDatosPage() {
           Para consultar, corregir o pedir la supresión de tus datos escribe a <a href={`mailto:${politica.correo}`}>{politica.correo}</a>.
         </p>
       )}
+      <p>
+        ¿Quieres consultar, corregir o suprimir tus datos? <Link to="/solicitud-de-datos">Radica tu solicitud aquí</Link>.
+      </p>
       <Link to="/" className="btn outline">
         Volver al inicio
       </Link>

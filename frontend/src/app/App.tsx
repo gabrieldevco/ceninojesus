@@ -5,9 +5,10 @@ import { Toasts } from '@/shared/ui/toast'
 import { PanelAdministracionPage } from '@/modules/administracion'
 import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, type Rol } from '@/modules/auth'
 import { AulaPage, GestionContenidoPage } from '@/modules/aula'
+import { GestionSolicitudesDatosPage, SolicitudDeDatosPage } from '@/modules/datosPersonales'
 import { EstudiantesPage } from '@/modules/estudiantes'
 import { AdmisionesPage, GestionInteresadosPage } from '@/modules/interesados'
-import { InicioPage, PoliticaDatosPage } from '@/modules/institucional'
+import { GestionSitioPage, InicioPage, PoliticaDatosPage } from '@/modules/institucional'
 import { MatriculaPage, SolicitudesPage } from '@/modules/matriculas'
 import { PortalLayout, PublicLayout } from './Layouts'
 
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="/restablecer-contrasena" element={<Anim><RestablecerClavePage /></Anim>} />
           <Route path="/admisiones" element={<Anim><AdmisionesPage /></Anim>} />
           <Route path="/politica-de-datos" element={<Anim><PoliticaDatosPage /></Anim>} />
+          <Route path="/solicitud-de-datos" element={<Anim><SolicitudDeDatosPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['acudiente']} crumb="Matrícula extracurricular" />}>
           <Route path="/familias/matricula" element={<Anim><MatriculaPage /></Anim>} />
@@ -75,6 +77,12 @@ export default function App() {
         </Route>
         <Route element={<Guard roles={['administrador']} crumb="Usuarios y grupos" />}>
           <Route path="/admin/usuarios" element={<Anim><PanelAdministracionPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['administrador']} crumb="Datos personales" />}>
+          <Route path="/admin/datos-personales" element={<Anim><GestionSolicitudesDatosPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['administrador']} crumb="Sitio web" />}>
+          <Route path="/admin/sitio" element={<Anim><GestionSitioPage /></Anim>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

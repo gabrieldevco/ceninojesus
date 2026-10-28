@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LINKS } from '@/shared/config/links'
 import { Ico, Logo } from '@/shared/ui/ui'
 import { useAuth, type Rol } from '@/modules/auth'
+import { useContenidoLanding, useEnlaces } from '@/modules/institucional'
 
 const TABS: ReadonlyArray<readonly [string, string]> = [['inicio', 'Inicio'], ['institucional', 'Institucional'], ['academico', 'Académico'], ['galeria', 'Vida escolar'], ['equipo', 'Equipo'], ['servicios', 'Servicios'], ['contacto', 'Contacto']]
 
@@ -80,18 +81,20 @@ export function PublicNav() {
 }
 
 export function Footer() {
+  const { informacion: info } = useContenidoLanding().contenido
+  const direccion = [info.direccion, info.ciudad].filter(Boolean).join(', ')
   return (
     <footer className="footer">
       <div className="footer-grid">
-        <div><Logo light /><p className="fdesc">Garantizando una formación intelectual y en valores cívicos con profunda conciencia del cuidado del medio ambiente y bilingüismo avanzado.</p>
-          <a className="fb-ico" href={LINKS.facebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook del Centro Educativo El Niño Jesús" title="Facebook">
+        <div><Logo light /><p className="fdesc">{info.pieDescripcion}</p>
+          {info.urlFacebook && <a className="fb-ico" href={info.urlFacebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook del Centro Educativo El Niño Jesús" title="Facebook">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
-          </a></div>
+          </a>}</div>
         <div><h4>ACCESOS RÁPIDOS</h4><Link to="/#institucional">Institucional</Link><Link to="/admisiones">Admisiones 2025</Link><Link to="/acceso">Portal de acceso</Link><a href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer">Aula virtual ↗</a><a href={LINKS.correo} target="_blank" rel="noopener noreferrer">Correo institucional ↗</a></div>
-        <div><h4>CONTACTO E INFORMACIÓN</h4><p className="frow">{Ico.pin}<span>Calle 38B # 4-35, Barranquilla - Colombia</span></p><p className="frow">{Ico.phone}<span>334 4105 · 315 8230285</span></p><p className="frow">{Ico.mail}<span>ce_nino@hotmail.com</span></p></div>
+        <div><h4>CONTACTO E INFORMACIÓN</h4>{direccion && <p className="frow">{Ico.pin}<span>{direccion}</span></p>}{info.telefonos && <p className="frow">{Ico.phone}<span>{info.telefonos}</span></p>}{info.correo && <p className="frow">{Ico.mail}<span>{info.correo}</span></p>}</div>
         <img className="icfes" src="/img/icfes.png" alt="Categoría A+ en las Pruebas Saber (ICFES)" />
       </div>
-      <div className="footer-bottom"><span>© 2025 Centro Educativo El Niño Jesús. Todos los derechos reservados.</span><span>Políticas de Privacidad · Términos de Servicio</span></div>
+      <div className="footer-bottom"><span>© {new Date().getFullYear()} {info.nombre}. Todos los derechos reservados.</span><Link to="/politica-de-datos">Política de tratamiento de datos</Link></div>
     </footer>
   )
 }
@@ -101,11 +104,13 @@ const MENU: Record<Rol, [string, string, string][]> = {
   acudiente: [['/familias/estudiantes', 'Mis estudiantes', '☺'], ['/familias/matricula', 'Matrícula extracurricular', '▤']],
   estudiante: [['/estudiante/aula', 'Aula estudiante', '▥']],
   administrador_grupo: SOLICITUDES,
-  administrador: [...SOLICITUDES, ['/admin/interesados', 'Interesados', '☎'], ['/admin/usuarios', 'Usuarios y grupos', '⚙']],
+  administrador: [...SOLICITUDES, ['/admin/interesados', 'Interesados', '☎'], ['/admin/usuarios', 'Usuarios y grupos', '⚙'], ['/admin/datos-personales', 'Datos personales', '⚖'], ['/admin/sitio', 'Sitio web', '✎']],
 }
 
 export function PortalLayout({ crumb }: { crumb: string }) {
-  const { usuario, cerrarSesion } = useAuth(); const nav = useNavigate()
+  const { usuario, cerrarSesion, modoDemo } = useAuth(); const nav = useNavigate()
+  const { enlaces } = useEnlaces()
+  const biblioteca = enlaces.find(e => e.tipo === 'biblioteca')
   if (!usuario) return null
   return (
     <div className="portal">
@@ -120,7 +125,7 @@ export function PortalLayout({ crumb }: { crumb: string }) {
             </NavLink>
           ))}
           <a className="side-link" href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer"><i>🎓</i>Aula virtual ↗</a>
-          <a className="side-link muted" href="#" onClick={e => e.preventDefault()} title="Pendiente de conexión"><i>▦</i>Biblioteca</a>
+          {biblioteca && <a className="side-link" href={biblioteca.url} target="_blank" rel="noopener noreferrer"><i>▦</i>{biblioteca.nombre} ↗</a>}
         </nav>
         <div className="side-note"><b>Acceso por permisos</b><p>Solo el alcance asignado a tu cuenta.</p></div>
         <Link className="side-help" to="/">Volver al sitio web</Link>
@@ -130,12 +135,12 @@ export function PortalLayout({ crumb }: { crumb: string }) {
           <span>Centro Educativo El Niño Jesús / {crumb}</span>
           <div className="top-right">
             <span className="bell" title="Notificaciones">🔔<em /></span>
-            <span className="demo-pill">Demostración</span>
+            {modoDemo && <span className="demo-pill">Demostración</span>}
             <button className="linkbtn" onClick={() => void cerrarSesion().then(() => nav('/'))}>Cerrar sesión</button>
           </div>
         </header>
         <main className="portal-content"><Outlet /></main>
-        <p className="portal-foot">Vista de diseño · Datos de demostración · Autenticación, notificaciones e integraciones requieren implementación.</p>
+        {modoDemo && <p className="portal-foot">Modo demostración · Los datos son de ejemplo y no se guardan en el servidor.</p>}
       </div>
     </div>
   )

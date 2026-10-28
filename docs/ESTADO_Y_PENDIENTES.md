@@ -25,7 +25,7 @@ Infraestructura: Docker Compose de desarrollo y producción (Caddy + HTTPS), ser
 ### 1. Integración frontend ↔ backend (lo más grande)
 - Cliente HTTP, manejo de JWT (login, refresh, logout) y recuperación de contraseña, reemplazando `store.jsx` y `data/demo.js`.
 - Conectar cada pantalla a su endpoint: matrícula, aula (material/actividades), solicitudes, admisiones (interesados), contacto.
-- Pantallas que no existen: solicitudes de datos personales (el panel de administración general, RF-20, ya existe en `/admin/usuarios`).
+- Pantallas que no existen: nada de lo listado: solicitudes de datos (`/admin/datos-personales`), panel de administración (`/admin/usuarios`) y biblioteca ya existen.
 - Rutas de `Guard` por los 5 roles reales del sistema (hoy solo 3 de demostración).
 
 ### 2. Calidad y profesionalización
@@ -55,3 +55,9 @@ Infraestructura: Docker Compose de desarrollo y producción (Caddy + HTTPS), ser
 6. Ley 1581 en el frontend (consentimiento, solicitudes).
 7. Pruebas, lint, contenido real.
 8. Despliegue, capacitación y entrega.
+
+## Contenido de la página de inicio (RF-01)
+
+Hecho: la institución administra desde `/admin/sitio` los textos, las listas, las fotos y los enlaces de la página. Backend: tabla `elementos_landing` (secciones `dato_destacado`, `valor`, `oferta`, `directivo`, `galeria` e imágenes únicas) y campos nuevos en `informacion_institucional`; la migración `0006` carga el contenido que antes estaba fijo en el código. Las imágenes subidas se sirven públicamente en `/api/institucional/elementos/<id>/imagen/` (solo JPG o PNG, 5 MB como máximo, con firma verificada).
+
+Pendiente a futuro: bandeja de mensajes de contacto para el administrador, y edición de los rótulos fijos de cada sección (por ejemplo "NUESTRA IDENTIDAD").
