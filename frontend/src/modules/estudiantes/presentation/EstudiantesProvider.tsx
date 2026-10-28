@@ -1,12 +1,19 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/modules/auth'
-import type { ListarEstudiantes, RegistrarEstudiante } from '../application/casosDeUso'
-import type { Estudiante, NuevoEstudiante } from '../domain/estudiante'
+import type {
+  CrearAccesoEstudiante,
+  ListarEstudiantes,
+  RegistrarEstudiante,
+  RestablecerClaveEstudiante,
+} from '../application/casosDeUso'
+import type { Estudiante, NuevoAcceso, NuevoEstudiante } from '../domain/estudiante'
 
 export interface CasosDeUsoEstudiantes {
   listarEstudiantes: ListarEstudiantes
   registrarEstudiante: RegistrarEstudiante
+  crearAccesoEstudiante: CrearAccesoEstudiante
+  restablecerClaveEstudiante: RestablecerClaveEstudiante
 }
 
 const Contexto = createContext<CasosDeUsoEstudiantes | null>(null)
@@ -41,5 +48,24 @@ export function useRegistrarEstudiante() {
   return useMutation({
     mutationFn: (nuevo: NuevoEstudiante) => registrarEstudiante.ejecutar(nuevo),
     onSuccess: () => cliente.invalidateQueries({ queryKey: clave }),
+  })
+}
+
+export function useCrearAcceso() {
+  const { crearAccesoEstudiante } = useCasosDeUso()
+  const cliente = useQueryClient()
+  const { clave } = useClave()
+  return useMutation({
+    mutationFn: (datos: { estudianteId: number; acceso: NuevoAcceso }) =>
+      crearAccesoEstudiante.ejecutar(datos.estudianteId, datos.acceso),
+    onSuccess: () => cliente.invalidateQueries({ queryKey: clave }),
+  })
+}
+
+export function useRestablecerClave() {
+  const { restablecerClaveEstudiante } = useCasosDeUso()
+  return useMutation({
+    mutationFn: (datos: { estudianteId: number; clave: string; confirmacion: string }) =>
+      restablecerClaveEstudiante.ejecutar(datos.estudianteId, datos.clave, datos.confirmacion),
   })
 }

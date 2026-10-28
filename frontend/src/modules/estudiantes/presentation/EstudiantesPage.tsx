@@ -6,6 +6,7 @@ import { Alert } from '@/shared/ui/ui'
 import { useToast } from '@/shared/ui/toast'
 import { DatosDeEstudianteInvalidos, type NuevoEstudiante } from '../domain/estudiante'
 import { useEstudiantes, useRegistrarEstudiante } from './EstudiantesProvider'
+import PanelDeAcceso, { type ModoDeAcceso } from './PanelDeAcceso'
 
 type Errores = Partial<Record<keyof NuevoEstudiante, string>>
 
@@ -34,6 +35,8 @@ export default function EstudiantesPage() {
   const registrar = useRegistrarEstudiante()
   const [datos, setDatos] = useState<NuevoEstudiante>(VACIO)
   const [errores, setErrores] = useState<Errores>({})
+  const [panel, setPanel] = useState<{ estudianteId: number; modo: ModoDeAcceso } | null>(null)
+  const estudianteDelPanel = estudiantes.find((e) => e.id === panel?.estudianteId)
 
   const cambiar = <K extends keyof NuevoEstudiante>(campo: K, valor: NuevoEstudiante[K]) => {
     setDatos((d) => ({ ...d, [campo]: valor }))
@@ -166,6 +169,7 @@ export default function EstudiantesPage() {
                   <th>Grado</th>
                   <th>Documento</th>
                   <th>Nacimiento</th>
+                  <th>Acceso al aula</th>
                 </tr>
               </thead>
               <tbody>
@@ -177,6 +181,12 @@ export default function EstudiantesPage() {
                     <td>{s.grado || '—'}</td>
                     <td>{s.documentoIdentidad || '—'}</td>
                     <td>{s.fechaNacimiento ? formatearFecha(s.fechaNacimiento) : '—'}</td>
+                    <td>
+                      {s.tieneAcceso ? <span className="badge aprobada">Con acceso</span> : <span className="badge pendiente">Sin acceso</span>}{' '}
+                      <button className="linkbtn" onClick={() => setPanel({ estudianteId: s.id, modo: s.tieneAcceso ? 'clave' : 'crear' })}>
+                        {s.tieneAcceso ? 'Cambiar contraseña' : 'Crear acceso'}
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -184,6 +194,10 @@ export default function EstudiantesPage() {
           </div>
         )}
       </section>
+
+      {panel && estudianteDelPanel && (
+        <PanelDeAcceso key={`${panel.estudianteId}-${panel.modo}`} estudiante={estudianteDelPanel} modo={panel.modo} alCerrar={() => setPanel(null)} />
+      )}
     </>
   )
 }

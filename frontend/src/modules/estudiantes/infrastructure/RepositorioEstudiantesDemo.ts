@@ -12,6 +12,7 @@ const estudiante = (id: number, letra: string): Estudiante => ({
   grado: '5°',
   documentoIdentidad: '',
   fechaNacimiento: null,
+  tieneAcceso: letra === 'A',
 })
 
 const SEMILLA: Estudiante[] = [estudiante(1, 'A'), estudiante(2, 'B')]
@@ -38,8 +39,25 @@ export class RepositorioEstudiantesDemo implements RepositorioEstudiantes {
       grado: nuevo.grado,
       documentoIdentidad: nuevo.documentoIdentidad,
       fechaNacimiento: nuevo.fechaNacimiento,
+      tieneAcceso: false,
     }
     this.almacenamiento.guardar(CLAVE, [...actuales, creado])
     return Promise.resolve(creado)
+  }
+
+  crearAcceso(estudianteId: number): Promise<Estudiante> {
+    const actuales = this.leer()
+    const actual = actuales.find((e) => e.id === estudianteId)
+    if (!actual) return Promise.reject(new Error(`No existe el estudiante ${estudianteId}`))
+    const conAcceso = { ...actual, tieneAcceso: true }
+    this.almacenamiento.guardar(
+      CLAVE,
+      actuales.map((e) => (e.id === estudianteId ? conAcceso : e)),
+    )
+    return Promise.resolve(conAcceso)
+  }
+
+  restablecerClave(): Promise<void> {
+    return Promise.resolve()
   }
 }

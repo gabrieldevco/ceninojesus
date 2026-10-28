@@ -35,6 +35,7 @@ describe('RepositorioEstudiantesHttp', () => {
         grado: '5°',
         documentoIdentidad: '123',
         fechaNacimiento: '2016-04-10',
+        tieneAcceso: false,
       },
     ])
   })
@@ -70,5 +71,39 @@ describe('RepositorioEstudiantesHttp', () => {
       .catch((e: unknown) => e)
     expect(error).toBeInstanceOf(ErrorApi)
     expect(error).toMatchObject({ campos: { documento_identidad: ['Documento ya registrado.'] } })
+  })
+
+  it('sabe si el estudiante ya tiene acceso por su usuario', async () => {
+    const { repo } = armar(() => respuesta(200, [{ ...ESTUDIANTE_API, usuario_id: 31 }]))
+    expect((await repo.listar())[0]?.tieneAcceso).toBe(true)
+  })
+
+  it('crea el acceso con los nombres de campo de la API', async () => {
+    const { repo, fetchFalso } = armar(() => respuesta(201, { ...ESTUDIANTE_API, usuario_id: 31 }))
+
+    const estudiante = await repo.crearAcceso(10, { nombreUsuario: 'luis', clave: 'Clave-segura-1', confirmacion: 'Clave-segura-1' })
+
+    const [url, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/estudiantes/10/acceso/')
+    expect(JSON.parse(opciones.body as string)).toEqual({ nombre_usuario: 'luis', password: 'Clave-segura-1' })
+    expect(estudiante.tieneAcceso).toBe(true)
+  })
+
+  it('cambia la contraseña del estudiante sin enviar la confirmación', async () => {
+    const { repo, fetchFalso } = armar(() => respuesta(200, { detail: 'La contraseña del estudiante se cambió.' }))
+
+    await repo.restablecerClave(10, 'Otra-clave-2')
+
+    const [url, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/estudiantes/10/acceso/contrasena/')
+    expect(JSON.parse(opciones.body as string)).toEqual({ password: 'Otra-clave-2' })
+  })
+
+  it('conserva el error cuando el usuario ya existe', async () => {
+    const { repo } = armar(() => respuesta(400, { detail: "El nombre de usuario 'luis' ya está en uso." }))
+    await expect(repo.crearAcceso(10, { nombreUsuario: 'luis', clave: 'Clave-segura-1', confirmacion: 'Clave-segura-1' })).rejects.toMatchObject({
+      estado: 400,
+      detalle: expect.stringContaining('ya está en uso') as string,
+    })
   })
 })
