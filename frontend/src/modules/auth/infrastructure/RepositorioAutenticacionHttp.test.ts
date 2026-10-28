@@ -86,6 +86,68 @@ describe('RepositorioAutenticacionHttp', () => {
     expect(opciones.body).toBe('{"refresh":"R"}')
   })
 
+  it('registra a un acudiente con los nombres de campo de la API, sin token ni iniciar sesión', async () => {
+    const { repo, sesion, fetchFalso } = armar(() => respuesta(201, { id: 9 }))
+
+    await repo.registrarAcudiente({
+      nombreUsuario: 'maria',
+      nombres: 'María',
+      apellidos: 'López',
+      correo: 'maria@example.com',
+      telefono: '3001234567',
+      clave: 'Clave-segura-1',
+      confirmacion: 'Clave-segura-1',
+      autorizaTratamientoDatos: true,
+    })
+
+    const [url, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/auth/registro/')
+    expect(opciones.headers).not.toHaveProperty('Authorization')
+    expect(JSON.parse(opciones.body as string)).toEqual({
+      nombre_usuario: 'maria',
+      password: 'Clave-segura-1',
+      nombres: 'María',
+      apellidos: 'López',
+      correo: 'maria@example.com',
+      telefono: '3001234567',
+      autoriza_tratamiento_datos: true,
+    })
+    expect(sesion.refresco()).toBeNull()
+  })
+
+  it('conserva el error cuando el usuario ya existe', async () => {
+    const { repo } = armar(() => respuesta(400, { detail: "El nombre de usuario 'maria' ya está en uso." }))
+    await expect(
+      repo.registrarAcudiente({
+        nombreUsuario: 'maria',
+        nombres: 'M',
+        apellidos: 'L',
+        correo: 'm@e.co',
+        telefono: '',
+        clave: 'Clave-segura-1',
+        confirmacion: 'Clave-segura-1',
+        autorizaTratamientoDatos: true,
+      }),
+    ).rejects.toMatchObject({ estado: 400, detalle: expect.stringContaining('ya está en uso') as string })
+  })
+
+  it('restablece la contraseña con los datos del enlace', async () => {
+    const { repo, fetchFalso } = armar(() => respuesta(200, { detail: 'La contraseña se cambió. Ya puede iniciar sesión.' }))
+
+    await repo.restablecerClave({ uid: 'Mw', token: 'abc-123', clave: 'Clave-segura-1', confirmacion: 'Clave-segura-1' })
+
+    const [url, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/auth/recuperar/confirmar/')
+    expect(JSON.parse(opciones.body as string)).toEqual({ uid: 'Mw', token: 'abc-123', password: 'Clave-segura-1' })
+  })
+
+  it('propaga el error de un enlace vencido', async () => {
+    const { repo } = armar(() => respuesta(400, { detail: 'El enlace para restablecer la contraseña no es válido o ya venció.' }))
+    await expect(
+      repo.restablecerClave({ uid: 'x', token: 'y', clave: 'Clave-segura-1', confirmacion: 'Clave-segura-1' }),
+    ).rejects.toMatchObject({ estado: 400, detalle: expect.stringContaining('ya venció') as string })
+  })
+
   it('cerrar sesión no falla aunque el servidor no responda', async () => {
     const { repo, sesion } = armar(() => {
       throw new TypeError('sin red')

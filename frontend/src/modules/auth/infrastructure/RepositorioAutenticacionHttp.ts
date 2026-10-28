@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { ErrorApi, NoAutorizado } from '@/shared/http/errores'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import { DemasiadosIntentos, type RepositorioAutenticacion } from '../domain/puertos'
+import type { NuevoAcudiente, RestablecimientoDeClave } from '../domain/registro'
 import { crearUsuario, ROLES, type Usuario } from '../domain/usuario'
 import type { GestorDeSesion } from './GestorDeSesion'
 
@@ -69,6 +70,32 @@ export class RepositorioAutenticacionHttp implements RepositorioAutenticacion {
       ruta: '/auth/recuperar/',
       cuerpo: { identificador },
       autenticada: false,
+    })
+  }
+
+  async registrarAcudiente(nuevo: NuevoAcudiente): Promise<void> {
+    await this.http.enviar({
+      metodo: 'POST',
+      ruta: '/auth/registro/',
+      autenticada: false,
+      cuerpo: {
+        nombre_usuario: nuevo.nombreUsuario,
+        password: nuevo.clave,
+        nombres: nuevo.nombres,
+        apellidos: nuevo.apellidos,
+        correo: nuevo.correo,
+        telefono: nuevo.telefono,
+        autoriza_tratamiento_datos: nuevo.autorizaTratamientoDatos,
+      },
+    })
+  }
+
+  async restablecerClave(datos: RestablecimientoDeClave): Promise<void> {
+    await this.http.enviar({
+      metodo: 'POST',
+      ruta: '/auth/recuperar/confirmar/',
+      autenticada: false,
+      cuerpo: { uid: datos.uid, token: datos.token, password: datos.clave },
     })
   }
 

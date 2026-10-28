@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { motion, useScroll, useSpring } from 'framer-motion'
 import { Toasts } from '@/shared/ui/toast'
-import { AccesoPage, puedeAcceder, useAuth, type Rol } from '@/modules/auth'
+import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, type Rol } from '@/modules/auth'
 import { AulaPage, GestionContenidoPage } from '@/modules/aula'
 import { EstudiantesPage } from '@/modules/estudiantes'
 import { AdmisionesPage } from '@/modules/interesados'
@@ -49,6 +49,8 @@ export default function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Anim><InicioPage /></Anim>} />
           <Route path="/acceso" element={<Anim><AccesoPage /></Anim>} />
+          <Route path="/registro" element={<Anim><RegistroPage /></Anim>} />
+          <Route path="/restablecer-contrasena" element={<Anim><RestablecerClavePage /></Anim>} />
           <Route path="/admisiones" element={<Anim><AdmisionesPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['acudiente']} crumb="Matrícula extracurricular" />}>
