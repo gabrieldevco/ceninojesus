@@ -5,7 +5,7 @@ import { Toasts } from '@/shared/ui/toast'
 import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, type Rol } from '@/modules/auth'
 import { AulaPage, GestionContenidoPage } from '@/modules/aula'
 import { EstudiantesPage } from '@/modules/estudiantes'
-import { AdmisionesPage } from '@/modules/interesados'
+import { AdmisionesPage, GestionInteresadosPage } from '@/modules/interesados'
 import { InicioPage } from '@/modules/institucional'
 import { MatriculaPage, SolicitudesPage } from '@/modules/matriculas'
 import { PortalLayout, PublicLayout } from './Layouts'
@@ -67,6 +67,9 @@ export default function App() {
         </Route>
         <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Contenido del grupo" />}>
           <Route path="/admin/contenido" element={<Anim><GestionContenidoPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['administrador']} crumb="Interesados" />}>
+          <Route path="/admin/interesados" element={<Anim><GestionInteresadosPage /></Anim>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

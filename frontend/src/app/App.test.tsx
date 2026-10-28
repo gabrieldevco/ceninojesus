@@ -142,6 +142,36 @@ describe('aplicación en modo demostración', () => {
     expect(screen.getByRole('link', { name: /volver a iniciar sesión/i })).toBeInTheDocument()
   })
 
+  it('el administrador general gestiona un interesado: registra un seguimiento y cambia su estado', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/interesados', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('cell', { name: 'Laura Pérez' }))
+    expect(await screen.findByRole('heading', { name: 'Seguimiento' })).toBeInTheDocument()
+
+    await usuario.click(screen.getByRole('button', { name: /registrar seguimiento/i }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/qué se habló/i)
+
+    await usuario.type(screen.getByPlaceholderText(/qué se habló y qué sigue/i), 'Se llamó y pidió informes de costos')
+    await usuario.click(screen.getByRole('button', { name: /registrar seguimiento/i }))
+    expect(await screen.findByText('Se llamó y pidió informes de costos')).toBeInTheDocument()
+
+    // Registrar un contacto pasa al interesado de "nuevo" a "en seguimiento": ya no se ofrece ese cambio
+    await waitFor(() => expect(screen.queryByRole('button', { name: /pasar a en seguimiento/i })).not.toBeInTheDocument())
+    await usuario.click(screen.getByRole('button', { name: /pasar a matriculado/i }))
+    expect(await screen.findByText(/este estado es final/i)).toBeInTheDocument()
+  })
+
+  it('un administrador de grupo no entra a la gestión de interesados', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'admin')
+    renderizar('/admin/interesados', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByRole('heading', { name: /revisar solicitudes de matrícula/i })).toBeInTheDocument()
+  })
+
   it('el aula es del estudiante: un acudiente que la abre vuelve a su matrícula', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'padre')

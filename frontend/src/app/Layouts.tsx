@@ -101,7 +101,7 @@ const MENU: Record<Rol, [string, string, string][]> = {
   acudiente: [['/familias/estudiantes', 'Mis estudiantes', '☺'], ['/familias/matricula', 'Matrícula extracurricular', '▤']],
   estudiante: [['/estudiante/aula', 'Aula estudiante', '▥']],
   administrador_grupo: SOLICITUDES,
-  administrador: SOLICITUDES,
+  administrador: [...SOLICITUDES, ['/admin/interesados', 'Interesados', '☎']],
 }
 
 export function PortalLayout({ crumb }: { crumb: string }) {
