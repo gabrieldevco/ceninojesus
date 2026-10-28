@@ -37,13 +37,17 @@ Salen de `develop`, viven poco y se borran al fusionarse. El nombre es `<prefijo
 - Si se sube un cambio nuevo después de aprobar, la aprobación se descarta.
 - Todas las conversaciones del PR deben estar resueltas antes de fusionar.
 
+## Autoría de los commits
+
+El código lo firman únicamente las personas del equipo. Los commits y PR **no** deben incluir líneas `Co-Authored-By` de herramientas de IA (por ejemplo Claude Code) ni textos como "Generated with Claude Code". El check `branch-policy` rechaza el PR si encuentra alguna.
+
 ## Checks obligatorios
 
 Un PR solo se puede fusionar si pasan, y si la rama está actualizada con su destino:
 
 | Check | Qué valida |
 |---|---|
-| `branch-policy` | Origen y destino permitidos y nombre de rama válido |
+| `branch-policy` | Origen y destino permitidos, nombre de rama válido y commits sin coautor de IA |
 | `pr-title` | Formato del título y coherencia con la rama |
 | `backend-tests` | `makemigrations --check`, `manage.py check` y `manage.py test` |
 | `frontend-build` | `npm ci` y `npm run build` |

@@ -15,6 +15,19 @@ jobs:
     name: branch-policy
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Rechazar coautoría de herramientas de IA en los commits
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          if git log --format=%B "$BASE_SHA..$HEAD_SHA" | grep -Eiq 'co-authored-by:.*(claude|anthropic|copilot|chatgpt|openai|gemini)|generated with.*claude'; then
+            echo "::error::Hay commits con coautoría o firma de una herramienta de IA. Reescribe el mensaje y vuelve a subir."
+            exit 1
+          fi
       - name: Validar origen y destino del PR
         env:
           BASE: ${{ github.base_ref }}
