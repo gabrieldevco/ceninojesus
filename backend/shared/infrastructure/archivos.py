@@ -40,3 +40,14 @@ def validar_archivo_permitido(archivo):
         if not inicio.startswith(firmas):
             raise serializers.ValidationError("El contenido del archivo no corresponde a su extensión.")
     return archivo
+
+
+TIPOS_IMAGEN = (".jpg", ".jpeg", ".png")
+
+
+def validar_imagen(archivo):
+    """Solo imágenes JPG o PNG: se sirven públicamente, así que no se admite nada más."""
+    extension = os.path.splitext(archivo.name)[1].lower()
+    if extension not in TIPOS_IMAGEN:
+        raise serializers.ValidationError("La imagen debe ser JPG o PNG.")
+    return validar_archivo_permitido(archivo)

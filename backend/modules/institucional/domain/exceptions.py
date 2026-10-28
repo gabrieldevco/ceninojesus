@@ -14,3 +14,13 @@ class EnlaceNoEncontrado(NotFoundError):
 class MensajeNoEncontrado(NotFoundError):
     def __init__(self, mensaje_id):
         super().__init__(f"No existe el mensaje con id {mensaje_id}.")
+
+
+class ElementoNoEncontrado(NotFoundError):
+    def __init__(self, elemento_id):
+        super().__init__(f"No existe el elemento con id {elemento_id}.")
+
+
+class ElementoSinImagen(NotFoundError):
+    def __init__(self):
+        super().__init__("El elemento no tiene una imagen subida.")
