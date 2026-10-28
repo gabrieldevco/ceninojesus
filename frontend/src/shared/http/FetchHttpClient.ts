@@ -46,13 +46,16 @@ export class FetchHttpClient implements HttpClient {
 
   private async llamar(peticion: PeticionHttp, token: string | null): Promise<Response> {
     const cabeceras: Record<string, string> = { Accept: 'application/json' }
-    if (peticion.cuerpo !== undefined) cabeceras['Content-Type'] = 'application/json'
+    // Con FormData el navegador fija el Content-Type (con el límite del multipart): no hay que ponerlo
+    const esFormulario = peticion.cuerpo instanceof FormData
+    if (peticion.cuerpo !== undefined && !esFormulario) cabeceras['Content-Type'] = 'application/json'
     if (token) cabeceras.Authorization = `Bearer ${token}`
     try {
       return await this.fetchImpl(this.baseUrl.replace(/\/$/, '') + peticion.ruta, {
         method: peticion.metodo,
         headers: cabeceras,
-        body: peticion.cuerpo === undefined ? undefined : JSON.stringify(peticion.cuerpo),
+        body:
+          peticion.cuerpo === undefined ? undefined : esFormulario ? (peticion.cuerpo as FormData) : JSON.stringify(peticion.cuerpo),
       })
     } catch (causa) {
       throw new ErrorDeRed(causa)

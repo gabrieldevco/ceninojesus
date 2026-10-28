@@ -33,7 +33,7 @@ const ACTIVIDAD_API = {
 }
 
 function armar(rutas: (url: string) => Response) {
-  const fetchFalso = vi.fn((url: string) => Promise.resolve(rutas(url)))
+  const fetchFalso = vi.fn((...argumentos: [url: string, opciones?: RequestInit]) => Promise.resolve(rutas(argumentos[0])))
   const http = new FetchHttpClient('/api', undefined, fetchFalso as unknown as typeof fetch)
   return { repo: new RepositorioContenidosHttp(http), fetchFalso }
 }
@@ -55,6 +55,7 @@ describe('RepositorioContenidosHttp', () => {
       url: '',
       tieneArchivo: true,
       fechaPublicacion: '2026-10-01',
+      publicado: true,
       tipo: 'documento',
     })
     expect(enlace).toMatchObject({ tipo: 'enlace', tieneArchivo: false, url: 'https://ejemplo.com' })
@@ -88,6 +89,62 @@ describe('RepositorioContenidosHttp', () => {
   it('si no tiene permiso, la descarga falla con el mensaje de la API', async () => {
     const { repo } = armar(() => respuesta(403, { detail: 'No pertenece al grupo.' }))
     await expect(repo.descargarArchivo('materiales', 3, 4)).rejects.toMatchObject({ estado: 403, detalle: 'No pertenece al grupo.' })
+  })
+
+  it('publica un material como multipart con el archivo adjunto', async () => {
+    const { repo, fetchFalso } = armar(() => respuesta(201, MATERIAL_API))
+    const archivo = new File(['%PDF-1.4'], 'guia.pdf', { type: 'application/pdf' })
+
+    await repo.crearMaterial({
+      grupoId: 3,
+      titulo: 'Guía',
+      descripcion: 'Léela',
+      tipo: 'documento',
+      url: '',
+      archivo,
+      publicado: false,
+    })
+
+    const [url, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/grupos/3/materiales/')
+    expect(opciones.method).toBe('POST')
+    const formulario = opciones.body as FormData
+    expect(formulario.get('titulo')).toBe('Guía')
+    expect(formulario.get('tipo')).toBe('documento')
+    expect(formulario.get('publicado')).toBe('false')
+    expect((formulario.get('archivo') as File).name).toBe('guia.pdf')
+    expect(formulario.has('url')).toBe(false)
+  })
+
+  it('publica una actividad con la entrega al final del día elegido', async () => {
+    const { repo, fetchFalso } = armar(() => respuesta(201, ACTIVIDAD_API))
+
+    await repo.crearActividad({
+      grupoId: 3,
+      titulo: 'Piensa tu jugada',
+      descripcion: '',
+      url: '',
+      archivo: null,
+      fechaEntrega: '2026-11-05',
+      publicado: true,
+    })
+
+    const formulario = (fetchFalso.mock.calls[0] as [string, RequestInit])[1].body as FormData
+    expect(formulario.get('fecha_entrega')).toBe('2026-11-05T23:59:00')
+    expect(formulario.has('archivo')).toBe(false)
+  })
+
+  it('elimina un contenido', async () => {
+    const { repo, fetchFalso } = armar(() => respuesta(204))
+    await repo.eliminar('actividades', 3, 9)
+    const [url, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/grupos/3/actividades/9/')
+    expect(opciones.method).toBe('DELETE')
+  })
+
+  it('propaga el error de la API si no administra el grupo', async () => {
+    const { repo } = armar(() => respuesta(403, { detail: 'No administra este grupo.' }))
+    await expect(repo.eliminar('materiales', 3, 4)).rejects.toMatchObject({ estado: 403, detalle: 'No administra este grupo.' })
   })
 
   it('rechaza una respuesta que no tiene la forma esperada', async () => {

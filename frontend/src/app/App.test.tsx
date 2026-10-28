@@ -70,6 +70,25 @@ describe('aplicación en modo demostración', () => {
     expect(screen.getByText('Piensa tu próxima jugada')).toBeInTheDocument()
   })
 
+  it('el administrador de grupo publica un material con enlace y puede eliminarlo', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'admin')
+    const usuario = userEvent.setup()
+    renderizar('/admin/contenido', { modoDemo: true, almacenamiento })
+
+    await usuario.type(await screen.findByLabelText(/título/i), 'Tutorial de apertura')
+    await usuario.click(screen.getByRole('button', { name: /publicar material/i }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/archivo o un enlace/i)
+
+    await usuario.type(screen.getByPlaceholderText('https://…'), 'https://ejemplo.com/apertura')
+    await usuario.click(screen.getAllByRole('button', { name: /publicar material/i }).at(-1) as HTMLElement)
+
+    expect(await screen.findByRole('cell', { name: /Tutorial de apertura/ })).toBeInTheDocument()
+    await usuario.click(screen.getAllByRole('button', { name: 'Eliminar' })[0] as HTMLElement)
+    await usuario.click(screen.getByRole('button', { name: /confirmar eliminación/i }))
+    await waitFor(() => expect(screen.queryByRole('cell', { name: /Tutorial de apertura/ })).not.toBeInTheDocument())
+  })
+
   it('un estudiante no puede entrar a las solicitudes de administración', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'estudiante')
