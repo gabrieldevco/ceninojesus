@@ -8,6 +8,8 @@ export interface Estudiante {
   documentoIdentidad: string
   /** Fecha ISO (AAAA-MM-DD) o `null` si no se registró */
   fechaNacimiento: string | null
+  /** Si ya tiene un usuario con el que entra al aula */
+  tieneAcceso: boolean
 }
 
 export interface NuevoEstudiante {
@@ -50,4 +52,47 @@ export function validarNuevoEstudiante(datos: NuevoEstudiante, hoy: Date = new D
     grado: datos.grado.trim(),
     documentoIdentidad: datos.documentoIdentidad.trim(),
   }
+}
+
+// --- Acceso del estudiante (RF-06): su propia cuenta para ver el aula ---
+
+export interface NuevoAcceso {
+  nombreUsuario: string
+  clave: string
+  confirmacion: string
+}
+
+export type ErroresDeAcceso = Partial<Record<'nombreUsuario' | 'clave' | 'confirmacion', string>>
+
+export class AccesoInvalido extends Error {
+  constructor(readonly campos: ErroresDeAcceso) {
+    super(Object.values(campos)[0] ?? 'Los datos de acceso no son válidos')
+    this.name = 'AccesoInvalido'
+  }
+}
+
+export const CLAVE_MINIMA_CARACTERES = 8
+
+/** Mismas exigencias que el backend para la contraseña: largo mínimo y no solo números. */
+export function validarClave(clave: string, confirmacion: string): ErroresDeAcceso {
+  const errores: ErroresDeAcceso = {}
+  if (clave.length < CLAVE_MINIMA_CARACTERES) errores.clave = `La contraseña debe tener al menos ${CLAVE_MINIMA_CARACTERES} caracteres.`
+  else if (/^\d+$/.test(clave)) errores.clave = 'La contraseña no puede ser solo números.'
+  else if (clave !== confirmacion) errores.confirmacion = 'Las contraseñas no coinciden.'
+  return errores
+}
+
+export function validarNuevoAcceso(acceso: NuevoAcceso): NuevoAcceso {
+  const errores = validarClave(acceso.clave, acceso.confirmacion)
+  const usuario = acceso.nombreUsuario.trim()
+  if (!usuario) errores.nombreUsuario = 'Escribe un nombre de usuario.'
+  else if (/\s/.test(usuario)) errores.nombreUsuario = 'El nombre de usuario no puede tener espacios.'
+  if (Object.keys(errores).length > 0) throw new AccesoInvalido(errores)
+  return { ...acceso, nombreUsuario: usuario }
+}
+
+export function validarNuevaClave(clave: string, confirmacion: string): string {
+  const errores = validarClave(clave, confirmacion)
+  if (Object.keys(errores).length > 0) throw new AccesoInvalido(errores)
+  return clave
 }

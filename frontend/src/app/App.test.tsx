@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { AlmacenamientoMemoria } from '@/shared/lib/almacenamiento'
@@ -51,6 +51,32 @@ describe('aplicación en modo demostración', () => {
     await usuario.click(screen.getByRole('button', { name: /registrar estudiante/i }))
 
     expect(await screen.findByRole('cell', { name: 'Sofía Ramos' })).toBeInTheDocument()
+  })
+
+  it('un acudiente crea el acceso de su estudiante: valida la contraseña y luego marca "Con acceso"', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'padre')
+    const usuario = userEvent.setup()
+    renderizar('/familias/estudiantes', { modoDemo: true, almacenamiento })
+
+    // El estudiante B no tiene acceso todavía: es el segundo botón "Crear acceso"
+    await usuario.click(await screen.findByRole('button', { name: 'Crear acceso' }))
+    const panel = screen.getByRole('form', { name: /acceso del estudiante/i })
+    const [nombreUsuario, clave, confirmacion] = Array.from(panel.querySelectorAll('input'))
+    await usuario.type(nombreUsuario as HTMLElement, 'estudiante-b')
+    await usuario.type(clave as HTMLElement, 'corta')
+    await usuario.type(confirmacion as HTMLElement, 'corta')
+    await usuario.click(within(panel).getByRole('button', { name: 'Crear acceso' }))
+    expect(await within(panel).findByRole('alert')).toHaveTextContent(/8 caracteres/)
+
+    await usuario.clear(clave as HTMLElement)
+    await usuario.clear(confirmacion as HTMLElement)
+    await usuario.type(clave as HTMLElement, 'Clave-segura-1')
+    await usuario.type(confirmacion as HTMLElement, 'Clave-segura-1')
+    await usuario.click(within(panel).getByRole('button', { name: 'Crear acceso' }))
+
+    await waitFor(() => expect(screen.getAllByText('Con acceso')).toHaveLength(2))
+    expect(screen.queryByRole('form', { name: /acceso del estudiante/i })).not.toBeInTheDocument()
   })
 
   it('el aula es del estudiante: un acudiente que la abre vuelve a su matrícula', async () => {

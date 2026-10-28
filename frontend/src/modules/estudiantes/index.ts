@@ -1,6 +1,11 @@
 import type { HttpClient } from '@/shared/http/HttpClient'
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
-import { ListarEstudiantes, RegistrarEstudiante } from './application/casosDeUso'
+import {
+  CrearAccesoEstudiante,
+  ListarEstudiantes,
+  RegistrarEstudiante,
+  RestablecerClaveEstudiante,
+} from './application/casosDeUso'
 import type { RepositorioEstudiantes } from './domain/puertos'
 import { RepositorioEstudiantesDemo } from './infrastructure/RepositorioEstudiantesDemo'
 import { RepositorioEstudiantesHttp } from './infrastructure/RepositorioEstudiantesHttp'
@@ -22,5 +27,10 @@ export function crearCasosDeUsoEstudiantes({
   const repositorio: RepositorioEstudiantes = modoDemo
     ? new RepositorioEstudiantesDemo(almacenamiento)
     : new RepositorioEstudiantesHttp(http)
-  return { listarEstudiantes: new ListarEstudiantes(repositorio), registrarEstudiante: new RegistrarEstudiante(repositorio) }
+  return {
+    listarEstudiantes: new ListarEstudiantes(repositorio),
+    registrarEstudiante: new RegistrarEstudiante(repositorio),
+    crearAccesoEstudiante: new CrearAccesoEstudiante(repositorio),
+    restablecerClaveEstudiante: new RestablecerClaveEstudiante(repositorio),
+  }
 }

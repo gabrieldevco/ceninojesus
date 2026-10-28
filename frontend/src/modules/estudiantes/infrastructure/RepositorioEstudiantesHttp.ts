@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { HttpClient } from '@/shared/http/HttpClient'
-import { nombreCompleto, type Estudiante, type NuevoEstudiante } from '../domain/estudiante'
+import { nombreCompleto, type Estudiante, type NuevoAcceso, type NuevoEstudiante } from '../domain/estudiante'
 import type { RepositorioEstudiantes } from '../domain/puertos'
 
 const EstudianteDto = z.object({
@@ -10,6 +10,7 @@ const EstudianteDto = z.object({
   documento_identidad: z.string().default(''),
   fecha_nacimiento: z.string().nullable().default(null),
   grado: z.string().default(''),
+  usuario_id: z.number().nullable().default(null),
 })
 
 function aEntidad(dto: z.infer<typeof EstudianteDto>): Estudiante {
@@ -21,6 +22,7 @@ function aEntidad(dto: z.infer<typeof EstudianteDto>): Estudiante {
     grado: dto.grado,
     documentoIdentidad: dto.documento_identidad,
     fechaNacimiento: dto.fecha_nacimiento,
+    tieneAcceso: dto.usuario_id !== null,
   }
 }
 
@@ -46,5 +48,22 @@ export class RepositorioEstudiantesHttp implements RepositorioEstudiantes {
       },
     })
     return aEntidad(EstudianteDto.parse(datos))
+  }
+
+  async crearAcceso(estudianteId: number, acceso: NuevoAcceso): Promise<Estudiante> {
+    const datos = await this.http.enviar({
+      metodo: 'POST',
+      ruta: `/estudiantes/${estudianteId}/acceso/`,
+      cuerpo: { nombre_usuario: acceso.nombreUsuario, password: acceso.clave },
+    })
+    return aEntidad(EstudianteDto.parse(datos))
+  }
+
+  async restablecerClave(estudianteId: number, clave: string): Promise<void> {
+    await this.http.enviar({
+      metodo: 'POST',
+      ruta: `/estudiantes/${estudianteId}/acceso/contrasena/`,
+      cuerpo: { password: clave },
+    })
   }
 }
