@@ -79,6 +79,22 @@ describe('aplicación en modo demostración', () => {
     expect(screen.queryByRole('form', { name: /acceso del estudiante/i })).not.toBeInTheDocument()
   })
 
+  it('un visitante envía el formulario de admisiones: valida y luego agradece', async () => {
+    const usuario = userEvent.setup()
+    renderizar('/admisiones', { modoDemo: true })
+
+    await usuario.type(await screen.findByPlaceholderText('Nombre completo'), 'Marta Gómez')
+    await usuario.type(screen.getByPlaceholderText('300 000 0000'), '3001234567')
+    await usuario.type(screen.getByPlaceholderText('correo@ejemplo.com'), 'marta@example.com')
+    await usuario.click(screen.getByRole('button', { name: /enviar solicitud/i }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/autorizar el tratamiento/i)
+
+    await usuario.click(screen.getByRole('checkbox'))
+    await usuario.click(screen.getByRole('button', { name: /enviar solicitud/i }))
+
+    expect(await screen.findByRole('heading', { name: /gracias, marta/i })).toBeInTheDocument()
+  })
+
   it('el aula es del estudiante: un acudiente que la abre vuelve a su matrícula', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'padre')
