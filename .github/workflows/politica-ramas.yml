@@ -1,0 +1,81 @@
+name: Política de ramas
+
+# Valida que cada PR respete el flujo definido en CONTRIBUTING.md:
+#   <prefijo>/<descripcion> -> develop   |   develop -> main
+on:
+  pull_request:
+    branches: [main, develop]
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+jobs:
+  branch-policy:
+    name: branch-policy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar origen y destino del PR
+        env:
+          BASE: ${{ github.base_ref }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          set -eu
+          patron='^(feature|fix|hotfix|docs|refactor|test|chore|ci)/[a-z0-9]+(-[a-z0-9]+)*$'
+
+          if [ "$BASE" = "main" ]; then
+            if [ "$HEAD" != "develop" ]; then
+              echo "::error::A main solo se llega desde develop (PR '$HEAD' -> main no permitido)."
+              exit 1
+            fi
+            echo "OK: develop -> main"
+            exit 0
+          fi
+
+          if [ "$BASE" = "develop" ]; then
+            case "$HEAD" in dependabot/*) echo "OK: dependabot -> develop"; exit 0 ;; esac
+            if ! echo "$HEAD" | grep -Eq "$patron"; then
+              echo "::error::La rama '$HEAD' no cumple el formato <prefijo>/<descripcion-en-minusculas-con-guiones>."
+              echo "Prefijos válidos: feature, fix, hotfix, docs, refactor, test, chore, ci."
+              echo "Ejemplo: feature/matricula-solicitud-api"
+              exit 1
+            fi
+            echo "OK: $HEAD -> develop"
+            exit 0
+          fi
+
+          echo "::error::Destino '$BASE' no permitido: solo main y develop."
+          exit 1
+
+  pr-title:
+    name: pr-title
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validar título del PR (Conventional Commits) y coherencia con la rama
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          set -eu
+          if ! echo "$TITLE" | grep -Eq '^(feat|fix|docs|refactor|test|chore|ci|perf|style)(\([a-z0-9-]+\))?!?: .{5,}$'; then
+            echo "::error::Título inválido: '$TITLE'"
+            echo "Formato: tipo(alcance): descripción. Ej.: feat(matriculas): solicitud de matrícula por acudiente"
+            exit 1
+          fi
+          tipo="${TITLE%%[(:!]*}"
+
+          # develop -> main agrupa varios cambios: se acepta cualquier tipo válido
+          [ "$HEAD" = "develop" ] && exit 0
+
+          prefijo="${HEAD%%/*}"
+          case "$prefijo" in
+            dependabot) esperado="chore" ;;
+            feature)  esperado="feat" ;;
+            fix|hotfix) esperado="fix" ;;
+            *)        esperado="$prefijo" ;;
+          esac
+          if [ "$tipo" != "$esperado" ] && [ "$prefijo" != "hotfix" ]; then
+            echo "::error::La rama '$prefijo/…' pide un título que empiece por '$esperado', pero empieza por '$tipo'."
+            exit 1
+          fi
+          echo "OK: $TITLE"

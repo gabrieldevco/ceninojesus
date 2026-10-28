@@ -1,0 +1,28 @@
+{
+  "name": "Nombres de rama permitidos",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["~ALL"],
+      "exclude": [
+        "refs/heads/main",
+        "refs/heads/develop",
+        "refs/heads/feature/*",
+        "refs/heads/fix/*",
+        "refs/heads/hotfix/*",
+        "refs/heads/docs/*",
+        "refs/heads/refactor/*",
+        "refs/heads/test/*",
+        "refs/heads/chore/*",
+        "refs/heads/ci/*",
+        "refs/heads/dependabot/*",
+        "refs/heads/dependabot/**/*"
+      ]
+    }
+  },
+  "bypass_actors": [],
+  "rules": [
+    { "type": "creation" }
+  ]
+}

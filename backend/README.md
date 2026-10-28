@@ -22,6 +22,8 @@ python manage.py runserver
 - API: http://127.0.0.1:8000/api/
 - Admin: http://127.0.0.1:8000/admin/
 
+Sin `REDIS_URL` las tareas de Celery se ejecutan en el mismo proceso y la caché usa la base de datos, por lo que en local no hace falta Redis.
+
 Sin `POSTGRES_DB` en el `.env`, Django usa SQLite. Con esa variable, usa PostgreSQL. Puedes usar el contenedor `db`, que queda expuesto en `localhost:5434` (para no chocar con otros PostgreSQL de tu equipo).
 
 ### Con Docker
@@ -36,7 +38,9 @@ docker compose up -d --build
 |---|---|---|
 | `backend` | http://localhost:8000 | Django con recarga automática (el código se monta como volumen) |
 | `db` | `localhost:5434` | PostgreSQL 17 (volumen `postgres_data`) |
-| `workflow` | — | Cada hora: recordatorios de interesados (RF-18) y alertas de solicitudes de datos por vencer |
+| `redis` | — | Caché, límite de envíos y cola de tareas (volumen `redis_data`) |
+| `celery` | — | Ejecuta las tareas en segundo plano: envío de correos con reintentos, recordatorios y alertas |
+| `celery-beat` | — | Programador: cada hora lanza los recordatorios de interesados (RF-18) y las alertas de solicitudes de datos por vencer |
 | `backup` | `./backups` | Copia diaria de la base de datos y de los archivos subidos (RNF-09) |
 | `pgadmin` | http://localhost:5050 | pgAdmin, con el servidor "Cenino Jesús (Docker)" ya registrado (volumen `pgadmin_data`) |
 
@@ -59,7 +63,7 @@ docker compose down -v     # detiene los contenedores y BORRA los volúmenes (ba
 | `caddy` | Único servicio expuesto (puertos 80 y 443). Obtiene y renueva solo el certificado HTTPS (Let's Encrypt) para `DOMINIO`, sirve el frontend compilado (`frontend/dist`) y reenvía `/api`, `/admin` y `/static` al backend. |
 | `backend` | Django con gunicorn y `config.settings.prod`. |
 | `db` | PostgreSQL, sin puertos expuestos. |
-| `workflow`, `backup` | Igual que en desarrollo. |
+| `redis`, `celery`, `celery-beat`, `backup` | Igual que en desarrollo. |
 
 Los archivos que suben los administradores de grupo quedan en el volumen `media_data` y **solo** se descargan por la API, con control de acceso (RF-14). No hay una URL pública `/media/`.
 
@@ -173,12 +177,13 @@ Las migraciones crean datos iniciales: la información pública del colegio y lo
 
 ## API
 
-**Autenticación:** el frontend obtiene los tokens con `POST /api/auth/token/` (`nombre_usuario`, `password`) y envía `Authorization: Bearer <access>` en cada petición. El token `access` dura 60 minutos; para renovarlo se usa `POST /api/auth/token/refresh/` con el `refresh`. Sin token, la API responde `401`; con un rol sin permiso, `403`.
+**Autenticación:** el frontend obtiene los tokens con `POST /api/auth/token/` (`nombre_usuario`, `password`) y envía `Authorization: Bearer <access>` en cada petición. El token `access` dura 15 minutos; para renovarlo se usa `POST /api/auth/token/refresh/` con el `refresh`, que **rota**: cada renovación devuelve un `refresh` nuevo y el anterior queda invalidado. `POST /api/auth/logout/` revoca el `refresh`. Tras 5 inicios de sesión fallidos de la misma cuenta desde la misma IP, el login responde `429` durante 15 minutos. Las contraseñas se guardan con Argon2. Sin token, la API responde `401`; con un rol sin permiso, `403`.
 
 | Método | Ruta | Quién | Descripción |
 |---|---|---|---|
 | `POST` | `/api/auth/token/` | Público | Inicio de sesión (JWT) |
-| `POST` | `/api/auth/token/refresh/` | Público | Renovar el token |
+| `POST` | `/api/auth/token/refresh/` | Público | Renovar el token (rota el `refresh`) |
+| `POST` | `/api/auth/logout/` | Público (con el `refresh`) | Revocar el `refresh` |
 | `POST` | `/api/auth/registro/` | Público | Registro de padres/acudientes (exige `autoriza_tratamiento_datos`) |
 | `POST` | `/api/auth/recuperar/` | Público | Envía un enlace para restablecer la contraseña (`identificador`: usuario o correo) |
 | `POST` | `/api/auth/recuperar/confirmar/` | Público | Nueva contraseña con el `uid` y el `token` del enlace |
@@ -234,11 +239,11 @@ Las migraciones crean datos iniciales: la información pública del colegio y lo
   - **Rectificación:** edición del perfil y de los estudiantes.
   - **Cualquier titular**, tenga cuenta o no, puede radicar una solicitud en `/api/datos-personales/solicitudes/`. Recibe un acuse con su número de radicado y la fecha límite: 10 días hábiles para consultas y 15 para reclamos. El cálculo no descuenta festivos.
   - **Supresión:** el administrador la atiende con los endpoints `anonimizar`. Estos borran los datos personales y conservan el historial sin identificar a nadie.
-- **Alertas:** el `workflow` avisa a los administradores, una vez al día, de las solicitudes a 3 días o menos de vencer.
+- **Alertas:** Celery Beat avisa a los administradores, una vez al día, de las solicitudes a 3 días o menos de vencer.
 
 ### Workflow de recordatorios (RF-18)
 
-El comando `python manage.py enviar_recordatorios_interesados` avisa a los administradores, en la aplicación y por correo, de los interesados en estado `nuevo` o `en_seguimiento` que llevan `INTERESADOS_DIAS_SIN_RESPUESTA` días (3 por defecto) sin respuesta. No repite el aviso dentro del mismo plazo. Registrar un seguimiento reinicia el plazo. En Docker, el servicio `workflow` lo ejecuta cada hora.
+El comando `python manage.py enviar_recordatorios_interesados` avisa a los administradores, en la aplicación y por correo, de los interesados en estado `nuevo` o `en_seguimiento` que llevan `INTERESADOS_DIAS_SIN_RESPUESTA` días (3 por defecto) sin respuesta. No repite el aviso dentro del mismo plazo. Registrar un seguimiento reinicia el plazo. En Docker lo programa Celery Beat cada hora (tarea `interesados.enviar_recordatorios`); el comando sigue disponible para ejecutarlo a mano.
 
 En desarrollo, los correos se imprimen en la consola: `docker compose logs -f backend`.
 

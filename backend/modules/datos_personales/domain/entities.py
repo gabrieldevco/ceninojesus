@@ -6,7 +6,7 @@ rectificación, supresión, revocatoria), 15 días hábiles.
 """
 
 from dataclasses import dataclass, field
-from datetime import date, datetime, timedelta, timezone
+from datetime import UTC, date, datetime, timedelta
 from enum import StrEnum
 
 from shared.domain.actor import Actor
@@ -43,7 +43,7 @@ def sumar_dias_habiles(inicio: date, dias: int) -> date:
 
 
 def _ahora():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 @dataclass

@@ -1,0 +1,21 @@
+target-version = "py314"
+line-length = 120
+extend-exclude = ["migrations"]
+
+[lint]
+select = [
+  "E", "F", "W",   # pycodestyle y pyflakes
+  "I",             # orden de imports
+  "B",             # bugbear
+  "UP",            # sintaxis moderna
+  "S",             # seguridad (bandit)
+  "DJ",            # buenas prácticas de Django
+  "C4", "SIM", "RUF",
+]
+ignore = [
+  "RUF012",        # atributos de clase mutables: patrón estándar de DRF y Django
+]
+
+[lint.per-file-ignores]
+"**/tests/**" = ["S101", "S105", "S106"]
+"shared/testing.py" = ["S101", "S105", "S106"]

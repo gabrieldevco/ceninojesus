@@ -143,6 +143,6 @@ class DjangoTokensRecuperacion(TokensRecuperacion):
     def validar(self, uid: str, token: str) -> int | None:
         try:
             model = UsuarioModel.objects.get(pk=force_str(urlsafe_base64_decode(uid)), is_active=True)
-        except (UsuarioModel.DoesNotExist, ValueError, TypeError, OverflowError):
+        except UsuarioModel.DoesNotExist, ValueError, TypeError, OverflowError:
             return None
         return model.id if default_token_generator.check_token(model, token) else None

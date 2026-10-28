@@ -44,7 +44,9 @@ class GrupoDetailView(APIView):
     def patch(self, request, grupo_id):
         serializer = s.GrupoSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        grupo = dependencies.actualizar_grupo().execute(actor_desde_request(request), grupo_id, serializer.validated_data)
+        grupo = dependencies.actualizar_grupo().execute(
+            actor_desde_request(request), grupo_id, serializer.validated_data
+        )
         return Response(s.GrupoSerializer(grupo).data)
 
 
@@ -91,7 +93,9 @@ class SolicitudListCreateView(APIView):
     def post(self, request):
         serializer = s.CrearSolicitudSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        solicitud = dependencies.solicitar_matricula().execute(actor_desde_request(request), **serializer.validated_data)
+        solicitud = dependencies.solicitar_matricula().execute(
+            actor_desde_request(request), **serializer.validated_data
+        )
         return Response(s.SolicitudSerializer(solicitud).data, status=status.HTTP_201_CREATED)
 
 

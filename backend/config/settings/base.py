@@ -41,6 +41,7 @@ DJANGO_APPS = [
 THIRD_PARTY_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "corsheaders",
 ]
 
@@ -174,20 +175,56 @@ REST_FRAMEWORK = {
     "NUM_PROXIES": int(os.getenv("NUM_PROXIES")) if os.getenv("NUM_PROXIES") else None,
 }
 
-# Caché compartida por todos los procesos (la usa el límite de envíos)
-CACHES = {
-    "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "cache_aplicacion",
-    }
+# Redis: caché, límite de envíos y cola de Celery. Sin REDIS_URL (desarrollo local sin Docker)
+# se usa la caché en base de datos y las tareas se ejecutan en el mismo proceso.
+REDIS_URL = os.getenv("REDIS_URL", "")
+
+if REDIS_URL:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.redis.RedisCache", "LOCATION": REDIS_URL}}
+else:
+    CACHES = {"default": {"BACKEND": "django.core.cache.backends.db.DatabaseCache", "LOCATION": "cache_aplicacion"}}
+
+# Celery (tareas en segundo plano)
+CELERY_BROKER_URL = REDIS_URL or "memory://"
+CELERY_TASK_ALWAYS_EAGER = not REDIS_URL
+CELERY_TASK_ACKS_LATE = True
+CELERY_TASK_TIME_LIMIT = 300
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BEAT_SCHEDULE = {
+    "recordatorios-interesados": {
+        "task": "interesados.enviar_recordatorios",
+        "schedule": int(os.getenv("WORKFLOW_INTERVALO_SEGUNDOS", "3600")),
+    },
+    "alertas-solicitudes-datos": {
+        "task": "datos_personales.alertar_por_vencer",
+        "schedule": int(os.getenv("WORKFLOW_INTERVALO_SEGUNDOS", "3600")),
+    },
 }
 
 # Autenticación JWT (RF-06): el frontend envía "Authorization: Bearer <access>"
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_ACCESS_MINUTOS", "60"))),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=int(os.getenv("JWT_ACCESS_MINUTOS", "15"))),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=int(os.getenv("JWT_REFRESH_DIAS", "7"))),
     "USER_ID_CLAIM": "usuario_id",
+    # Cada refresh entrega uno nuevo e invalida el anterior: un refresh robado deja de servir al usarse
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
 }
+
+# Contraseñas: Argon2 para las nuevas; las antiguas (PBKDF2) se actualizan solas al iniciar sesión
+PASSWORD_HASHERS = [
+    "django.contrib.auth.hashers.Argon2PasswordHasher",
+    "django.contrib.auth.hashers.PBKDF2PasswordHasher",
+]
+
+# Bloqueo temporal tras varios inicios de sesión fallidos de una misma cuenta desde una misma IP
+LOGIN_MAX_INTENTOS = int(os.getenv("LOGIN_MAX_INTENTOS", "5"))
+LOGIN_SEGUNDOS_BLOQUEO = int(os.getenv("LOGIN_SEGUNDOS_BLOQUEO", "900"))
+
+# Archivos subidos por los administradores de grupo (ver shared/infrastructure/archivos.py)
+ARCHIVO_MAX_MB = int(os.getenv("ARCHIVO_MAX_MB", "20"))
 
 
 # CORS (el frontend vive en otro origen)

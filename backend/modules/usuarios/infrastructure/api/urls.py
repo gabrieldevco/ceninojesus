@@ -6,6 +6,7 @@ from . import views
 auth_urlpatterns = [
     path("token/", views.IniciarSesionView.as_view(), name="token"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token-refresh"),
+    path("logout/", views.CerrarSesionView.as_view(), name="logout"),
     path("registro/", views.RegistroAcudienteView.as_view(), name="registro"),
     path("recuperar/", views.SolicitarRecuperacionView.as_view(), name="recuperar"),
     path("recuperar/confirmar/", views.ConfirmarRecuperacionView.as_view(), name="recuperar-confirmar"),
