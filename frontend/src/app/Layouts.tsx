@@ -96,7 +96,7 @@ export function Footer() {
   )
 }
 
-const SOLICITUDES: [string, string, string][] = [['/admin/solicitudes', 'Solicitudes', '▤']]
+const SOLICITUDES: [string, string, string][] = [['/admin/solicitudes', 'Solicitudes', '▤'], ['/admin/contenido', 'Contenido del grupo', '▥']]
 const MENU: Record<Rol, [string, string, string][]> = {
   acudiente: [['/familias/estudiantes', 'Mis estudiantes', '☺'], ['/familias/matricula', 'Matrícula extracurricular', '▤']],
   estudiante: [['/estudiante/aula', 'Aula estudiante', '▥']],

@@ -12,6 +12,8 @@ interface ContenidoBase {
   tieneArchivo: boolean
   /** Fecha ISO (AAAA-MM-DD) de publicación */
   fechaPublicacion: string
+  /** Los borradores solo los ve quien administra el grupo */
+  publicado: boolean
 }
 
 /** RF-12: documentos, videos o enlaces de apoyo. */
@@ -49,4 +51,80 @@ export function esEnlaceSeguro(url: string): boolean {
   } catch {
     return false
   }
+}
+
+// --- Publicación (RF-12 y RF-13): reglas que el backend también exige, para avisar antes de enviar ---
+
+export const TAMANO_MAXIMO_MB = 20
+export const EXTENSIONES_PERMITIDAS = [
+  '.pdf', '.png', '.jpg', '.jpeg', '.docx', '.pptx', '.xlsx', '.zip', '.doc', '.ppt', '.xls', '.mp4', '.txt',
+] as const
+
+export interface NuevoMaterial {
+  grupoId: number
+  titulo: string
+  descripcion: string
+  tipo: TipoMaterial
+  url: string
+  archivo: File | null
+  publicado: boolean
+}
+
+export interface NuevaActividad {
+  grupoId: number
+  titulo: string
+  descripcion: string
+  url: string
+  archivo: File | null
+  /** Fecha ISO (AAAA-MM-DD) o `null` */
+  fechaEntrega: string | null
+  publicado: boolean
+}
+
+export type ErroresDePublicacion = Partial<Record<'titulo' | 'url' | 'archivo' | 'recurso', string>>
+
+export class PublicacionInvalida extends Error {
+  constructor(readonly campos: ErroresDePublicacion) {
+    super(Object.values(campos)[0] ?? 'La publicación no es válida')
+    this.name = 'PublicacionInvalida'
+  }
+}
+
+export function validarArchivo(archivo: Pick<File, 'name' | 'size'>): string | null {
+  const punto = archivo.name.lastIndexOf('.')
+  const extension = punto === -1 ? '' : archivo.name.slice(punto).toLowerCase()
+  if (!(EXTENSIONES_PERMITIDAS as readonly string[]).includes(extension)) {
+    return `Tipo de archivo no permitido. Usa: ${EXTENSIONES_PERMITIDAS.join(', ')}.`
+  }
+  if (archivo.size > TAMANO_MAXIMO_MB * 1024 * 1024) return `El archivo supera el máximo de ${TAMANO_MAXIMO_MB} MB.`
+  return null
+}
+
+function validarComun(
+  datos: { titulo: string; url: string; archivo: File | null },
+  campos: ErroresDePublicacion,
+): void {
+  if (!datos.titulo.trim()) campos.titulo = 'Escribe un título.'
+  else if (datos.titulo.trim().length > 200) campos.titulo = 'El título no puede pasar de 200 caracteres.'
+  if (datos.url.trim() && !esEnlaceSeguro(datos.url.trim())) campos.url = 'El enlace debe empezar por http:// o https://.'
+  if (datos.archivo) {
+    const error = validarArchivo(datos.archivo)
+    if (error) campos.archivo = error
+  }
+}
+
+export function validarNuevoMaterial(datos: NuevoMaterial): NuevoMaterial {
+  const campos: ErroresDePublicacion = {}
+  validarComun(datos, campos)
+  if (datos.tipo === 'enlace' && !datos.url.trim()) campos.url = 'Un material de tipo enlace necesita una URL.'
+  if (!datos.archivo && !datos.url.trim()) campos.recurso = 'El material debe tener un archivo o un enlace.'
+  if (Object.keys(campos).length > 0) throw new PublicacionInvalida(campos)
+  return { ...datos, titulo: datos.titulo.trim(), descripcion: datos.descripcion.trim(), url: datos.url.trim() }
+}
+
+export function validarNuevaActividad(datos: NuevaActividad): NuevaActividad {
+  const campos: ErroresDePublicacion = {}
+  validarComun(datos, campos)
+  if (Object.keys(campos).length > 0) throw new PublicacionInvalida(campos)
+  return { ...datos, titulo: datos.titulo.trim(), descripcion: datos.descripcion.trim(), url: datos.url.trim() }
 }

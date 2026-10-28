@@ -4,6 +4,7 @@ export interface PeticionHttp {
   metodo: MetodoHttp
   /** Ruta relativa a la base de la API, p. ej. `/auth/perfil/` */
   ruta: string
+  /** Se envía como JSON; un `FormData` se envía como multipart (subida de archivos). */
   cuerpo?: unknown
   /** Si es `true` (por defecto) se envía el token y se renueva ante un 401. */
   autenticada?: boolean

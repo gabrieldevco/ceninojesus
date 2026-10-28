@@ -38,6 +38,29 @@ describe('FetchHttpClient', () => {
     expect(opciones.headers).toMatchObject({ Authorization: 'Bearer abc', 'Content-Type': 'application/json' })
   })
 
+  it('envía un FormData tal cual, sin fijar el Content-Type', async () => {
+    const fetchFalso = vi.fn().mockResolvedValue(json(201, {}))
+    const formulario = new FormData()
+    formulario.append('titulo', 'Guía')
+
+    await new FetchHttpClient('/api', undefined, fetchFalso).enviar({ metodo: 'POST', ruta: '/x/', cuerpo: formulario })
+
+    const [, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(opciones.body).toBe(formulario)
+    expect(opciones.headers).not.toHaveProperty('Content-Type')
+  })
+
+  it('descarga un archivo con el token y el nombre del servidor', async () => {
+    const fetchFalso = vi.fn().mockResolvedValue(
+      new Response('contenido', { status: 200, headers: { 'Content-Disposition': 'attachment; filename="a b.pdf"' } }),
+    )
+    const archivo = await new FetchHttpClient('/api', new ProveedorFalso('abc'), fetchFalso).descargar({ ruta: '/x/archivo/' })
+
+    expect(archivo.nombre).toBe('a b.pdf')
+    expect(await archivo.contenido.text()).toBe('contenido')
+    expect((fetchFalso.mock.calls[0] as [string, RequestInit])[1].headers).toMatchObject({ Authorization: 'Bearer abc' })
+  })
+
   it('no envía el token en las peticiones no autenticadas', async () => {
     const fetchFalso = vi.fn().mockResolvedValue(json(200, {}))
     await new FetchHttpClient('/api', new ProveedorFalso('abc'), fetchFalso).enviar({

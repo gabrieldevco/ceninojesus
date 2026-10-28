@@ -1,13 +1,23 @@
 import { createContext, useContext, type ReactNode } from 'react'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/modules/auth'
-import type { DescargarArchivo, ListarActividades, ListarMateriales } from '../application/casosDeUso'
-import type { Actividad, Material, TipoContenido } from '../domain/contenido'
+import type {
+  DescargarArchivo,
+  EliminarContenido,
+  ListarActividades,
+  ListarMateriales,
+  PublicarActividad,
+  PublicarMaterial,
+} from '../application/casosDeUso'
+import type { Actividad, Material, NuevaActividad, NuevoMaterial, TipoContenido } from '../domain/contenido'
 
 export interface CasosDeUsoAula {
   listarMateriales: ListarMateriales
   listarActividades: ListarActividades
   descargarArchivo: DescargarArchivo
+  publicarMaterial: PublicarMaterial
+  publicarActividad: PublicarActividad
+  eliminarContenido: EliminarContenido
 }
 
 const Contexto = createContext<CasosDeUsoAula | null>(null)
@@ -68,5 +78,41 @@ export function useDescargarArchivo() {
       enlace.remove()
       setTimeout(() => URL.revokeObjectURL(direccion), 10_000)
     },
+  })
+}
+
+/** Tras publicar o eliminar se vuelve a pedir la lista del grupo afectado. */
+function useInvalidarGrupo() {
+  const cliente = useQueryClient()
+  const { usuario } = useAuth()
+  return (tipo: TipoContenido, grupoId: number) =>
+    cliente.invalidateQueries({ queryKey: [tipo === 'materiales' ? 'materiales' : 'actividades', usuario?.id, grupoId] })
+}
+
+export function usePublicarMaterial() {
+  const { publicarMaterial } = useCasosDeUso()
+  const invalidar = useInvalidarGrupo()
+  return useMutation({
+    mutationFn: (nuevo: NuevoMaterial) => publicarMaterial.ejecutar(nuevo),
+    onSuccess: (_creado, nuevo) => invalidar('materiales', nuevo.grupoId),
+  })
+}
+
+export function usePublicarActividad() {
+  const { publicarActividad } = useCasosDeUso()
+  const invalidar = useInvalidarGrupo()
+  return useMutation({
+    mutationFn: (nueva: NuevaActividad) => publicarActividad.ejecutar(nueva),
+    onSuccess: (_creada, nueva) => invalidar('actividades', nueva.grupoId),
+  })
+}
+
+export function useEliminarContenido() {
+  const { eliminarContenido } = useCasosDeUso()
+  const invalidar = useInvalidarGrupo()
+  return useMutation({
+    mutationFn: (datos: { tipo: TipoContenido; grupoId: number; contenidoId: number }) =>
+      eliminarContenido.ejecutar(datos.tipo, datos.grupoId, datos.contenidoId),
+    onSuccess: (_vacio, datos) => invalidar(datos.tipo, datos.grupoId),
   })
 }

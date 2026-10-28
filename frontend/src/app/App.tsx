@@ -3,7 +3,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { motion, useScroll, useSpring } from 'framer-motion'
 import { Toasts } from '@/shared/ui/toast'
 import { AccesoPage, puedeAcceder, useAuth, type Rol } from '@/modules/auth'
-import { AulaPage } from '@/modules/aula'
+import { AulaPage, GestionContenidoPage } from '@/modules/aula'
 import { EstudiantesPage } from '@/modules/estudiantes'
 import { AdmisionesPage } from '@/modules/interesados'
 import { InicioPage } from '@/modules/institucional'
@@ -62,6 +62,9 @@ export default function App() {
         </Route>
         <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Solicitudes" />}>
           <Route path="/admin/solicitudes" element={<Anim><SolicitudesPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Contenido del grupo" />}>
+          <Route path="/admin/contenido" element={<Anim><GestionContenidoPage /></Anim>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
