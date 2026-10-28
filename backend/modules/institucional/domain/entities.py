@@ -1,12 +1,12 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from .exceptions import AutorizacionDatosRequerida
 
 
 def _ahora():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 @dataclass

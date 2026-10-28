@@ -7,8 +7,11 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import override_settings
 from rest_framework.test import APITestCase
 
-from modules.grupos.infrastructure.models import GrupoAdministradorModel, GrupoExtracurricularModel
-from modules.grupos.infrastructure.models import SolicitudMatriculaModel
+from modules.grupos.infrastructure.models import (
+    GrupoAdministradorModel,
+    GrupoExtracurricularModel,
+    SolicitudMatriculaModel,
+)
 from modules.usuarios.infrastructure.models import EstudianteModel
 from shared.domain.actor import Rol
 from shared.testing_api import crear_usuario
@@ -34,11 +37,17 @@ class ContenidoApiTests(APITestCase):
             nombres="Luis", apellidos="Pérez", acudiente=acudiente, usuario=self.estudiante
         )
         SolicitudMatriculaModel.objects.create(
-            grupo=self.grupo, estudiante=hijo, acudiente=acudiente, estado="aprobada", fecha_solicitud="2026-10-01T00:00Z"
+            grupo=self.grupo,
+            estudiante=hijo,
+            acudiente=acudiente,
+            estado="aprobada",
+            fecha_solicitud="2026-10-01T00:00Z",
         )
 
         self.no_inscrito = crear_usuario("pedro", Rol.ESTUDIANTE)
-        EstudianteModel.objects.create(nombres="Pedro", apellidos="Gómez", acudiente=acudiente, usuario=self.no_inscrito)
+        EstudianteModel.objects.create(
+            nombres="Pedro", apellidos="Gómez", acudiente=acudiente, usuario=self.no_inscrito
+        )
 
         self.url = f"/api/grupos/{self.grupo.id}/materiales/"
 

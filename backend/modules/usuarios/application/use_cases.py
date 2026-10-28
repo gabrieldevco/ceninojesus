@@ -1,7 +1,7 @@
 """Casos de uso de usuarios, roles (RF-06, RF-20), estudiantes y derechos sobre los datos (RNF-10)."""
 
 from dataclasses import dataclass, replace
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
 from modules.usuarios.domain.entities import Estudiante, Usuario
 from modules.usuarios.domain.exceptions import (
@@ -22,7 +22,7 @@ from shared.domain.notificaciones import EnviadorCorreo
 
 
 def _ahora():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 @dataclass(frozen=True)

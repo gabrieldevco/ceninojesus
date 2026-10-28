@@ -20,3 +20,8 @@ staticfiles/
 
 # Copias de seguridad (RNF-09)
 backups/
+
+# Calidad
+.coverage
+.ruff_cache/
+.import_linter_cache/

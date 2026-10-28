@@ -33,6 +33,7 @@ jobs:
           fi
 
           if [ "$BASE" = "develop" ]; then
+            case "$HEAD" in dependabot/*) echo "OK: dependabot -> develop"; exit 0 ;; esac
             if ! echo "$HEAD" | grep -Eq "$patron"; then
               echo "::error::La rama '$HEAD' no cumple el formato <prefijo>/<descripcion-en-minusculas-con-guiones>."
               echo "Prefijos válidos: feature, fix, hotfix, docs, refactor, test, chore, ci."
@@ -68,6 +69,7 @@ jobs:
 
           prefijo="${HEAD%%/*}"
           case "$prefijo" in
+            dependabot) esperado="chore" ;;
             feature)  esperado="feat" ;;
             fix|hotfix) esperado="fix" ;;
             *)        esperado="$prefijo" ;;

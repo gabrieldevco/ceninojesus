@@ -1,4 +1,4 @@
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 from unittest import TestCase
 
 from modules.datos_personales.domain.entities import (
@@ -11,7 +11,7 @@ from modules.datos_personales.domain.exceptions import RespuestaRequerida, Solic
 from shared.domain.actor import Actor, Rol
 
 ADMIN = Actor(id=1, rol=Rol.ADMINISTRADOR)
-VIERNES = datetime(2026, 10, 2, 10, tzinfo=timezone.utc)
+VIERNES = datetime(2026, 10, 2, 10, tzinfo=UTC)
 
 
 def solicitud(tipo=TipoSolicitudDatos.CONSULTA):
