@@ -2,7 +2,7 @@
 
 API de la plataforma web del Centro Educativo El Niño Jesús.
 
-**Stack:** Python 3.14 · Django 6.1 · Django REST Framework · JWT (SimpleJWT) · PostgreSQL 17 (SQLite opcional en local).
+**Stack:** Python 3.14 · Django 6.1 · Django REST Framework · JWT (SimpleJWT) · PostgreSQL 17.
 
 ## Puesta en marcha
 
@@ -24,7 +24,7 @@ python manage.py runserver
 
 Sin `REDIS_URL` las tareas de Celery se ejecutan en el mismo proceso y la caché usa la base de datos, por lo que en local no hace falta Redis.
 
-Sin `POSTGRES_DB` en el `.env`, Django usa SQLite. Con esa variable, usa PostgreSQL. Puedes usar el contenedor `db`, que queda expuesto en `localhost:5434` (para no chocar con otros PostgreSQL de tu equipo).
+Django usa siempre PostgreSQL, también en las pruebas. Levanta el contenedor con `docker compose up -d db`; queda expuesto en `localhost:5434` (para no chocar con otros PostgreSQL de tu equipo).
 
 ### Con Docker
 
