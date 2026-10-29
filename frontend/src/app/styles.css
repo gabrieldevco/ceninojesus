@@ -4,7 +4,6 @@ body{margin:0;font-family:Inter,system-ui,sans-serif;color:var(--ink);background
 h1,h2,h3,h4,.logo-text strong{font-family:Montserrat,Inter,sans-serif;color:var(--blue);margin:0}
 a{color:inherit;text-decoration:none}p{line-height:1.55;margin:.4rem 0}
 button,input,select,textarea{font:inherit}
-@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 /* botones */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 20px;border:0;border-radius:10px;background:var(--blue);color:#fff;font-weight:600;font-size:14px;cursor:pointer;transition:transform .18s,box-shadow .18s,background .18s}
@@ -477,3 +476,11 @@ fieldset.card{border:1px solid var(--line);margin:0 0 16px}
 
 /* Mientras llega una página que se carga al visitarla */
 .page-loading{min-height:70vh}
+
+/* Cursor de lápiz amarillo (solo con mouse; en pantallas táctiles no aplica). La punta es el punto activo. */
+@media (pointer:fine){
+  html,body{cursor:url(/cursor/lapiz.svg) 2 30,auto}
+  a,button,summary,label,select,[role=button],[role=tab],.chip,.gtile,.sel tbody tr,.bell,.car-slide{cursor:url(/cursor/lapiz-clic.svg) 2 30,pointer!important}
+  input:not([type=checkbox]):not([type=radio]),textarea,[contenteditable=true]{cursor:text!important}
+  :disabled,.gtile.locked{cursor:not-allowed!important}
+}
