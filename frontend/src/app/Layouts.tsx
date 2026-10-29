@@ -92,7 +92,7 @@ export function Footer() {
           </a>}</div>
         <div><h4>ACCESOS RÁPIDOS</h4><Link to="/#institucional">Institucional</Link><Link to="/admisiones">Admisiones 2025</Link><Link to="/acceso">Portal de acceso</Link><a href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer">Aula virtual ↗</a><a href={LINKS.correo} target="_blank" rel="noopener noreferrer">Correo institucional ↗</a></div>
         <div><h4>CONTACTO E INFORMACIÓN</h4>{direccion && <p className="frow">{Ico.pin}<span>{direccion}</span></p>}{info.telefonos && <p className="frow">{Ico.phone}<span>{info.telefonos}</span></p>}{info.correo && <p className="frow">{Ico.mail}<span>{info.correo}</span></p>}</div>
-        <img className="icfes" src="/img/icfes.png" alt="Categoría A+ en las Pruebas Saber (ICFES)" />
+        <img className="icfes" src="/img/icfes.png" alt="Categoría A+ en las Pruebas Saber (ICFES)" width={372} height={179} loading="lazy" decoding="async" />
       </div>
       <div className="footer-bottom"><span>© {new Date().getFullYear()} {info.nombre}. Todos los derechos reservados.</span><Link to="/politica-de-datos">Política de tratamiento de datos</Link></div>
     </footer>

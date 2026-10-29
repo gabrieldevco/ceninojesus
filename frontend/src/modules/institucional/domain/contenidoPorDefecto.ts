@@ -91,5 +91,5 @@ export const CONTENIDO_POR_DEFECTO: ContenidoLanding = {
 export const IMAGENES_POR_DEFECTO = {
   imagen_portada: { src: '/img/hero-colegio.jpg', alt: 'Estudiantes del Centro Educativo El Niño Jesús en actividades escolares' },
   imagen_quienes: { src: '/img/quienes-somos.jpg', alt: 'Estudiantes en actividades de danza, títeres y laboratorio' },
-  imagen_enfoque: { src: '/img/foto-constructivismo.png', alt: 'Estudiantes pintando en un taller de arte' },
+  imagen_enfoque: { src: '/img/foto-constructivismo.webp', alt: 'Estudiantes pintando en un taller de arte' },
 } as const
