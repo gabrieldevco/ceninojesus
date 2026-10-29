@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
 import {
@@ -20,9 +20,9 @@ export { puedeAcceder } from './domain/usuario'
 export { DemasiadosIntentos } from './domain/puertos'
 export { AuthProvider, useAuth } from './presentation/AuthProvider'
 // Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
-export const AccesoPage = lazy(() => import('./presentation/AccesoPage'))
-export const RegistroPage = lazy(() => import('./presentation/RegistroPage'))
-export const RestablecerClavePage = lazy(() => import('./presentation/RestablecerClavePage'))
+export const AccesoPage = cargaDiferida(() => import('./presentation/AccesoPage'))
+export const RegistroPage = cargaDiferida(() => import('./presentation/RegistroPage'))
+export const RestablecerClavePage = cargaDiferida(() => import('./presentation/RestablecerClavePage'))
 
 /** Crea el gestor de sesión que el cliente HTTP usa para enviar y renovar el token. */
 export function crearGestorDeSesion(almacenamiento: Almacenamiento, http: HttpClient): GestorDeSesion {

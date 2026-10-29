@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
   ActualizarGrupo,
@@ -17,7 +17,7 @@ import type { CasosDeUsoAdministracion } from './presentation/AdministracionProv
 
 export { AdministracionProvider } from './presentation/AdministracionProvider'
 // Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
-export const PanelAdministracionPage = lazy(() => import('./presentation/PanelAdministracionPage'))
+export const PanelAdministracionPage = cargaDiferida(() => import('./presentation/PanelAdministracionPage'))
 
 export function crearCasosDeUsoAdministracion({
   http,

@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
   CambiarEstadoInteresado,
@@ -14,8 +14,8 @@ import type { CasosDeUsoInteresados } from './presentation/InteresadosProvider'
 
 export { InteresadosProvider } from './presentation/InteresadosProvider'
 // Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
-export const AdmisionesPage = lazy(() => import('./presentation/AdmisionesPage'))
-export const GestionInteresadosPage = lazy(() => import('./presentation/GestionInteresadosPage'))
+export const AdmisionesPage = cargaDiferida(() => import('./presentation/AdmisionesPage'))
+export const GestionInteresadosPage = cargaDiferida(() => import('./presentation/GestionInteresadosPage'))
 
 export function crearCasosDeUsoInteresados({ http, modoDemo }: { http: HttpClient; modoDemo: boolean }): CasosDeUsoInteresados {
   const repositorio: RepositorioInteresados = modoDemo ? new RepositorioInteresadosDemo() : new RepositorioInteresadosHttp(http)

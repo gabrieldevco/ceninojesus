@@ -16,9 +16,18 @@
 		reverse_proxy backend:8000
 	}
 
+	# Archivos compilados: si no existen (versión anterior) responde 404 en vez de index.html,
+	# para que el navegador sepa que debe recargar.
+	handle /assets/* {
+		root * /srv/frontend
+		file_server
+	}
+
 	# Aplicación de una sola página: las rutas del frontend devuelven index.html
 	handle {
 		root * /srv/frontend
+		# index.html siempre se revalida, así cada visita usa la versión publicada
+		header Cache-Control "no-cache"
 		try_files {path} /index.html
 		file_server
 	}

@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
   DescargarArchivo,
@@ -15,8 +15,8 @@ import type { CasosDeUsoAula } from './presentation/AulaProvider'
 
 export { AulaProvider } from './presentation/AulaProvider'
 // Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
-export const AulaPage = lazy(() => import('./presentation/AulaPage'))
-export const GestionContenidoPage = lazy(() => import('./presentation/GestionContenidoPage'))
+export const AulaPage = cargaDiferida(() => import('./presentation/AulaPage'))
+export const GestionContenidoPage = cargaDiferida(() => import('./presentation/GestionContenidoPage'))
 
 export function crearCasosDeUsoAula({ http, modoDemo }: { http: HttpClient; modoDemo: boolean }): CasosDeUsoAula {
   const repositorio: RepositorioContenidos = modoDemo ? new RepositorioContenidosDemo() : new RepositorioContenidosHttp(http)

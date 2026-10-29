@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
   ListarSolicitudesDeDatos,
@@ -13,8 +13,8 @@ import type { CasosDeUsoDatosPersonales } from './presentation/DatosPersonalesPr
 
 export { DatosPersonalesProvider } from './presentation/DatosPersonalesProvider'
 // Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
-export const SolicitudDeDatosPage = lazy(() => import('./presentation/SolicitudDeDatosPage'))
-export const GestionSolicitudesDatosPage = lazy(() => import('./presentation/GestionSolicitudesDatosPage'))
+export const SolicitudDeDatosPage = cargaDiferida(() => import('./presentation/SolicitudDeDatosPage'))
+export const GestionSolicitudesDatosPage = cargaDiferida(() => import('./presentation/GestionSolicitudesDatosPage'))
 
 export function crearCasosDeUsoDatosPersonales({
   http,

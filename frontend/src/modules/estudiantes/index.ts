@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
 import {
@@ -15,7 +15,7 @@ import type { CasosDeUsoEstudiantes } from './presentation/EstudiantesProvider'
 export type { Estudiante } from './domain/estudiante'
 export { EstudiantesProvider, useEstudiantes } from './presentation/EstudiantesProvider'
 // Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
-export const EstudiantesPage = lazy(() => import('./presentation/EstudiantesPage'))
+export const EstudiantesPage = cargaDiferida(() => import('./presentation/EstudiantesPage'))
 
 export function crearCasosDeUsoEstudiantes({
   http,

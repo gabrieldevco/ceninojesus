@@ -1,6 +1,7 @@
 import { Suspense, useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { motion, useScroll, useSpring } from 'framer-motion'
+import { LimiteDeError } from '@/shared/ui/cargaDiferida'
 import { Toasts } from '@/shared/ui/toast'
 import { PanelAdministracionPage } from '@/modules/administracion'
 import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, type Rol } from '@/modules/auth'
@@ -47,6 +48,7 @@ export default function App() {
 
   return (
     <>
+      <LimiteDeError>
       <Suspense fallback={<div className="page-loading" aria-busy="true" />}>
       <Routes>
         <Route element={<PublicLayout />}>
@@ -88,6 +90,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>
+      </LimiteDeError>
       <BarraDeScroll />
       <Toasts />
     </>

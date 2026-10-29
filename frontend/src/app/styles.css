@@ -528,3 +528,7 @@ fieldset.card{border:1px solid var(--line);margin:0 0 16px}
 
 /* Enfoque constructivista sobre una hoja de cuaderno */
 #constructivismo{background:linear-gradient(90deg,transparent 0 46px,rgba(240,74,52,.22) 46px 48px,transparent 48px),repeating-linear-gradient(180deg,transparent 0 31px,rgba(11,95,214,.08) 31px 32px),linear-gradient(180deg,#fff,var(--coral-bg))}
+
+/* Aviso cuando una página no se pudo cargar */
+.error-carga{min-height:60vh;display:grid;place-content:center;justify-items:center;gap:6px;padding:48px 22px;text-align:center}
+.error-carga h2{font-size:26px;color:var(--blue);margin:0}.error-carga p{color:var(--muted);margin:0 0 12px}

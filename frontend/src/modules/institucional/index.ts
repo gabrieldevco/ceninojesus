@@ -1,4 +1,4 @@
-import { lazy } from 'react'
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import { EnviarMensajeDeContacto, ListarEnlaces, ObtenerPoliticaDeDatos } from './application/casosDeUso'
 import {
@@ -29,9 +29,9 @@ export { CONTENIDO_POR_DEFECTO } from './domain/contenidoPorDefecto'
 export type { InformacionLanding } from './domain/landing'
 export { InstitucionalProvider, useContenidoLanding, useEnlaces } from './presentation/InstitucionalProvider'
 // Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
-export const GestionSitioPage = lazy(() => import('./presentation/GestionSitioPage'))
+export const GestionSitioPage = cargaDiferida(() => import('./presentation/GestionSitioPage'))
 export { default as InicioPage } from './presentation/InicioPage'
-export const PoliticaDatosPage = lazy(() => import('./presentation/PoliticaDatosPage'))
+export const PoliticaDatosPage = cargaDiferida(() => import('./presentation/PoliticaDatosPage'))
 
 export function crearCasosDeUsoInstitucional({
   http,
