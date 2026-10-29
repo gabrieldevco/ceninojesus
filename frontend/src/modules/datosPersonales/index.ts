@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
   ListarSolicitudesDeDatos,
@@ -11,8 +12,9 @@ import { RepositorioSolicitudesDeDatosHttp } from './infrastructure/RepositorioS
 import type { CasosDeUsoDatosPersonales } from './presentation/DatosPersonalesProvider'
 
 export { DatosPersonalesProvider } from './presentation/DatosPersonalesProvider'
-export { default as SolicitudDeDatosPage } from './presentation/SolicitudDeDatosPage'
-export { default as GestionSolicitudesDatosPage } from './presentation/GestionSolicitudesDatosPage'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const SolicitudDeDatosPage = lazy(() => import('./presentation/SolicitudDeDatosPage'))
+export const GestionSolicitudesDatosPage = lazy(() => import('./presentation/GestionSolicitudesDatosPage'))
 
 export function crearCasosDeUsoDatosPersonales({
   http,

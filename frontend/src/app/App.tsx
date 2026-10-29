@@ -1,6 +1,6 @@
-import { useEffect, type ReactNode } from 'react'
+import { Suspense, useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
-import { motion, useScroll, useSpring } from 'framer-motion'
+import { MotionConfig, motion, useScroll, useSpring } from 'framer-motion'
 import { Toasts } from '@/shared/ui/toast'
 import { PanelAdministracionPage } from '@/modules/administracion'
 import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, type Rol } from '@/modules/auth'
@@ -46,7 +46,9 @@ export default function App() {
   }, [ubicacion.pathname, ubicacion.hash])
 
   return (
-    <>
+    // reducedMotion="user": respeta la preferencia del sistema de reducir el movimiento
+    <MotionConfig reducedMotion="user">
+      <Suspense fallback={<div className="page-loading" aria-busy="true" />}>
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Anim><InicioPage /></Anim>} />
@@ -86,8 +88,9 @@ export default function App() {
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
       <BarraDeScroll />
       <Toasts />
-    </>
+    </MotionConfig>
   )
 }

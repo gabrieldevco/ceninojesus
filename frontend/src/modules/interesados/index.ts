@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
   CambiarEstadoInteresado,
@@ -12,8 +13,9 @@ import { RepositorioInteresadosHttp } from './infrastructure/RepositorioInteresa
 import type { CasosDeUsoInteresados } from './presentation/InteresadosProvider'
 
 export { InteresadosProvider } from './presentation/InteresadosProvider'
-export { default as AdmisionesPage } from './presentation/AdmisionesPage'
-export { default as GestionInteresadosPage } from './presentation/GestionInteresadosPage'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const AdmisionesPage = lazy(() => import('./presentation/AdmisionesPage'))
+export const GestionInteresadosPage = lazy(() => import('./presentation/GestionInteresadosPage'))
 
 export function crearCasosDeUsoInteresados({ http, modoDemo }: { http: HttpClient; modoDemo: boolean }): CasosDeUsoInteresados {
   const repositorio: RepositorioInteresados = modoDemo ? new RepositorioInteresadosDemo() : new RepositorioInteresadosHttp(http)

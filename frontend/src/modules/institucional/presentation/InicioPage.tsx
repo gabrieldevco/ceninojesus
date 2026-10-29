@@ -68,7 +68,7 @@ export default function Inicio() {
 
       <section className="sec" id="institucional">
         <div className="split about">
-          <Reveal className="frame"><div className="frame-bg" /><img src={quienes.src} alt={quienes.alt} /></Reveal>
+          <Reveal className="frame"><div className="frame-bg" /><img src={quienes.src} alt={quienes.alt} loading="lazy" decoding="async" /></Reveal>
           <Reveal delay={.1}>
             <p className="eyebrow coral">NUESTRA IDENTIDAD</p><h2>¿Quiénes somos?</h2>
             <p className="big">{info.quienesPrincipal}</p>
@@ -80,7 +80,7 @@ export default function Inicio() {
       <section className="sec tint-coral" id="constructivismo">
         <Reveal><p className="eyebrow coral">ENFOQUE CONSTRUCTIVISTA</p><h2>{info.enfoqueTitulo}</h2></Reveal>
         <div className="split">
-          <Reveal className="phbox"><img src={enfoque.src} alt={enfoque.alt} /></Reveal>
+          <Reveal className="phbox"><img src={enfoque.src} alt={enfoque.alt} loading="lazy" decoding="async" /></Reveal>
           <Reveal delay={.12}>
             <p>{info.enfoqueTexto}</p>
             {pasos.length > 0 && (
@@ -190,11 +190,9 @@ export default function Inicio() {
             </ul>
           </div>
         </Reveal>
-      </section>
-
-      <section className="sec" id="escribenos">
-        <Reveal>
-          <div style={{ maxWidth: 760, margin: '0 auto' }}>
+        {/* El formulario se monta sobre la tarjeta de contacto: un solo bloque, sin hueco entre ambos */}
+        <Reveal className="cta-form" delay={.1}>
+          <div id="escribenos">
             <FormularioContacto />
           </div>
         </Reveal>

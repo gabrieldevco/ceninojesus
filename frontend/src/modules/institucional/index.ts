@@ -1,3 +1,4 @@
+import { lazy } from 'react'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import { EnviarMensajeDeContacto, ListarEnlaces, ObtenerPoliticaDeDatos } from './application/casosDeUso'
 import {
@@ -27,9 +28,10 @@ export type { Enlace } from './domain/contacto'
 export { CONTENIDO_POR_DEFECTO } from './domain/contenidoPorDefecto'
 export type { InformacionLanding } from './domain/landing'
 export { InstitucionalProvider, useContenidoLanding, useEnlaces } from './presentation/InstitucionalProvider'
-export { default as GestionSitioPage } from './presentation/GestionSitioPage'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const GestionSitioPage = lazy(() => import('./presentation/GestionSitioPage'))
 export { default as InicioPage } from './presentation/InicioPage'
-export { default as PoliticaDatosPage } from './presentation/PoliticaDatosPage'
+export const PoliticaDatosPage = lazy(() => import('./presentation/PoliticaDatosPage'))
 
 export function crearCasosDeUsoInstitucional({
   http,

@@ -142,9 +142,9 @@ tbody tr{transition:background .15s}.sel tbody tr{cursor:pointer}.sel tbody tr:h
 .float-chip{position:absolute;background:#fff;color:var(--blue);font-weight:700;font-size:13px;padding:9px 14px;border-radius:99px;box-shadow:0 10px 26px rgba(0,74,173,.22);animation:bob 4.5s ease-in-out infinite}
 .float-chip.c1{left:-22px;top:26px}.float-chip.c2{right:-18px;top:46%;animation-delay:-1.5s;color:var(--coral)}.float-chip.c3{left:10%;bottom:-18px;animation-delay:-3s}
 .split{display:grid;grid-template-columns:450px 1fr;gap:44px;align-items:center;margin-top:20px}
-.phbox img{width:100%;display:block;border-radius:18px;box-shadow:0 18px 44px rgba(0,74,173,.18);transition:transform .5s}.phbox:hover img{transform:scale(1.03) rotate(-.6deg)}
+.phbox img{width:100%;height:auto;aspect-ratio:450/290;object-fit:cover;display:block;border-radius:18px;box-shadow:0 18px 44px rgba(0,74,173,.18);transition:transform .5s}.phbox:hover img{transform:scale(1.03) rotate(-.6deg)}
 .steps{color:var(--blue);font-size:17px}.steps b{background:linear-gradient(90deg,var(--blue),var(--coral));-webkit-background-clip:text;background-clip:text;color:transparent}
-.footer-grid{grid-template-columns:1.4fr 1fr 1.4fr auto;align-items:start}.icfes{width:260px;max-width:100%;border-radius:12px}
+.footer-grid{grid-template-columns:1.4fr 1fr 1.4fr auto;align-items:start}.icfes{width:260px;max-width:100%;height:auto;border-radius:12px}
 @media(max-width:960px){.split{grid-template-columns:1fr}.footer-grid{grid-template-columns:1fr}.float-chip.c1{left:6px}.float-chip.c2{right:6px}}
 
 /* fotos reales */
@@ -153,7 +153,7 @@ tbody tr{transition:background .15s}.sel tbody tr{cursor:pointer}.sel tbody tr:h
 .split.about{grid-template-columns:420px 1fr;gap:56px}
 .frame{position:relative;padding:0 0 22px 22px}
 .frame-bg{position:absolute;left:0;top:22px;right:22px;bottom:0;background:var(--coral);border-radius:6px;transition:transform .4s}
-.frame img{position:relative;display:block;width:100%;border:6px solid #fff;border-radius:6px;box-shadow:0 18px 44px rgba(0,0,0,.18);transition:transform .4s}
+.frame img{position:relative;display:block;width:100%;height:auto;aspect-ratio:1;object-fit:cover;border:6px solid #fff;border-radius:6px;box-shadow:0 18px 44px rgba(0,0,0,.18);transition:transform .4s}
 .frame:hover img{transform:translate(4px,-4px)}.frame:hover .frame-bg{transform:translate(-4px,4px)}
 .icfes{background:#f5f8fd;padding:0;box-shadow:0 8px 22px rgba(0,0,0,.18);transition:transform .3s}.icfes:hover{transform:scale(1.04) rotate(-1deg)}
 @media(max-width:960px){.split.about{grid-template-columns:1fr}.hero-card.photo img{max-height:380px}}
@@ -210,8 +210,8 @@ tbody tr{transition:background .15s}.sel tbody tr{cursor:pointer}.sel tbody tr:h
 .mmenu nav{background:#fff;margin:0 14px;border-radius:20px;padding:14px;display:flex;flex-direction:column;gap:2px;box-shadow:0 30px 70px rgba(0,0,0,.3);max-height:calc(100vh - 120px);overflow:auto}
 .mmenu nav a:not(.btn){display:block;padding:14px 16px;border-radius:12px;font-weight:600;color:var(--ink)}
 .mmenu nav a.on{background:var(--soft);color:var(--blue)}.mmenu .m-aula{background:var(--soft);color:var(--blue)!important;margin-top:8px}.mmenu .m-portal{border:1.5px solid var(--blue);color:var(--blue)!important;text-align:center;margin:6px 0}
-@media(max-width:1180px){.btn-aula span{display:none}.ptab{padding:10px 9px;font-size:13px}}
-@media(max-width:1020px){.ptabs,.pacts{display:none}.burger{display:flex}.pnav{padding:0 18px;height:72px}.pnav.scrolled{height:62px}}
+@media(max-width:1280px){.btn-aula span{display:none}.ptab{padding:10px 9px;font-size:13px}}
+@media(max-width:1180px){.ptabs,.pacts{display:none}.burger{display:flex}.pnav{padding:0 18px;height:72px}.pnav.scrolled{height:62px}}
 .fb-ico{display:grid!important;place-items:center;width:42px;height:42px;margin-top:6px!important;border-radius:50%;background:rgba(255,255,255,.12);color:#fff!important;transition:background .25s,transform .25s}
 .fb-ico:hover{background:#1877f2;transform:translateY(-3px) scale(1.08)}
 .mmenu{padding-top:84px}
@@ -463,3 +463,17 @@ fieldset.card{border:1px solid var(--line);margin:0 0 16px}
 .fila-elemento{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}
 .fila-elemento .btns{display:flex;flex-wrap:wrap;gap:6px}
 .fila-elemento .btn{padding:6px 12px;font-size:13px}
+
+/* Formulario de contacto montado sobre la tarjeta azul */
+.cta-form{position:relative;z-index:1;max-width:760px;margin:-28px auto 0}
+.cta-form .card.form,.cta-form .contacto-ok{box-shadow:0 24px 60px rgba(0,74,173,.18)}
+
+/* Móvil: "Lo que ofrecemos" se desliza en horizontal en lugar de apilar seis tarjetas */
+@media(max-width:560px){
+  #academico .grid3{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;margin:20px -22px 0;padding:4px 22px 18px;scrollbar-width:none}
+  #academico .grid3::-webkit-scrollbar{display:none}
+  #academico .grid3>*{flex:0 0 82%;scroll-snap-align:center}
+}
+
+/* Mientras llega una página que se carga al visitarla */
+.page-loading{min-height:70vh}
