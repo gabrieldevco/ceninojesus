@@ -484,3 +484,47 @@ fieldset.card{border:1px solid var(--line);margin:0 0 16px}
   input:not([type=checkbox]):not([type=radio]),textarea,[contenteditable=true]{cursor:text!important}
   :disabled,.gtile.locked{cursor:not-allowed!important}
 }
+
+/* ===== Animaciones con GSAP y Framer Motion ===== */
+
+/* Títulos que se escriben letra por letra; el trazo inferior se dibuja con la variable --trazo */
+.word{display:inline-block;white-space:nowrap}.ch{display:inline-block;will-change:transform}
+.sec h2::after,.cta h2::after{transform:scaleX(var(--trazo,1));transform-origin:left}
+.sec.contact h2::after,.sec.gallery h2::after{transform:translateX(-50%) scaleX(var(--trazo,1));transform-origin:center}
+
+/* Tarjetas que se inclinan en 3D con brillo */
+.tilt{position:relative;height:100%;will-change:transform}
+.tilt-shine{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .35s;mix-blend-mode:soft-light}
+.tilt:hover .tilt-shine{opacity:1}
+.tilt-link{border-radius:20px}.tilt-link>a{height:100%}
+
+/* "Lo que ofrecemos": cada tarjeta con su color */
+.offer.o1{--c1:#0b5fd6;--c2:#4f8ff0;--tint:#e8f0fd}
+.offer.o2{--c1:#e5432d;--c2:#ff8a78;--tint:#fdecea}
+.offer.o3{--c1:#d98500;--c2:#f5b942;--tint:#fdf3df}
+.offer.o4{--c1:#1e9c63;--c2:#5fd39a;--tint:#e6f6ee}
+.offer.o5{--c1:#7b4fd6;--c2:#a98bf0;--tint:#f0ebfc}
+.offer.o6{--c1:#0e8fa0;--c2:#4fcfdc;--tint:#e3f6f8}
+.offer[class*=" o"]{background:radial-gradient(circle at 100% 0,color-mix(in srgb,var(--c2) 26%,transparent),transparent 42%),linear-gradient(165deg,var(--tint),#fff 62%)}
+.offer[class*=" o"] .offer-ico{background:linear-gradient(135deg,var(--c1),var(--c2));box-shadow:0 10px 22px color-mix(in srgb,var(--c1) 35%,transparent)}
+.offer[class*=" o"] .offer-num{color:var(--c1);opacity:.12}
+.offer[class*=" o"] h3{color:var(--c1)}
+.offer[class*=" o"] .offer-bar{background:linear-gradient(90deg,var(--c1),var(--c2))}
+.offer[class*=" o"]:hover{border-color:color-mix(in srgb,var(--c1) 40%,#fff);box-shadow:0 24px 50px color-mix(in srgb,var(--c1) 22%,transparent)}
+
+/* Garabatos de cuaderno en la portada */
+.doodles{position:absolute;inset:0;pointer-events:none;z-index:0}
+.doodle{position:absolute;opacity:.8}
+.hero-text{position:relative;z-index:1}
+@media(max-width:960px){.doodle{opacity:.35}}
+
+/* Galería: las fotos entran con un zoom lento */
+.car-slide img{animation:kenburns 8s ease-out both}
+@keyframes kenburns{from{transform:scale(1.12)}to{transform:scale(1)}}
+
+/* Botón coral que se "colorea" de azul de izquierda a derecha */
+.btn.coral{background:linear-gradient(90deg,var(--blue) 50%,var(--coral) 50%) 100% 0/202% 100% no-repeat;transition:background-position .45s cubic-bezier(.22,1,.36,1),transform .18s,box-shadow .18s}
+.btn.coral:hover{background-position:0 0;box-shadow:0 10px 22px rgba(0,74,173,.3)}
+
+/* Enfoque constructivista sobre una hoja de cuaderno */
+#constructivismo{background:linear-gradient(90deg,transparent 0 46px,rgba(240,74,52,.22) 46px 48px,transparent 48px),repeating-linear-gradient(180deg,transparent 0 31px,rgba(11,95,214,.08) 31px 32px),linear-gradient(180deg,#fff,var(--coral-bg))}
