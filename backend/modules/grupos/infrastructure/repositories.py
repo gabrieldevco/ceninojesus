@@ -27,6 +27,9 @@ class DjangoGrupoRepository(GrupoRepository):
         )
         return self.obtener_por_id(model.id)
 
+    def existe_nombre(self, nombre: str, excepto_id: int | None = None) -> bool:
+        return GrupoExtracurricularModel.objects.filter(nombre__iexact=nombre.strip()).exclude(id=excepto_id).exists()
+
     def obtener_por_id(self, grupo_id: int) -> GrupoExtracurricular | None:
         model = self._queryset().filter(id=grupo_id).first()
         return self._to_entity(model) if model else None

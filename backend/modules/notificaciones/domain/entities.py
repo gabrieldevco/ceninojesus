@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from shared.domain.actor import Actor
 from shared.domain.exceptions import PermisoDenegado
@@ -11,7 +11,7 @@ class Notificacion:
     titulo: str
     mensaje: str
     leida: bool = False
-    fecha_creacion: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    fecha_creacion: datetime = field(default_factory=lambda: datetime.now(UTC))
     id: int | None = None
 
     def marcar_leida(self, actor: Actor):

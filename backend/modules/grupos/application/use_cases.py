@@ -12,6 +12,7 @@ from modules.grupos.domain.exceptions import (
     AdministradoresInvalidos,
     CupoAgotado,
     EstudianteNoPertenece,
+    GrupoDuplicado,
     GrupoInactivo,
     GrupoNoEncontrado,
     SolicitudDuplicada,
@@ -72,6 +73,8 @@ class CrearGrupo:
         self.repository = repository
 
     def execute(self, datos: DatosGrupo) -> GrupoExtracurricular:
+        if self.repository.existe_nombre(datos.nombre):
+            raise GrupoDuplicado(datos.nombre)
         return self.repository.guardar(GrupoExtracurricular(**datos.__dict__))
 
 
@@ -81,6 +84,9 @@ class ActualizarGrupo:
 
     def execute(self, actor: Actor, grupo_id: int, cambios: dict) -> GrupoExtracurricular:
         grupo = _obtener_grupo_gestionable(self.repository, actor, grupo_id)
+        nombre = cambios.get("nombre")
+        if nombre is not None and self.repository.existe_nombre(nombre, excepto_id=grupo_id):
+            raise GrupoDuplicado(nombre)
         return self.repository.guardar(replace(grupo, **cambios))
 
 

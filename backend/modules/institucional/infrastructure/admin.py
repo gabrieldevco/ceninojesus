@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import EnlacePortalModel, InformacionInstitucionalModel, MensajeContactoModel
+from .models import ElementoLandingModel, EnlacePortalModel, InformacionInstitucionalModel, MensajeContactoModel
 
 
 @admin.register(InformacionInstitucionalModel)
@@ -22,3 +22,10 @@ class MensajeContactoAdmin(admin.ModelAdmin):
     list_display = ["asunto", "nombre", "correo", "leido", "fecha_envio"]
     list_filter = ["leido"]
     search_fields = ["asunto", "nombre", "correo"]
+
+
+@admin.register(ElementoLandingModel)
+class ElementoLandingAdmin(admin.ModelAdmin):
+    list_display = ["seccion", "titulo", "orden", "activo"]
+    list_editable = ["orden", "activo"]
+    list_filter = ["seccion", "activo"]

@@ -1,4 +1,4 @@
-# Entorno de desarrollo: PostgreSQL + backend Django + workflow + copias de seguridad + pgAdmin
+# Entorno de desarrollo: PostgreSQL + Redis + backend Django + Celery (worker y beat) + copias de seguridad + pgAdmin
 # Producción: ver docker-compose.prod.yml
 # Uso: docker compose up -d --build   (requiere backend/.env, ver backend/.env.example)
 
@@ -19,6 +19,19 @@ services:
       retries: 10
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    container_name: ceninojesus-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
   backend:
     build: ./backend
     container_name: ceninojesus-backend
@@ -27,6 +40,7 @@ services:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       POSTGRES_HOST: db
       POSTGRES_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
     # Servidor de desarrollo con recarga automática; en producción se usa el CMD del Dockerfile (gunicorn)
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
@@ -37,6 +51,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/salud/')"]
       interval: 10s
@@ -45,17 +61,37 @@ services:
       start_period: 20s
     restart: unless-stopped
 
-  # Tareas automáticas (cada hora): recordatorios de interesados (RF-18) y alertas de solicitudes de datos (Ley 1581)
-  workflow:
+  # Tareas en segundo plano: correos, recordatorios de interesados (RF-18) y alertas de datos personales (Ley 1581)
+  celery:
     build: ./backend
-    container_name: ceninojesus-workflow
+    container_name: ceninojesus-celery
     env_file: ./backend/.env
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       POSTGRES_HOST: db
       POSTGRES_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
     # Sin el entrypoint del backend: las migraciones ya las aplica el servicio backend
-    entrypoint: ["sh", "/app/workflow.sh"]
+    entrypoint: ["celery", "-A", "config", "worker", "--loglevel=info", "--concurrency=2"]
+    command: []
+    volumes:
+      - ./backend:/app
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Programador: dispara las tareas periódicas (un único proceso)
+  celery-beat:
+    build: ./backend
+    container_name: ceninojesus-celery-beat
+    env_file: ./backend/.env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "5432"
+      REDIS_URL: redis://redis:6379/0
+    entrypoint: ["celery", "-A", "config", "beat", "--loglevel=info", "--schedule=/tmp/celerybeat-schedule"]
     command: []
     volumes:
       - ./backend:/app
@@ -94,5 +130,6 @@ services:
 
 volumes:
   postgres_data:
+  redis_data:
   pgadmin_data:
   media_data:

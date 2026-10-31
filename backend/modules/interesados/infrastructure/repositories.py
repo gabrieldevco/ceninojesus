@@ -29,9 +29,7 @@ class DjangoInteresadoRepository(InteresadoRepository):
         return [self._to_entity(model) for model in queryset]
 
     def listar_pendientes(self) -> list[Interesado]:
-        queryset = InteresadoModel.objects.filter(
-            estado__in=[EstadoInteresado.NUEVO, EstadoInteresado.EN_SEGUIMIENTO]
-        )
+        queryset = InteresadoModel.objects.filter(estado__in=[EstadoInteresado.NUEVO, EstadoInteresado.EN_SEGUIMIENTO])
         return [self._to_entity(model) for model in queryset]
 
     @staticmethod

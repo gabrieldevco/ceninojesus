@@ -1,0 +1,102 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend-tests:
+    name: backend-tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: ceninojesus
+          POSTGRES_USER: ceninojesus
+          POSTGRES_PASSWORD: ci-solo-para-pruebas
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ceninojesus -d ceninojesus"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DJANGO_SECRET_KEY: ci-solo-para-pruebas
+      POSTGRES_DB: ceninojesus
+      POSTGRES_USER: ceninojesus
+      POSTGRES_PASSWORD: ci-solo-para-pruebas
+      POSTGRES_HOST: 127.0.0.1
+      POSTGRES_PORT: "5432"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: pip install -r requirements-dev.txt
+      - name: Lint (Ruff)
+        run: ruff check .
+      - name: Formato (Ruff)
+        run: ruff format --check .
+      - name: Arquitectura (import-linter)
+        run: lint-imports
+      - name: Verificar que no falten migraciones
+        run: python manage.py makemigrations --check --dry-run
+      - name: Verificar configuración de Django
+        run: python manage.py check
+      - name: Pruebas con cobertura
+        run: |
+          coverage run manage.py test
+          coverage report
+
+  backend-audit:
+    name: backend-audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.14"
+      - name: Auditar dependencias (pip-audit)
+        run: |
+          pip install pip-audit==2.10.0
+          pip-audit -r backend/requirements.txt
+
+  frontend-build:
+    name: frontend-build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Lint y reglas de arquitectura (ESLint)
+        run: npm run lint
+      - name: Pruebas (Vitest)
+        run: npm test
+      - name: Tipos y compilación
+        run: npm run build
+      - name: Auditar dependencias (npm audit)
+        run: npm audit --omit=dev --audit-level=high

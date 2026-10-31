@@ -40,6 +40,9 @@ class GrupoAdministradorModel(models.Model):
         verbose_name_plural = "administradores de grupo"
         constraints = [models.UniqueConstraint(fields=["grupo", "usuario"], name="grupo_administrador_unico")]
 
+    def __str__(self):
+        return f"{self.usuario} administra {self.grupo}"
+
 
 class SolicitudMatriculaModel(models.Model):
     grupo = models.ForeignKey(GrupoExtracurricularModel, on_delete=models.PROTECT, related_name="solicitudes")

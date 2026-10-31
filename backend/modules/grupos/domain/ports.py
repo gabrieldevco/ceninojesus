@@ -10,6 +10,10 @@ class GrupoRepository(ABC):
     def guardar(self, grupo: GrupoExtracurricular) -> GrupoExtracurricular: ...
 
     @abstractmethod
+    def existe_nombre(self, nombre: str, excepto_id: int | None = None) -> bool:
+        """Sin distinguir mayúsculas; `excepto_id` excluye al grupo que se está editando."""
+
+    @abstractmethod
     def obtener_por_id(self, grupo_id: int) -> GrupoExtracurricular | None: ...
 
     @abstractmethod

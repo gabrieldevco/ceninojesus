@@ -1,6 +1,6 @@
 """Pruebas del dominio y los casos de uso: sin base de datos ni Django."""
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from unittest import TestCase
 
 from modules.interesados.application.use_cases import (
@@ -61,7 +61,7 @@ def crear_interesado(**kwargs):
     return Interesado(**{**datos, **kwargs})
 
 
-AHORA = datetime(2026, 10, 10, tzinfo=timezone.utc)
+AHORA = datetime(2026, 10, 10, tzinfo=UTC)
 
 
 class InteresadoTests(TestCase):
@@ -102,9 +102,7 @@ class InteresadoTests(TestCase):
         self.assertFalse(interesado.requiere_recordatorio(AHORA, dias=3, ultimo_recordatorio=ultimo))
 
     def test_estado_final_no_requiere_recordatorio(self):
-        interesado = crear_interesado(
-            fecha_registro=AHORA - timedelta(days=10), estado=EstadoInteresado.DESCARTADO
-        )
+        interesado = crear_interesado(fecha_registro=AHORA - timedelta(days=10), estado=EstadoInteresado.DESCARTADO)
         self.assertFalse(interesado.requiere_recordatorio(AHORA, dias=3, ultimo_recordatorio=None))
 
 

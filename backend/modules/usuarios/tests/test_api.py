@@ -136,6 +136,28 @@ class GestionUsuariosTests(APITestCase):
         self.client.force_authenticate(crear_usuario("mama"))
         self.assertEqual(self.client.get("/api/usuarios/").status_code, 403)
 
+    def test_el_administrador_no_puede_quitarse_el_acceso(self):
+        self.client.force_authenticate(self.admin)
+        url = f"/api/usuarios/{self.admin.id}/"
+        self.assertEqual(self.client.patch(url, {"activo": False}, format="json").status_code, 403)
+        self.assertEqual(self.client.patch(url, {"rol": "acudiente"}, format="json").status_code, 403)
+        self.assertEqual(self.client.post(f"{url}anonimizar/").status_code, 403)
+        # Sí puede corregir sus datos o confirmar su propio rol
+        self.assertEqual(
+            self.client.patch(url, {"rol": "administrador", "nombres": "Rector"}, format="json").status_code, 200
+        )
+        self.admin.refresh_from_db()
+        self.assertTrue(self.admin.is_active)
+
+    def test_cambiar_rol_y_desactivar_a_otro_usuario(self):
+        profe = crear_usuario("profe", Rol.ACUDIENTE)
+        self.client.force_authenticate(self.admin)
+        response = self.client.patch(
+            f"/api/usuarios/{profe.id}/", {"rol": "administrador_grupo", "activo": False}, format="json"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual((response.data["rol"], response.data["activo"]), ("administrador_grupo", False))
+
     def test_anonimizar_acudiente_y_sus_hijos(self):
         acudiente = crear_usuario("mama", nombres="Ana", telefono="300")
         cuenta_hijo = crear_usuario("luis", Rol.ESTUDIANTE)

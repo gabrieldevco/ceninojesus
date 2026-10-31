@@ -1,0 +1,76 @@
+[importlinter]
+include_external_packages = True
+root_packages =
+    modules
+    shared
+    config
+
+[importlinter:contract:capas]
+name = Cada módulo respeta infrastructure -> application -> domain
+type = layers
+layers =
+    infrastructure
+    application
+    domain
+containers =
+    modules.contenidos
+    modules.datos_personales
+    modules.grupos
+    modules.institucional
+    modules.interesados
+    modules.notificaciones
+    modules.usuarios
+exhaustive = false
+
+[importlinter:contract:dominio-puro]
+name = El dominio y la aplicación no dependen de Django ni de DRF
+type = forbidden
+source_modules =
+    modules.contenidos.domain
+    modules.contenidos.application
+    modules.datos_personales.domain
+    modules.datos_personales.application
+    modules.grupos.domain
+    modules.grupos.application
+    modules.institucional.domain
+    modules.institucional.application
+    modules.interesados.domain
+    modules.interesados.application
+    modules.notificaciones.domain
+    modules.notificaciones.application
+    modules.usuarios.domain
+    modules.usuarios.application
+    shared.domain
+forbidden_modules =
+    django
+    rest_framework
+    rest_framework_simplejwt
+
+[importlinter:contract:shared-domain]
+name = shared.domain no depende de los módulos
+type = forbidden
+source_modules =
+    shared.domain
+forbidden_modules =
+    modules
+    shared.infrastructure
+
+[importlinter:contract:dominio-sin-otros-modulos]
+name = El dominio no importa la infraestructura de ningún módulo
+type = forbidden
+source_modules =
+    modules.contenidos.domain
+    modules.datos_personales.domain
+    modules.grupos.domain
+    modules.institucional.domain
+    modules.interesados.domain
+    modules.notificaciones.domain
+    modules.usuarios.domain
+forbidden_modules =
+    modules.contenidos.infrastructure
+    modules.datos_personales.infrastructure
+    modules.grupos.infrastructure
+    modules.institucional.infrastructure
+    modules.interesados.infrastructure
+    modules.notificaciones.infrastructure
+    modules.usuarios.infrastructure

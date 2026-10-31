@@ -87,9 +87,7 @@ class CrearContenido(_CasoDeUsoContenido):
 
 
 class ActualizarContenido(_CasoDeUsoContenido):
-    def execute(
-        self, actor: Actor, grupo_id: int, contenido_id: int, cambios: dict, archivo: Any = None
-    ) -> Contenido:
+    def execute(self, actor: Actor, grupo_id: int, contenido_id: int, cambios: dict, archivo: Any = None) -> Contenido:
         self._exigir_gestion(actor, grupo_id)
         actual = self._obtener(grupo_id, contenido_id)
         contenido = replace(actual, **cambios)

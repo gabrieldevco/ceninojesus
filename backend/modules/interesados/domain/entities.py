@@ -5,7 +5,7 @@ Python puro: esta capa no importa Django ni ningún framework.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 
 from .exceptions import AutorizacionDatosRequerida, TransicionEstadoInvalida
@@ -35,7 +35,7 @@ TRANSICIONES_PERMITIDAS = {
 
 
 def _ahora():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 @dataclass

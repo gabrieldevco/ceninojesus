@@ -5,7 +5,7 @@ Orquestan el dominio a través de los puertos; no conocen Django.
 """
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from modules.interesados.domain.entities import EstadoInteresado, Interesado, Seguimiento
 from modules.interesados.domain.exceptions import InteresadoNoEncontrado
@@ -125,7 +125,7 @@ class EnviarRecordatoriosSeguimiento:
         self.notificador = notificador
 
     def execute(self, dias: int, ahora: datetime | None = None) -> list[Interesado]:
-        ahora = ahora or datetime.now(timezone.utc)
+        ahora = ahora or datetime.now(UTC)
         pendientes = self.repository.listar_pendientes()
         ultimos = self.recordatorios.ultimos([i.id for i in pendientes])
         vencidos = [i for i in pendientes if i.requiere_recordatorio(ahora, dias, ultimos.get(i.id))]

@@ -1,6 +1,6 @@
 from django.core.exceptions import ImproperlyConfigured
 
-from .base import *  # noqa: F401,F403
+from .base import *  # noqa: F403
 from .base import ALLOWED_HOSTS, REST_FRAMEWORK, SECRET_KEY, env_list, os
 
 if not SECRET_KEY:

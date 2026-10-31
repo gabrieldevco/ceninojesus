@@ -2,6 +2,7 @@ from django.urls import reverse
 from rest_framework import serializers
 
 from modules.contenidos.domain.entities import TipoMaterial
+from shared.infrastructure.archivos import validar_archivo_permitido
 
 
 class _ContenidoSerializer(serializers.Serializer):
@@ -17,6 +18,9 @@ class _ContenidoSerializer(serializers.Serializer):
     archivo_url = serializers.SerializerMethodField()
 
     tipo_contenido = None  # "materiales" o "actividades"
+
+    def validate_archivo(self, archivo):
+        return validar_archivo_permitido(archivo)
 
     def get_archivo_url(self, contenido):
         if not contenido.archivo:

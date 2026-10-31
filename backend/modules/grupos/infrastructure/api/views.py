@@ -24,7 +24,10 @@ class GrupoListCreateView(APIView):
         return [AllowAny()] if self.request.method == "GET" else [EsAdministrador()]
 
     def get(self, request):
-        grupos = dependencies.listar_grupos().execute(solo_activos=True)
+        # El administrador puede pedir también los grupos inactivos (`?todos=true`) para gestionarlos
+        es_administrador = request.user.is_authenticated and actor_desde_request(request).es_administrador
+        solo_activos = not (es_administrador and request.query_params.get("todos") == "true")
+        grupos = dependencies.listar_grupos().execute(solo_activos=solo_activos)
         return Response(s.GrupoSerializer(grupos, many=True).data)
 
     def post(self, request):
@@ -44,7 +47,9 @@ class GrupoDetailView(APIView):
     def patch(self, request, grupo_id):
         serializer = s.GrupoSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        grupo = dependencies.actualizar_grupo().execute(actor_desde_request(request), grupo_id, serializer.validated_data)
+        grupo = dependencies.actualizar_grupo().execute(
+            actor_desde_request(request), grupo_id, serializer.validated_data
+        )
         return Response(s.GrupoSerializer(grupo).data)
 
 
@@ -91,7 +96,9 @@ class SolicitudListCreateView(APIView):
     def post(self, request):
         serializer = s.CrearSolicitudSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        solicitud = dependencies.solicitar_matricula().execute(actor_desde_request(request), **serializer.validated_data)
+        solicitud = dependencies.solicitar_matricula().execute(
+            actor_desde_request(request), **serializer.validated_data
+        )
         return Response(s.SolicitudSerializer(solicitud).data, status=status.HTTP_201_CREATED)
 
 
