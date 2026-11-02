@@ -108,7 +108,14 @@ const MENU: Record<Rol, [string, string, string][]> = {
     ['/estudiante/aula', 'Aula estudiante', '▥'],
   ],
   administrador_grupo: SOLICITUDES,
-  administrador: [...SOLICITUDES, ['/admin/interesados', 'Interesados', '☎'], ['/admin/usuarios', 'Usuarios y grupos', '⚙'], ['/admin/datos-personales', 'Datos personales', '⚖'], ['/admin/sitio', 'Sitio web', '✎']],
+  administrador: [
+    ...SOLICITUDES,
+    ['/admin/interesados', 'Interesados', '☎'],
+    ['/admin/contacto', 'Mensajes contacto', '✉'],
+    ['/admin/usuarios', 'Usuarios y grupos', '⚙'],
+    ['/admin/datos-personales', 'Datos personales', '⚖'],
+    ['/admin/sitio', 'Sitio web', '✎'],
+  ],
 }
 
 export function PortalLayout({ crumb }: { crumb: string }) {

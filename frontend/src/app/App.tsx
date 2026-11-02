@@ -8,7 +8,7 @@ import { AulaPage, EspacioPage, GestionContenidoPage } from '@/modules/aula'
 import { GestionSolicitudesDatosPage, SolicitudDeDatosPage } from '@/modules/datosPersonales'
 import { EstudiantesPage } from '@/modules/estudiantes'
 import { AdmisionesPage, GestionInteresadosPage } from '@/modules/interesados'
-import { GestionSitioPage, InicioPage, PoliticaDatosPage } from '@/modules/institucional'
+import { BandejaContactoPage, GestionSitioPage, InicioPage, PoliticaDatosPage } from '@/modules/institucional'
 import { MatriculaPage, SolicitudesPage } from '@/modules/matriculas'
 import { PortalLayout, PublicLayout } from './Layouts'
 
@@ -86,6 +86,9 @@ export default function App() {
         </Route>
         <Route element={<Guard roles={['administrador']} crumb="Sitio web" />}>
           <Route path="/admin/sitio" element={<Anim><GestionSitioPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['administrador']} crumb="Mensajes de contacto" />}>
+          <Route path="/admin/contacto" element={<Anim><BandejaContactoPage /></Anim>} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

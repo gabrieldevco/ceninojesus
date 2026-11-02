@@ -121,6 +121,39 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByText(/de demostración/i)).toBeInTheDocument()
   })
 
+  it('la página de inicio no muestra la advertencia de textos pendientes de validación por defecto', async () => {
+    renderizar('/', { modoDemo: true })
+    expect(await screen.findByRole('heading', { name: /nuestro horizonte institucional/i })).toBeInTheDocument()
+    expect(screen.queryByText(/textos propuestos/i)).not.toBeInTheDocument()
+  })
+
+  it('el administrador consulta la bandeja de contacto, filtra y marca un mensaje como leído', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/contacto', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByRole('heading', { name: /mensajes de contacto recibidos/i })).toBeInTheDocument()
+    expect(await screen.findByText('Carolina Herrera')).toBeInTheDocument()
+    expect(screen.getByText('Jorge Mendoza')).toBeInTheDocument()
+
+    // Filtrar solo no leídos
+    await usuario.click(screen.getByRole('button', { name: /solo no leídos/i }))
+    expect(screen.getByText('Carolina Herrera')).toBeInTheDocument()
+    expect(screen.queryByText('Jorge Mendoza')).not.toBeInTheDocument()
+
+    // Ver detalle y marcar como leído
+    await usuario.click(screen.getByText('Carolina Herrera'))
+    expect(screen.getAllByText('Consulta sobre admisiones para transición').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/quisiera información sobre los costos de matrícula/i).length).toBeGreaterThanOrEqual(1)
+
+    const botonMarcar = screen.getByRole('button', { name: /marcar como leído/i })
+    await usuario.click(botonMarcar)
+
+    expect(await screen.findByText(/mensaje marcado como leído/i)).toBeInTheDocument()
+  })
+
+
   it('un visitante crea su cuenta de acudiente: valida y lo lleva a iniciar sesión', async () => {
     const usuario = userEvent.setup()
     renderizar('/registro', { modoDemo: true })
