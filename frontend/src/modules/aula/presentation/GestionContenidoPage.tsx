@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { ErrorApi } from '@/shared/http/errores'
 import { formatearFecha } from '@/shared/lib/fecha'
 import { useToast } from '@/shared/ui/toast'
-import { useMisGrupos } from '@/modules/grupos'
+import { GrupoInvalido, useCrearGrupo, useMisGrupos, type Grupo } from '@/modules/grupos'
 import {
   EXTENSIONES_PERMITIDAS,
   PublicacionInvalida,
@@ -19,6 +21,8 @@ import {
   usePublicarActividad,
   usePublicarMaterial,
 } from './AulaProvider'
+import { RevisarEntregas } from './RevisarEntregas'
+import { BannerDeClase, TarjetasDeClases } from './TarjetasDeClases'
 
 interface Formulario {
   titulo: string
@@ -130,17 +134,17 @@ function ListaGestionada({
   )
 }
 
-export default function GestionContenidoPage() {
+type PestanaDocente = 'tablon' | 'entregas'
+
+function ClaseDelDocente({ grupo, indice, onVolver }: { grupo: Grupo; indice: number; onVolver: () => void }) {
   const { push } = useToast()
-  const { grupos, cargando: cargandoGrupos } = useMisGrupos()
-  const [grupoElegido, setGrupoElegido] = useState<number | null>(null)
+  const [pestana, setPestana] = useState<PestanaDocente>('tablon')
   const [tipoDePublicacion, setTipoDePublicacion] = useState<TipoContenido>('materiales')
   const [datos, setDatos] = useState<Formulario>(VACIO)
   const [errores, setErrores] = useState<ErroresDePublicacion>({})
   // Cambiar la clave del input de archivo lo limpia después de publicar
   const [claveArchivo, setClaveArchivo] = useState(0)
 
-  const grupo = grupos.find((g) => g.id === grupoElegido) ?? grupos[0]
   const materiales = useMateriales(grupo?.id)
   const actividades = useActividades(grupo?.id)
   const publicarMaterial = usePublicarMaterial()
@@ -168,7 +172,6 @@ export default function GestionContenidoPage() {
 
   const enviar = (e: FormEvent) => {
     e.preventDefault()
-    if (!grupo) return
     setErrores({})
     const comun = { grupoId: grupo.id, titulo: datos.titulo, descripcion: datos.descripcion, url: datos.url, archivo: datos.archivo, publicado: datos.publicado }
     if (tipoDePublicacion === 'materiales') {
@@ -176,7 +179,7 @@ export default function GestionContenidoPage() {
     } else {
       publicarActividad.mutate(
         { ...comun, fechaEntrega: datos.fechaEntrega || null },
-        { onSuccess: () => alExito('Actividad publicada'), onError: alError },
+        { onSuccess: () => alExito('Tarea publicada'), onError: alError },
       )
     }
   }
@@ -188,51 +191,35 @@ export default function GestionContenidoPage() {
       </small>
     ) : null
 
-  if (cargandoGrupos) return <p className="card">Cargando tus grupos…</p>
-  if (!grupo) {
-    return (
-      <>
-        <p className="kicker">GRUPOS ASIGNADOS / CONTENIDO</p>
-        <h1 className="ptitle">Contenido del grupo</h1>
-        <p className="card">Todavía no administras ningún grupo.</p>
-      </>
-    )
-  }
-
   const esMaterial = tipoDePublicacion === 'materiales'
 
   return (
     <>
-      <p className="kicker">GRUPOS ASIGNADOS / CONTENIDO</p>
-      <h1 className="ptitle">Contenido del grupo</h1>
-      <p className="sub">
-        Publica material de apoyo y actividades. Solo los estudiantes con matrícula aprobada en el grupo pueden verlos.
-      </p>
+      <BannerDeClase grupo={grupo} indice={indice} onVolver={onVolver} />
+      <div className="clase-tabs" role="tablist" aria-label="Secciones de la clase">
+        <button type="button" role="tab" aria-selected={pestana === 'tablon'} className={`clase-tab ${pestana === 'tablon' ? 'on' : ''}`} onClick={() => setPestana('tablon')}>
+          Tablón y publicaciones
+        </button>
+        <button type="button" role="tab" aria-selected={pestana === 'entregas'} className={`clase-tab ${pestana === 'entregas' ? 'on' : ''}`} onClick={() => setPestana('entregas')}>
+          Entregas y calificaciones
+        </button>
+      </div>
 
-      <section className="card">
-        <label>
-          Grupo
-          <select value={grupo.id} onChange={(e) => setGrupoElegido(Number(e.target.value))}>
-            {grupos.map((g) => (
-              <option key={g.id} value={g.id}>
-                {g.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-      </section>
-
+      {pestana === 'entregas' ? (
+        <RevisarEntregas grupoId={grupo.id} actividades={actividades.items} />
+      ) : (
+        <>
       <div className="tabs">
         <button className={esMaterial ? 'on' : ''} onClick={() => { setTipoDePublicacion('materiales'); setErrores({}) }}>
           Material de apoyo
         </button>
         <button className={!esMaterial ? 'on' : ''} onClick={() => { setTipoDePublicacion('actividades'); setErrores({}) }}>
-          Actividad
+          Tarea
         </button>
       </div>
 
       <form className="card form" onSubmit={enviar} noValidate>
-        <h3>{esMaterial ? 'Publicar material' : 'Publicar actividad'}</h3>
+        <h3>{esMaterial ? 'Publicar material' : 'Publicar tarea'}</h3>
         <label>
           Título *
           <input value={datos.titulo} onChange={(e) => cambiar('titulo', e.target.value)} maxLength={200} />
@@ -280,7 +267,7 @@ export default function GestionContenidoPage() {
             accept={EXTENSIONES_PERMITIDAS.join(',')}
             onChange={(e) => cambiar('archivo', e.target.files?.[0] ?? null)}
           />
-          <small>Máximo {TAMANO_MAXIMO_MB} MB. {esMaterial ? 'El material necesita un archivo o un enlace.' : 'Opcional.'}</small>
+          <small>Máximo {TAMANO_MAXIMO_MB} MB. {esMaterial ? 'El material necesita un archivo o un enlace. Los videos de YouTube se ven dentro de la clase.' : 'Opcional.'}</small>
           {mensaje('archivo')}
           {mensaje('recurso')}
         </label>
@@ -289,12 +276,109 @@ export default function GestionContenidoPage() {
           <span>Publicar ahora (si lo desmarcas queda como borrador, que solo ves tú).</span>
         </label>
         <button className="btn" disabled={publicando}>
-          {publicando ? 'Publicando…' : esMaterial ? 'Publicar material' : 'Publicar actividad'}
+          {publicando ? 'Publicando…' : esMaterial ? 'Publicar material' : 'Publicar tarea'}
         </button>
       </form>
 
       <ListaGestionada titulo="Material publicado" tipo="materiales" items={materiales.items} cargando={materiales.cargando} grupoId={grupo.id} />
-      <ListaGestionada titulo="Actividades publicadas" tipo="actividades" items={actividades.items} cargando={actividades.cargando} grupoId={grupo.id} />
+      <ListaGestionada titulo="Tareas publicadas" tipo="actividades" items={actividades.items} cargando={actividades.cargando} grupoId={grupo.id} />
+        </>
+      )}
+    </>
+  )
+}
+
+/** Tarjeta para que el docente cree su propia clase; queda como su docente. */
+function CrearClase() {
+  const { push } = useToast()
+  const crear = useCrearGrupo()
+  const [abierta, setAbierta] = useState(false)
+  const [datos, setDatos] = useState({ nombre: '', descripcion: '', horario: '' })
+  const [error, setError] = useState<string | null>(null)
+
+  if (!abierta) {
+    return (
+      <motion.button type="button" className="clase-card nueva" onClick={() => setAbierta(true)} whileHover={{ y: -5 }} whileTap={{ scale: 0.98 }}>
+        <span className="clase-nueva-mas" aria-hidden="true">
+          ＋
+        </span>
+        <b>Crear clase</b>
+        <small>Una tarjeta nueva para tu asignatura</small>
+      </motion.button>
+    )
+  }
+
+  const enviar = (e: FormEvent) => {
+    e.preventDefault()
+    setError(null)
+    crear.mutate(datos, {
+      onSuccess: (grupo) => {
+        push(`Clase “${grupo.nombre}” creada`)
+        setDatos({ nombre: '', descripcion: '', horario: '' })
+        setAbierta(false)
+      },
+      onError: (err) => {
+        if (err instanceof GrupoInvalido) return setError(err.message)
+        if (err instanceof ErrorApi) return setError(err.campos.nombre?.[0] ?? err.detalle)
+        return setError(err instanceof Error ? err.message : 'No se pudo crear la clase.')
+      },
+    })
+  }
+
+  return (
+    <motion.form className="clase-card nueva-form" onSubmit={enviar} noValidate initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} aria-label="Crear clase">
+      <b>Nueva clase</b>
+      <label>
+        Nombre de la asignatura *
+        <input value={datos.nombre} onChange={(e) => setDatos({ ...datos, nombre: e.target.value })} maxLength={100} placeholder="Ej. Matemáticas 5°" />
+      </label>
+      <label>
+        Descripción
+        <input value={datos.descripcion} onChange={(e) => setDatos({ ...datos, descripcion: e.target.value })} placeholder="¿De qué trata la clase?" />
+      </label>
+      <label>
+        Horario
+        <input value={datos.horario} onChange={(e) => setDatos({ ...datos, horario: e.target.value })} maxLength={200} placeholder="Martes y jueves 2:00 p. m." />
+      </label>
+      {error && (
+        <small className="field-err" role="alert">
+          {error}
+        </small>
+      )}
+      <div className="entrega-acciones">
+        <button className="btn sm" disabled={crear.isPending}>
+          {crear.isPending ? 'Creando…' : 'Crear'}
+        </button>
+        <button type="button" className="btn outline sm" onClick={() => setAbierta(false)}>
+          Cancelar
+        </button>
+      </div>
+    </motion.form>
+  )
+}
+
+export default function GestionContenidoPage() {
+  const { grupos, cargando } = useMisGrupos()
+  const [params, setParams] = useSearchParams()
+  const pedido = Number(params.get('grupo'))
+  const indice = grupos.findIndex((g) => g.id === pedido)
+  const activo = indice >= 0 ? grupos[indice] : undefined
+
+  return (
+    <>
+      <p className="kicker">PORTAL DOCENTE / MIS CLASES</p>
+      <h1 className="ptitle">Mis clases</h1>
+      <p className="sub">
+        Cada tarjeta es una asignatura. Publica material y tareas, revisa las entregas y califica. Solo los estudiantes con matrícula aprobada
+        ven la clase.
+      </p>
+      {cargando ? (
+        <p className="card">Cargando tus clases…</p>
+      ) : activo ? (
+        <ClaseDelDocente key={activo.id} grupo={activo} indice={indice} onVolver={() => setParams({})} />
+      ) : (
+        <TarjetasDeClases grupos={grupos} onAbrir={(g) => setParams({ grupo: String(g.id) })} pie={() => 'Gestionar clase'} extra={<CrearClase />} />
+      )}
     </>
   )
 }

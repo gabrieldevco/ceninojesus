@@ -1,10 +1,15 @@
 import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
+  CalificarEntrega,
   DescargarArchivo,
+  DescargarEntrega,
   EliminarContenido,
+  EntregarActividad,
   ListarActividades,
+  ListarEntregas,
   ListarMateriales,
+  ListarMisEntregas,
   PublicarActividad,
   PublicarMaterial,
 } from './application/casosDeUso'
@@ -27,5 +32,10 @@ export function crearCasosDeUsoAula({ http, modoDemo }: { http: HttpClient; modo
     publicarMaterial: new PublicarMaterial(repositorio),
     publicarActividad: new PublicarActividad(repositorio),
     eliminarContenido: new EliminarContenido(repositorio),
+    listarMisEntregas: new ListarMisEntregas(repositorio),
+    entregarActividad: new EntregarActividad(repositorio),
+    listarEntregas: new ListarEntregas(repositorio),
+    calificarEntrega: new CalificarEntrega(repositorio),
+    descargarEntrega: new DescargarEntrega(repositorio),
   }
 }
