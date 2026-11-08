@@ -66,12 +66,12 @@ function AccionDeContenido({ contenido, tipo, etiqueta }: { contenido: Contenido
   }
   if (accion === 'abrir-enlace' && esEnlaceSeguro(contenido.url)) {
     return (
-      <a className="btn-mat-action" href={contenido.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+      <a className="btn-mat-action" href={contenido.url} target="_blank" rel="noopener noreferrer">
         Abrir enlace ↗
       </a>
     )
   }
-  return <span className="muted-p" style={{ fontSize: '13px' }}>Sin archivo ni enlace por ahora.</span>
+  return <span className="muted-p aula-sin">Sin archivo ni enlace por ahora.</span>
 }
 
 export default function AulaPage() {
@@ -89,7 +89,7 @@ export default function AulaPage() {
   return (
     <>
       <p className="kicker">
-        <Link to="/estudiante/espacio" style={{ color: 'inherit', textDecoration: 'none' }}>MI ESPACIO</Link> / AULA ESTUDIANTE
+        <Link to="/estudiante/espacio" className="kicker-link">MI ESPACIO</Link> / AULA ESTUDIANTE
       </p>
       <h1 className="ptitle">Aprende, explora y participa</h1>
       <p className="sub">{usuario?.nombre || 'Estudiante'} · Solo puedes acceder a los grupos con matrícula aprobada.</p>
@@ -119,7 +119,7 @@ export default function AulaPage() {
             })}
           </div>
         )}
-        <p className="muted-p" style={{ margin: '8px 0 0', fontSize: '13.5px' }}>
+        <p className="muted-p aula-nota">
           Aquí aparecen los grupos con matrícula aprobada.
         </p>
       </section>
@@ -162,21 +162,21 @@ export default function AulaPage() {
             </div>
 
             {pestana === 'info' ? (
-              <div className="card" style={{ padding: '28px', borderRadius: '16px' }}>
-                <h3 style={{ fontSize: '20px', color: '#003380', marginBottom: '16px' }}>
+              <div className="card aula-info">
+                <h3>
                   Información institucional del grupo {activo.nombre}
                 </h3>
-                <div style={{ display: 'grid', gap: '16px', maxWidth: '640px', fontSize: '14px', lineHeight: 1.6 }}>
+                <div className="aula-info-datos">
                   <div>
-                    <strong style={{ display: 'block', color: '#004aad' }}>Horario de sesiones:</strong>
+                    <strong>Horario de sesiones:</strong>
                     <span>{activo.horario || 'Horario por confirmar con la institución.'}</span>
                   </div>
                   <div>
-                    <strong style={{ display: 'block', color: '#004aad' }}>Docente responsable:</strong>
+                    <strong>Docente responsable:</strong>
                     <span>Docente asignado por la institución</span>
                   </div>
                   <div>
-                    <strong style={{ display: 'block', color: '#004aad' }}>Objetivo formativo:</strong>
+                    <strong>Objetivo formativo:</strong>
                     <span>{activo.descripcion || 'Fomentar el desarrollo integral de los estudiantes en actividades extracurriculares.'}</span>
                   </div>
                 </div>
@@ -185,7 +185,7 @@ export default function AulaPage() {
               <div className="two lms">
                 {/* Columna Izquierda: Materiales */}
                 <div>
-                  <h3 className="sech" style={{ fontSize: '20px', fontWeight: 800, color: '#003380', margin: '4px 0 16px' }}>
+                  <h3 className="sech aula-sech">
                     Material del grupo
                   </h3>
                   {materiales.cargando && <p className="muted-p">Cargando material…</p>}
@@ -209,7 +209,7 @@ export default function AulaPage() {
                           </small>
                         </div>
                       </div>
-                      {m.descripcion && <p style={{ fontSize: '13.5px', color: '#627187', margin: 0 }}>{m.descripcion}</p>}
+                      {m.descripcion && <p className="mat-card-d">{m.descripcion}</p>}
                       <span className="badge-pill resource">
                         {ETIQUETA[m.tipo]}
                       </span>
@@ -223,13 +223,13 @@ export default function AulaPage() {
 
                 {/* Columna Derecha: Actividades */}
                 <div>
-                  <h3 className="sech" style={{ fontSize: '20px', fontWeight: 800, color: '#003380', margin: '4px 0 16px' }}>
+                  <h3 className="sech aula-sech">
                     Actividades
                   </h3>
                   {actividades.cargando && <p className="muted-p">Cargando actividades…</p>}
                   {actividades.error && <p className="muted-p">No pudimos cargar las actividades. Intenta de nuevo más tarde.</p>}
                   {actividades.items.map((a) => (
-                    <div className="act-featured-card" key={a.id} style={{ marginBottom: '16px' }}>
+                    <div className="act-featured-card" key={a.id}>
                       <span className="badge-pill activity">
                         Actividad
                       </span>
@@ -247,7 +247,7 @@ export default function AulaPage() {
                       )}
                       <AccionDeContenido contenido={a} tipo="actividades" etiqueta="adjunto" />
 
-                      <div className="act-info-notice" style={{ marginTop: '16px' }}>
+                      <div className="act-info-notice">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                           <circle cx="12" cy="12" r="10" />
                           <path d="M12 16v-4" />

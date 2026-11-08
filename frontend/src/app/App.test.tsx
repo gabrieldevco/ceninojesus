@@ -121,10 +121,11 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByText(/de demostración/i)).toBeInTheDocument()
   })
 
-  it('la página de inicio no muestra la advertencia de textos pendientes de validación por defecto', async () => {
+  it('por defecto la página de inicio advierte que los textos del horizonte están pendientes de validación', async () => {
+    // Igual que el backend: el aviso se quita desde Gestión del sitio cuando la institución valida los textos
     renderizar('/', { modoDemo: true })
     expect(await screen.findByRole('heading', { name: /nuestro horizonte institucional/i })).toBeInTheDocument()
-    expect(screen.queryByText(/textos propuestos/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/textos propuestos/i)).toBeInTheDocument()
   })
 
   it('el administrador consulta la bandeja de contacto, filtra y marca un mensaje como leído', async () => {
@@ -152,7 +153,6 @@ describe('aplicación en modo demostración', () => {
 
     expect(await screen.findByText(/mensaje marcado como leído/i)).toBeInTheDocument()
   })
-
 
   it('un visitante crea su cuenta de acudiente: valida y lo lleva a iniciar sesión', async () => {
     const usuario = userEvent.setup()

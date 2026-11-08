@@ -3,7 +3,6 @@ import { NavLink, Link, useNavigate, useLocation, Outlet } from 'react-router-do
 import { motion, AnimatePresence } from 'framer-motion'
 import { LINKS } from '@/shared/config/links'
 import { Ico, Logo } from '@/shared/ui/ui'
-import { useToast } from '@/shared/ui/toast'
 import { useAuth, type Rol } from '@/modules/auth'
 import { useContenidoLanding, useEnlaces } from '@/modules/institucional'
 
@@ -120,7 +119,6 @@ const MENU: Record<Rol, [string, string, string][]> = {
 
 export function PortalLayout({ crumb }: { crumb: string }) {
   const { usuario, cerrarSesion, modoDemo } = useAuth(); const nav = useNavigate()
-  const { push } = useToast()
   const { enlaces } = useEnlaces()
   const biblioteca = enlaces.find(e => e.tipo === 'biblioteca')
   if (!usuario) return null
@@ -150,7 +148,7 @@ export function PortalLayout({ crumb }: { crumb: string }) {
           <p>{usuario.rol === 'estudiante' ? 'Los grupos requieren aprobación previa.' : 'Solo el alcance asignado a tu cuenta.'}</p>
         </div>
         <div className="side-links-foot">
-          <a className="side-help" href="#" onClick={e => { e.preventDefault(); push('Canal de ayuda institucional: coordinacion@ceninojesus.edu.co · PBX: 334 4105', 'info') }}>Ayuda y contacto</a>
+          <Link className="side-help" to="/#contacto">Ayuda y contacto</Link>
           <Link className="side-help" to="/">Volver al sitio web</Link>
         </div>
       </aside>

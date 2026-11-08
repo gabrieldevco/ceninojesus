@@ -29,7 +29,7 @@ export class RepositorioInstitucionalDemo implements RepositorioInstitucional {
   ]
 
   enviarMensaje(nuevo: NuevoMensaje): Promise<void> {
-    const id = this.mensajes.length + 1
+    const id = Math.max(0, ...this.mensajes.map((m) => m.id)) + 1
     this.mensajes.unshift({
       id,
       nombre: nuevo.nombre,

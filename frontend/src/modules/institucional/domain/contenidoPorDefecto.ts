@@ -55,7 +55,7 @@ export const CONTENIDO_POR_DEFECTO: ContenidoLanding = {
       'El estudiante construye sus propios conocimientos a través de la mediación docente. El constructivismo favorece la autonomía, el liderazgo y el sentido de pertenencia para ser gestores y promotores de cambio.',
     enfoquePasos: 'Explorar, Preguntar, Construir, Reflexionar',
     enfoqueNota: 'Experiencias cercanas, diálogo, trabajo colaborativo y reflexión sobre lo aprendido.',
-    horizontePendienteValidacion: false,
+    horizontePendienteValidacion: true,
     contactoTitulo: 'Conversemos en Barranquilla',
     contactoTexto: 'Resolvemos tus dudas sobre admisiones, grupos extracurriculares y servicios del colegio.',
     pieDescripcion:
