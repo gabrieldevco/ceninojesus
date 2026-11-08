@@ -67,15 +67,25 @@ class DatosGrupo:
 
 
 class CrearGrupo:
-    """RNF-05: crear un grupo nuevo no requiere cambios en el sistema."""
+    """
+    RNF-05: crear un grupo nuevo no requiere cambios en el sistema.
+
+    El administrador general crea grupos y luego asigna quién los dirige. Un docente
+    (administrador de grupo) también puede crear su propia clase y queda como su docente.
+    """
 
     def __init__(self, repository: GrupoRepository):
         self.repository = repository
 
-    def execute(self, datos: DatosGrupo) -> GrupoExtracurricular:
+    def execute(self, datos: DatosGrupo, actor: Actor | None = None) -> GrupoExtracurricular:
+        if actor is not None and not (actor.es_administrador or actor.rol == Rol.ADMINISTRADOR_GRUPO):
+            raise PermisoDenegado("Solo el administrador o un docente pueden crear grupos.")
         if self.repository.existe_nombre(datos.nombre):
             raise GrupoDuplicado(datos.nombre)
-        return self.repository.guardar(GrupoExtracurricular(**datos.__dict__))
+        grupo = GrupoExtracurricular(**datos.__dict__)
+        if actor is not None and actor.rol == Rol.ADMINISTRADOR_GRUPO:
+            grupo.administrador_ids = [actor.id]
+        return self.repository.guardar(grupo)
 
 
 class ActualizarGrupo:

@@ -218,7 +218,7 @@ LOGIN_MAX_INTENTOS = int(os.getenv("LOGIN_MAX_INTENTOS", "5"))
 LOGIN_SEGUNDOS_BLOQUEO = int(os.getenv("LOGIN_SEGUNDOS_BLOQUEO", "900"))
 
 # Archivos subidos por los administradores de grupo (ver shared/infrastructure/archivos.py)
-ARCHIVO_MAX_MB = int(os.getenv("ARCHIVO_MAX_MB", "20"))
+ARCHIVO_MAX_MB = int(os.getenv("ARCHIVO_MAX_MB", "100"))
 
 
 # CORS (el frontend vive en otro origen)

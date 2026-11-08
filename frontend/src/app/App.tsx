@@ -66,13 +66,13 @@ export default function App() {
         <Route element={<Guard roles={['acudiente']} crumb="Mis estudiantes" />}>
           <Route path="/familias/estudiantes" element={<Anim><EstudiantesPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['estudiante']} crumb="Aula estudiante" />}>
+        <Route element={<Guard roles={['estudiante']} crumb="Mis clases" />}>
           <Route path="/estudiante/aula" element={<Anim><AulaPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Solicitudes" />}>
           <Route path="/admin/solicitudes" element={<Anim><SolicitudesPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Contenido del grupo" />}>
+        <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Mis clases" />}>
           <Route path="/admin/contenido" element={<Anim><GestionContenidoPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['administrador']} crumb="Interesados" />}>

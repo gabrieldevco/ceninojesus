@@ -18,10 +18,10 @@ from . import serializers as s
 
 
 class GrupoListCreateView(APIView):
-    """Listado público de grupos activos (para que los padres elijan); el administrador los crea."""
+    """Listado público de grupos activos (para que los padres elijan); el administrador o un docente los crea."""
 
     def get_permissions(self):
-        return [AllowAny()] if self.request.method == "GET" else [EsAdministrador()]
+        return [AllowAny()] if self.request.method == "GET" else [EsGestorDeGrupos()]
 
     def get(self, request):
         # El administrador puede pedir también los grupos inactivos (`?todos=true`) para gestionarlos
@@ -33,7 +33,9 @@ class GrupoListCreateView(APIView):
     def post(self, request):
         serializer = s.GrupoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        grupo = dependencies.crear_grupo().execute(DatosGrupo(**serializer.validated_data))
+        grupo = dependencies.crear_grupo().execute(
+            DatosGrupo(**serializer.validated_data), actor_desde_request(request)
+        )
         return Response(s.GrupoSerializer(grupo).data, status=status.HTTP_201_CREATED)
 
 

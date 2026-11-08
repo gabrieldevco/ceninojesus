@@ -83,8 +83,9 @@ describe('validarArchivo', () => {
     expect(validarArchivo({ name: 'sinextension', size: 10 })).toMatch(/no permitido/i)
   })
 
-  it('rechaza archivos de más de 20 MB', () => {
-    expect(validarArchivo({ name: 'grande.pdf', size: 21 * 1024 * 1024 })).toMatch(/máximo/i)
+  it('rechaza archivos de más de 100 MB y acepta videos de hasta 100 MB', () => {
+    expect(validarArchivo({ name: 'grande.mp4', size: 101 * 1024 * 1024 })).toMatch(/máximo/i)
+    expect(validarArchivo({ name: 'clase.mp4', size: 99 * 1024 * 1024 })).toBeNull()
   })
 })
 
