@@ -113,7 +113,8 @@ describe('aplicación en modo demostración', () => {
     await usuario.click(dentro.getByRole('button', { name: /enviar mensaje/i }))
 
     expect(await screen.findByRole('heading', { name: /gracias por escribirnos/i })).toBeInTheDocument()
-  })
+    // Escribe cuatro campos con la landing completa renderizada: en equipos lentos pasa de los 5 s por defecto
+  }, 20_000)
 
   it('la política de datos es pública', async () => {
     renderizar('/politica-de-datos', { modoDemo: true })
