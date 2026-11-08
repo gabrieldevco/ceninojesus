@@ -21,7 +21,7 @@ psycopg-binary==3.3.6
 psycopg==3.3.6
 pycparser==3.12
 PyJWT==2.15.1
-python-dateutil==3.0.0
+python-dateutil==4.0.0
 python-dotenv==1.2.4
 redis==6.4.0
 six==1.17.0
