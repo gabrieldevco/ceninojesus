@@ -1,4 +1,4 @@
-import type { Grupo } from '../domain/grupo'
+import { validarNuevoGrupo, type Grupo, type NuevoGrupo } from '../domain/grupo'
 import type { RepositorioGrupos } from '../domain/puertos'
 
 export class ListarGrupos {
@@ -14,5 +14,13 @@ export class ListarMisGrupos {
 
   ejecutar(): Promise<Grupo[]> {
     return this.repositorio.listarMios()
+  }
+}
+
+export class CrearGrupo {
+  constructor(private readonly repositorio: RepositorioGrupos) {}
+
+  ejecutar(nuevo: NuevoGrupo): Promise<Grupo> {
+    return this.repositorio.crear(validarNuevoGrupo(nuevo))
   }
 }

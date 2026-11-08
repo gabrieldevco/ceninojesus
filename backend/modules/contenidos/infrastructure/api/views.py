@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 from modules.contenidos.infrastructure import dependencies
 from shared.infrastructure.permissions import actor_desde_request
 
-from .serializers import SERIALIZERS
+from .serializers import SERIALIZERS, CalificacionSerializer, NuevaEntregaSerializer, entrega_a_dict
 
 
 class _ContenidoView(APIView):
@@ -70,3 +70,64 @@ class ContenidoArchivoView(_ContenidoView):
             as_attachment=True,  # nunca se muestra en línea: evita ejecutar HTML o scripts subidos
             content_type=content_type or "application/octet-stream",
         )
+
+
+def _descargar(ruta: str) -> FileResponse:
+    content_type, _ = mimetypes.guess_type(ruta)
+    return FileResponse(
+        default_storage.open(ruta, "rb"),
+        filename=ruta.rsplit("/", 1)[-1],
+        as_attachment=True,
+        content_type=content_type or "application/octet-stream",
+    )
+
+
+class MiEntregaView(APIView):
+    """GET: la entrega del estudiante en la actividad (o null). POST: entrega o reemplaza el trabajo."""
+
+    def get(self, request, grupo_id, contenido_id):
+        item = dependencies.mi_entrega().execute(actor_desde_request(request), grupo_id, contenido_id)
+        return Response(entrega_a_dict(item, grupo_id, request) if item else None)
+
+    def post(self, request, grupo_id, contenido_id):
+        serializer = NuevaEntregaSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        datos = dict(serializer.validated_data)
+        archivo = datos.pop("archivo", None)
+        item = dependencies.entregar_actividad().execute(
+            actor_desde_request(request), grupo_id, contenido_id, datos, archivo
+        )
+        return Response(entrega_a_dict(item, grupo_id, request), status=status.HTTP_201_CREATED)
+
+
+class MisEntregasView(APIView):
+    def get(self, request, grupo_id):
+        items = dependencies.mis_entregas().execute(actor_desde_request(request), grupo_id)
+        return Response([entrega_a_dict(i, grupo_id, request) for i in items])
+
+
+class EntregasDeActividadView(APIView):
+    def get(self, request, grupo_id, contenido_id):
+        items = dependencies.listar_entregas().execute(actor_desde_request(request), grupo_id, contenido_id)
+        return Response([entrega_a_dict(i, grupo_id, request) for i in items])
+
+
+class CalificarEntregaView(APIView):
+    def post(self, request, grupo_id, contenido_id, entrega_id):
+        serializer = CalificacionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        item = dependencies.calificar_entrega().execute(
+            actor_desde_request(request),
+            grupo_id,
+            contenido_id,
+            entrega_id,
+            serializer.validated_data["calificacion"],
+            serializer.validated_data["comentario"],
+        )
+        return Response(entrega_a_dict(item, grupo_id, request))
+
+
+class ArchivoEntregaView(APIView):
+    def get(self, request, grupo_id, contenido_id, entrega_id):
+        ruta = dependencies.archivo_entrega().execute(actor_desde_request(request), grupo_id, contenido_id, entrega_id)
+        return _descargar(ruta)

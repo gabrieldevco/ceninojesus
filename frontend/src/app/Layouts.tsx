@@ -99,10 +99,10 @@ export function Footer() {
   )
 }
 
-const SOLICITUDES: [string, string, string][] = [['/admin/solicitudes', 'Solicitudes', '▤'], ['/admin/contenido', 'Contenido del grupo', '▥']]
+const SOLICITUDES: [string, string, string][] = [['/admin/solicitudes', 'Solicitudes', '▤'], ['/admin/contenido', 'Mis clases', '▥']]
 const MENU: Record<Rol, [string, string, string][]> = {
   acudiente: [['/familias/estudiantes', 'Mis estudiantes', '☺'], ['/familias/matricula', 'Matrícula extracurricular', '▤']],
-  estudiante: [['/estudiante/aula', 'Aula estudiante', '▥']],
+  estudiante: [['/estudiante/aula', 'Mis clases', '▥']],
   administrador_grupo: SOLICITUDES,
   administrador: [...SOLICITUDES, ['/admin/interesados', 'Interesados', '☎'], ['/admin/usuarios', 'Usuarios y grupos', '⚙'], ['/admin/datos-personales', 'Datos personales', '⚖'], ['/admin/sitio', 'Sitio web', '✎']],
 }

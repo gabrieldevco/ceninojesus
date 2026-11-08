@@ -19,3 +19,23 @@ class EnlaceRequerido(DomainError):
 class SinArchivo(NotFoundError):
     def __init__(self):
         super().__init__("Este contenido no tiene archivo adjunto.")
+
+
+class EntregaNoEncontrada(NotFoundError):
+    def __init__(self, entrega_id):
+        super().__init__(f"No existe la entrega con id {entrega_id} en esta actividad.")
+
+
+class EntregaVacia(DomainError):
+    def __init__(self):
+        super().__init__("La entrega debe tener un texto, un archivo o un enlace.")
+
+
+class EntregaYaCalificada(DomainError):
+    def __init__(self):
+        super().__init__("Esta entrega ya fue calificada: no se puede modificar.")
+
+
+class CalificacionInvalida(DomainError):
+    def __init__(self):
+        super().__init__("La calificación debe estar entre 0.0 y 5.0.")
