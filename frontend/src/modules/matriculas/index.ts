@@ -1,3 +1,4 @@
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
 import { EnviarSolicitud, ListarSolicitudes, ResolverSolicitud } from './application/casosDeUso'
@@ -8,8 +9,9 @@ import type { CasosDeUsoMatriculas } from './presentation/MatriculasProvider'
 
 export type { EstadoSolicitud, SolicitudMatricula } from './domain/solicitud'
 export { MatriculasProvider, useSolicitudes } from './presentation/MatriculasProvider'
-export { default as MatriculaPage } from './presentation/MatriculaPage'
-export { default as SolicitudesPage } from './presentation/SolicitudesPage'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const MatriculaPage = cargaDiferida(() => import('./presentation/MatriculaPage'))
+export const SolicitudesPage = cargaDiferida(() => import('./presentation/SolicitudesPage'))
 
 export function crearCasosDeUsoMatriculas({
   http,

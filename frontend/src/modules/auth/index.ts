@@ -1,3 +1,4 @@
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import type { Almacenamiento } from '@/shared/lib/almacenamiento'
 import {
@@ -18,9 +19,10 @@ export type { Rol, Usuario } from './domain/usuario'
 export { puedeAcceder } from './domain/usuario'
 export { DemasiadosIntentos } from './domain/puertos'
 export { AuthProvider, useAuth } from './presentation/AuthProvider'
-export { default as AccesoPage } from './presentation/AccesoPage'
-export { default as RegistroPage } from './presentation/RegistroPage'
-export { default as RestablecerClavePage } from './presentation/RestablecerClavePage'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const AccesoPage = cargaDiferida(() => import('./presentation/AccesoPage'))
+export const RegistroPage = cargaDiferida(() => import('./presentation/RegistroPage'))
+export const RestablecerClavePage = cargaDiferida(() => import('./presentation/RestablecerClavePage'))
 
 /** Crea el gestor de sesión que el cliente HTTP usa para enviar y renovar el token. */
 export function crearGestorDeSesion(almacenamiento: Almacenamiento, http: HttpClient): GestorDeSesion {

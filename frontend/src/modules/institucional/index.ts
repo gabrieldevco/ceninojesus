@@ -1,3 +1,4 @@
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
   EnviarMensajeDeContacto,
@@ -39,10 +40,11 @@ export {
   useMarcarMensajeContactoLeido,
   useMensajesContacto,
 } from './presentation/InstitucionalProvider'
-export { default as BandejaContactoPage } from './presentation/BandejaContactoPage'
-export { default as GestionSitioPage } from './presentation/GestionSitioPage'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const BandejaContactoPage = cargaDiferida(() => import('./presentation/BandejaContactoPage'))
+export const GestionSitioPage = cargaDiferida(() => import('./presentation/GestionSitioPage'))
 export { default as InicioPage } from './presentation/InicioPage'
-export { default as PoliticaDatosPage } from './presentation/PoliticaDatosPage'
+export const PoliticaDatosPage = cargaDiferida(() => import('./presentation/PoliticaDatosPage'))
 
 export function crearCasosDeUsoInstitucional({
   http,

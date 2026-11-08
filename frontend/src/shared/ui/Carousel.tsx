@@ -25,7 +25,7 @@ export default function Carousel({ slides }: { slides: readonly Diapositiva[] })
             transition={{ duration: .6, ease: [0.22, 1, 0.36, 1] }}
             drag="x" dragConstraints={{ left: 0, right: 0 }} dragElastic={.2}
             onDragEnd={(_, { offset }) => Math.abs(offset.x) > 80 && go(offset.x < 0 ? 1 : -1)}>
-            <img src={actual.src} alt={actual.alt} draggable={false} />
+            <img src={actual.src} alt={actual.alt} draggable={false} decoding="async" />
             <figcaption>{actual.caption}</figcaption>
           </motion.figure>
         </AnimatePresence>

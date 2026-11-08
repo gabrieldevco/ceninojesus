@@ -19,7 +19,7 @@ export function Logo({ size = 44, light = false }: { size?: number; light?: bool
   )
 }
 
-/* Aparece con desplazamiento suave al entrar en pantalla */
+/* Aparece con desplazamiento suave justo antes de entrar en pantalla (así no se ven huecos al desplazarse rápido) */
 export function Reveal({
   children,
   delay = 0,
@@ -32,7 +32,7 @@ export function Reveal({
   className?: string
 }) {
   const ref = useRef<HTMLDivElement>(null)
-  const inView = useInView(ref, { once: true, margin: '0px 0px -60px 0px' })
+  const inView = useInView(ref, { once: true, margin: '0px 0px 120px 0px' })
   const [force, setForce] = useState(false)
   useEffect(() => {
     const t = setTimeout(() => setForce(true), 1600)
@@ -45,7 +45,7 @@ export function Reveal({
       className={className}
       initial={false}
       animate={show ? { opacity: 1, y: 0 } : { opacity: 0, y }}
-      transition={{ duration: 0.55, delay: show && !inView ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.45, delay: show && !inView ? 0 : delay, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>

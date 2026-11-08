@@ -1,5 +1,6 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { ErrorApi } from '@/shared/http/errores'
 import { useToast } from '@/shared/ui/toast'
 import { RegistroInvalido, type ErroresDeRegistro, type NuevoAcudiente } from '../domain/registro'
@@ -15,6 +16,13 @@ const VACIO: NuevoAcudiente = {
   confirmacion: '',
   autorizaTratamientoDatos: false,
 }
+
+/* Qué puede hacer el acudiente con su cuenta */
+const PASOS = [
+  { t: 'Crea tu cuenta', d: 'Tus datos de contacto y un usuario para entrar al portal.', c: 'gold' },
+  { t: 'Registra a tus estudiantes', d: 'Agrega a tus hijos o acudidos y, si quieres, crea su acceso.', c: 'green' },
+  { t: 'Solicita la matrícula', d: 'Elige los grupos extracurriculares y sigue el estado de cada solicitud.', c: 'coral' },
+]
 
 /** Errores por campo de la API hacia los del formulario. */
 const CAMPOS_API: Record<string, keyof NuevoAcudiente> = {
@@ -77,83 +85,118 @@ export default function RegistroPage() {
     ) : null
 
   return (
-    <div className="ad-wrap" style={{ maxWidth: 720, margin: '40px auto' }}>
-      <form className="ac-card ad-form" onSubmit={(e) => void enviar(e)} noValidate aria-label="Crear cuenta">
-        <h2>Crear cuenta de acudiente</h2>
-        <p className="sub">
-          Con tu cuenta puedes registrar a tus estudiantes y solicitar su matrícula en los grupos extracurriculares. Los campos con * son
-          obligatorios.
-        </p>
-        <div className="ad-row">
-          <label>
-            Nombres *
-            <input value={datos.nombres} onChange={(e) => cambiar('nombres', e.target.value)} maxLength={150} autoComplete="given-name" />
-            {mensaje('nombres')}
-          </label>
-          <label>
-            Apellidos *
-            <input value={datos.apellidos} onChange={(e) => cambiar('apellidos', e.target.value)} maxLength={150} autoComplete="family-name" />
-            {mensaje('apellidos')}
-          </label>
-        </div>
-        <div className="ad-row">
-          <label>
-            Correo electrónico *
-            <input type="email" value={datos.correo} onChange={(e) => cambiar('correo', e.target.value)} autoComplete="email" />
-            {mensaje('correo')}
-          </label>
-          <label>
-            Teléfono
-            <input inputMode="tel" value={datos.telefono} onChange={(e) => cambiar('telefono', e.target.value)} maxLength={20} autoComplete="tel" />
-            {mensaje('telefono')}
-          </label>
-        </div>
-        <label>
-          Nombre de usuario *
-          <input
-            value={datos.nombreUsuario}
-            onChange={(e) => cambiar('nombreUsuario', e.target.value)}
-            maxLength={150}
-            autoComplete="username"
-            autoCapitalize="none"
-          />
-          {mensaje('nombreUsuario')}
-        </label>
-        <div className="ad-row">
-          <label>
-            Contraseña *
-            <input type="password" value={datos.clave} onChange={(e) => cambiar('clave', e.target.value)} autoComplete="new-password" />
-            {mensaje('clave')}
-          </label>
-          <label>
-            Repite la contraseña *
-            <input type="password" value={datos.confirmacion} onChange={(e) => cambiar('confirmacion', e.target.value)} autoComplete="new-password" />
-            {mensaje('confirmacion')}
-          </label>
-        </div>
-        <label className="check">
-          <input
-            type="checkbox"
-            checked={datos.autorizaTratamientoDatos}
-            onChange={(e) => cambiar('autorizaTratamientoDatos', e.target.checked)}
-          />
-          <span>
-            Autorizo el tratamiento de mis datos personales para la gestión de la matrícula y los grupos extracurriculares (Ley 1581 de
-            2012).{' '}
-            <Link to="/politica-de-datos" target="_blank" rel="noopener noreferrer">
-              Ver la política de datos
-            </Link>
-            . *
-          </span>
-        </label>
-        {mensaje('autorizaTratamientoDatos')}
-        <button className="ac-go" disabled={enviando}>
-          {enviando ? <span className="spin" /> : <>Crear cuenta <span>→</span></>}
-        </button>
-        <p className="ad-priv">
-          ¿Ya tienes cuenta? <Link to="/acceso">Inicia sesión</Link>
-        </p>
-      </form>
-    </div>
+    <>
+      <section className="ad-hero">
+        <i className="ac-blob a" />
+        <i className="ac-blob b" />
+        <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+          <span className="ac-pill">● PORTAL DE FAMILIAS</span>
+          <h1>
+            Únete a la <em>familia</em> El Niño Jesús
+          </h1>
+          <p>Crea tu cuenta de acudiente para registrar a tus estudiantes y pedir su matrícula en los grupos extracurriculares.</p>
+        </motion.div>
+      </section>
+
+      <div className="ad-wrap">
+        <aside className="ad-info">
+          <h3>¿Para qué sirve tu cuenta?</h3>
+          <ol className="ad-steps">
+            {PASOS.map((s, i) => (
+              <motion.li
+                key={s.t}
+                className={s.c}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + i * 0.12 }}
+              >
+                <span className="n">{i + 1}</span>
+                <div>
+                  <b>{s.t}</b>
+                  <small>{s.d}</small>
+                </div>
+              </motion.li>
+            ))}
+          </ol>
+          <div className="ad-contact">
+            <small>¿YA TIENES CUENTA?</small>
+            <Link to="/acceso">Inicia sesión en el portal →</Link>
+          </div>
+        </aside>
+
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
+          <form className="ac-card ad-form" onSubmit={(e) => void enviar(e)} noValidate aria-label="Crear cuenta">
+            <h2>Crear cuenta de acudiente</h2>
+            <p className="sub">Los campos con * son obligatorios.</p>
+            <div className="ad-row">
+              <label>
+                Nombres *
+                <input value={datos.nombres} onChange={(e) => cambiar('nombres', e.target.value)} maxLength={150} autoComplete="given-name" />
+                {mensaje('nombres')}
+              </label>
+              <label>
+                Apellidos *
+                <input value={datos.apellidos} onChange={(e) => cambiar('apellidos', e.target.value)} maxLength={150} autoComplete="family-name" />
+                {mensaje('apellidos')}
+              </label>
+            </div>
+            <div className="ad-row">
+              <label>
+                Correo electrónico *
+                <input type="email" value={datos.correo} onChange={(e) => cambiar('correo', e.target.value)} autoComplete="email" />
+                {mensaje('correo')}
+              </label>
+              <label>
+                Teléfono
+                <input inputMode="tel" value={datos.telefono} onChange={(e) => cambiar('telefono', e.target.value)} maxLength={20} autoComplete="tel" />
+                {mensaje('telefono')}
+              </label>
+            </div>
+            <label>
+              Nombre de usuario *
+              <input
+                value={datos.nombreUsuario}
+                onChange={(e) => cambiar('nombreUsuario', e.target.value)}
+                maxLength={150}
+                autoComplete="username"
+                autoCapitalize="none"
+              />
+              {mensaje('nombreUsuario')}
+            </label>
+            <div className="ad-row">
+              <label>
+                Contraseña *
+                <input type="password" value={datos.clave} onChange={(e) => cambiar('clave', e.target.value)} autoComplete="new-password" />
+                {mensaje('clave')}
+              </label>
+              <label>
+                Repite la contraseña *
+                <input type="password" value={datos.confirmacion} onChange={(e) => cambiar('confirmacion', e.target.value)} autoComplete="new-password" />
+                {mensaje('confirmacion')}
+              </label>
+            </div>
+            <label className="check">
+              <input
+                type="checkbox"
+                checked={datos.autorizaTratamientoDatos}
+                onChange={(e) => cambiar('autorizaTratamientoDatos', e.target.checked)}
+              />
+              <span>
+                Autorizo el tratamiento de mis datos personales para la gestión de la matrícula y los grupos extracurriculares (Ley 1581 de
+                2012).{' '}
+                <Link to="/politica-de-datos" target="_blank" rel="noopener noreferrer">
+                  Ver la política de datos
+                </Link>
+                . *
+              </span>
+            </label>
+            {mensaje('autorizaTratamientoDatos')}
+            <button className="ac-go" disabled={enviando}>
+              {enviando ? <span className="spin" /> : <>Crear cuenta <span>→</span></>}
+            </button>
+          </form>
+        </motion.div>
+      </div>
+    </>
   )
 }

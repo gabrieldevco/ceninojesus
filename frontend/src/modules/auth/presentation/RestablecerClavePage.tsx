@@ -1,6 +1,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { ErrorApi } from '@/shared/http/errores'
+import { EncabezadoPagina } from '@/shared/ui/EncabezadoPagina'
 import { useToast } from '@/shared/ui/toast'
 import { RestablecimientoInvalido, type ErroresDeRestablecimiento } from '../domain/registro'
 import { useAuth } from './AuthProvider'
@@ -48,37 +49,42 @@ export default function RestablecerClavePage() {
 
   const sinDatos = !uid || !token
   return (
-    <div className="ad-wrap" style={{ maxWidth: 560, margin: '40px auto' }}>
-      <form className="ac-card ad-form" onSubmit={(e) => void enviar(e)} noValidate aria-label="Restablecer contraseña">
-        <h2>Crea una contraseña nueva</h2>
-        {sinDatos || enlaceInvalido ? (
-          <>
-            <p className="sub" role="alert">
-              {enlaceInvalido ?? 'El enlace está incompleto. Pide uno nuevo desde “¿Olvidaste tu acceso?”.'}
-            </p>
-            <Link to="/acceso" className="btn">
-              Volver a iniciar sesión
-            </Link>
-          </>
-        ) : (
-          <>
-            <p className="sub">Elige una contraseña de al menos 8 caracteres que no sea solo números.</p>
-            <label>
-              Contraseña nueva *
-              <input type="password" value={clave} onChange={(e) => setClave(e.target.value)} autoComplete="new-password" />
-              {mensaje('clave')}
-            </label>
-            <label>
-              Repite la contraseña *
-              <input type="password" value={confirmacion} onChange={(e) => setConfirmacion(e.target.value)} autoComplete="new-password" />
-              {mensaje('confirmacion')}
-            </label>
-            <button className="ac-go" disabled={enviando}>
-              {enviando ? <span className="spin" /> : <>Cambiar contraseña <span>→</span></>}
-            </button>
-          </>
-        )}
-      </form>
-    </div>
+    <>
+      <EncabezadoPagina etiqueta="PORTAL DE ACCESO" titulo={<>Recupera tu <em>acceso</em></>}>
+        Elige una contraseña nueva para volver a entrar al portal.
+      </EncabezadoPagina>
+      <div className="ad-wrap una">
+        <form className="ac-card ad-form" onSubmit={(e) => void enviar(e)} noValidate aria-label="Restablecer contraseña">
+          <h2>Crea una contraseña nueva</h2>
+          {sinDatos || enlaceInvalido ? (
+            <>
+              <p className="sub" role="alert">
+                {enlaceInvalido ?? 'El enlace está incompleto. Pide uno nuevo desde “¿Olvidaste tu acceso?”.'}
+              </p>
+              <Link to="/acceso" className="btn">
+                Volver a iniciar sesión
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="sub">Elige una contraseña de al menos 8 caracteres que no sea solo números.</p>
+              <label>
+                Contraseña nueva *
+                <input type="password" value={clave} onChange={(e) => setClave(e.target.value)} autoComplete="new-password" />
+                {mensaje('clave')}
+              </label>
+              <label>
+                Repite la contraseña *
+                <input type="password" value={confirmacion} onChange={(e) => setConfirmacion(e.target.value)} autoComplete="new-password" />
+                {mensaje('confirmacion')}
+              </label>
+              <button className="ac-go" disabled={enviando}>
+                {enviando ? <span className="spin" /> : <>Cambiar contraseña <span>→</span></>}
+              </button>
+            </>
+          )}
+        </form>
+      </div>
+    </>
   )
 }
