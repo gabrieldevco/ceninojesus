@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ErrorApi } from '@/shared/http/errores'
 import { formatearFecha, formatearFechaHora } from '@/shared/lib/fecha'
@@ -348,7 +348,7 @@ export default function AulaPage() {
 
   return (
     <>
-      <p className="kicker">MI ESPACIO / MIS CLASES</p>
+      <p className="kicker"><Link to="/estudiante/espacio" className="kicker-link">MI ESPACIO</Link> / MIS CLASES</p>
       <h1 className="ptitle">Aprende, explora y participa</h1>
       <p className="sub">{usuario?.nombre} · Estas son las clases en las que tienes matrícula aprobada.</p>
 

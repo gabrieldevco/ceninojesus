@@ -102,9 +102,19 @@ export function Footer() {
 const SOLICITUDES: [string, string, string][] = [['/admin/solicitudes', 'Solicitudes', '▤'], ['/admin/contenido', 'Mis clases', '▥']]
 const MENU: Record<Rol, [string, string, string][]> = {
   acudiente: [['/familias/estudiantes', 'Mis estudiantes', '☺'], ['/familias/matricula', 'Matrícula extracurricular', '▤']],
-  estudiante: [['/estudiante/aula', 'Mis clases', '▥']],
+  estudiante: [
+    ['/estudiante/espacio', 'Mi espacio', '▦'],
+    ['/estudiante/aula', 'Mis clases', '▥'],
+  ],
   administrador_grupo: SOLICITUDES,
-  administrador: [...SOLICITUDES, ['/admin/interesados', 'Interesados', '☎'], ['/admin/usuarios', 'Usuarios y grupos', '⚙'], ['/admin/datos-personales', 'Datos personales', '⚖'], ['/admin/sitio', 'Sitio web', '✎']],
+  administrador: [
+    ...SOLICITUDES,
+    ['/admin/interesados', 'Interesados', '☎'],
+    ['/admin/contacto', 'Mensajes contacto', '✉'],
+    ['/admin/usuarios', 'Usuarios y grupos', '⚙'],
+    ['/admin/datos-personales', 'Datos personales', '⚖'],
+    ['/admin/sitio', 'Sitio web', '✎'],
+  ],
 }
 
 export function PortalLayout({ crumb }: { crumb: string }) {
@@ -112,6 +122,7 @@ export function PortalLayout({ crumb }: { crumb: string }) {
   const { enlaces } = useEnlaces()
   const biblioteca = enlaces.find(e => e.tipo === 'biblioteca')
   if (!usuario) return null
+
   return (
     <div className="portal">
       <aside className="side">
@@ -125,10 +136,21 @@ export function PortalLayout({ crumb }: { crumb: string }) {
             </NavLink>
           ))}
           <a className="side-link" href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer"><i>🎓</i>Aula virtual ↗</a>
-          {biblioteca && <a className="side-link" href={biblioteca.url} target="_blank" rel="noopener noreferrer"><i>▦</i>{biblioteca.nombre} ↗</a>}
+          {biblioteca && (
+            <a className="side-link" href={biblioteca.url} target="_blank" rel="noopener noreferrer"><i>▦</i>{biblioteca.nombre} ↗</a>
+          )}
         </nav>
-        <div className="side-note"><b>Acceso por permisos</b><p>Solo el alcance asignado a tu cuenta.</p></div>
-        <Link className="side-help" to="/">Volver al sitio web</Link>
+        <div className="side-note">
+          <div className="side-note-h">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            <b>Acceso por permisos</b>
+          </div>
+          <p>{usuario.rol === 'estudiante' ? 'Los grupos requieren aprobación previa.' : 'Solo el alcance asignado a tu cuenta.'}</p>
+        </div>
+        <div className="side-links-foot">
+          <Link className="side-help" to="/#contacto">Ayuda y contacto</Link>
+          <Link className="side-help" to="/">Volver al sitio web</Link>
+        </div>
       </aside>
       <div className="portal-main">
         <header className="topbar">

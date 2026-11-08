@@ -1,4 +1,4 @@
-import type { Enlace, NuevoMensaje, PoliticaDeDatos } from './contacto'
+import type { Enlace, MensajeContactoRecibido, NuevoMensaje, PoliticaDeDatos } from './contacto'
 
 export interface RepositorioInstitucional {
   /** Formulario de contacto general (RF-03): no requiere sesión. */
@@ -7,4 +7,8 @@ export interface RepositorioInstitucional {
   politicaDeDatos(): Promise<PoliticaDeDatos>
   /** Enlaces activos visibles para la sesión actual, en el orden definido por la institución. */
   listarEnlaces(): Promise<Enlace[]>
+  /** Listado de mensajes de contacto para el administrador general (RF-03). */
+  listarMensajesContacto(soloNoLeidos?: boolean): Promise<MensajeContactoRecibido[]>
+  /** Marca un mensaje de contacto como leído por el administrador. */
+  marcarMensajeContactoLeido(id: number): Promise<void>
 }
