@@ -21,6 +21,7 @@ import type { CasosDeUsoAula } from './presentation/AulaProvider'
 export { AulaProvider } from './presentation/AulaProvider'
 // Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
 export const AulaPage = cargaDiferida(() => import('./presentation/AulaPage'))
+export const EspacioPage = cargaDiferida(() => import('./presentation/EspacioPage'))
 export const GestionContenidoPage = cargaDiferida(() => import('./presentation/GestionContenidoPage'))
 
 export function crearCasosDeUsoAula({ http, modoDemo }: { http: HttpClient; modoDemo: boolean }): CasosDeUsoAula {

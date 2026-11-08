@@ -113,12 +113,46 @@ describe('aplicación en modo demostración', () => {
     await usuario.click(dentro.getByRole('button', { name: /enviar mensaje/i }))
 
     expect(await screen.findByRole('heading', { name: /gracias por escribirnos/i })).toBeInTheDocument()
-  })
+    // Escribe cuatro campos con la landing completa renderizada: en equipos lentos pasa de los 5 s por defecto
+  }, 20_000)
 
   it('la política de datos es pública', async () => {
     renderizar('/politica-de-datos', { modoDemo: true })
     expect(await screen.findByRole('heading', { name: /política de tratamiento de datos/i })).toBeInTheDocument()
     expect(await screen.findByText(/de demostración/i)).toBeInTheDocument()
+  })
+
+  it('por defecto la página de inicio advierte que los textos del horizonte están pendientes de validación', async () => {
+    // Igual que el backend: el aviso se quita desde Gestión del sitio cuando la institución valida los textos
+    renderizar('/', { modoDemo: true })
+    expect(await screen.findByRole('heading', { name: /nuestro horizonte institucional/i })).toBeInTheDocument()
+    expect(screen.getByText(/textos propuestos/i)).toBeInTheDocument()
+  })
+
+  it('el administrador consulta la bandeja de contacto, filtra y marca un mensaje como leído', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/contacto', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByRole('heading', { name: /mensajes de contacto recibidos/i })).toBeInTheDocument()
+    expect(await screen.findByText('Carolina Herrera')).toBeInTheDocument()
+    expect(screen.getByText('Jorge Mendoza')).toBeInTheDocument()
+
+    // Filtrar solo no leídos
+    await usuario.click(screen.getByRole('button', { name: /solo no leídos/i }))
+    expect(screen.getByText('Carolina Herrera')).toBeInTheDocument()
+    expect(screen.queryByText('Jorge Mendoza')).not.toBeInTheDocument()
+
+    // Ver detalle y marcar como leído
+    await usuario.click(screen.getByText('Carolina Herrera'))
+    expect(screen.getAllByText('Consulta sobre admisiones para transición').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/quisiera información sobre los costos de matrícula/i).length).toBeGreaterThanOrEqual(1)
+
+    const botonMarcar = screen.getByRole('button', { name: /marcar como leído/i })
+    await usuario.click(botonMarcar)
+
+    expect(await screen.findByText(/mensaje marcado como leído/i)).toBeInTheDocument()
   })
 
   it('un visitante crea su cuenta de acudiente: valida y lo lleva a iniciar sesión', async () => {

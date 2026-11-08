@@ -1,7 +1,13 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/modules/auth'
-import type { EnviarMensajeDeContacto, ListarEnlaces, ObtenerPoliticaDeDatos } from '../application/casosDeUso'
+import type {
+  EnviarMensajeDeContacto,
+  ListarEnlaces,
+  ListarMensajesContacto,
+  MarcarMensajeContactoLeido,
+  ObtenerPoliticaDeDatos,
+} from '../application/casosDeUso'
 import type {
   ActualizarElemento,
   ActualizarEnlace,
@@ -17,7 +23,7 @@ import type {
   ReemplazarImagenUnica,
   SubirImagenDeElemento,
 } from '../application/casosDeUsoSitio'
-import type { Enlace, NuevoMensaje, PoliticaDeDatos } from '../domain/contacto'
+import type { Enlace, MensajeContactoRecibido, NuevoMensaje, PoliticaDeDatos } from '../domain/contacto'
 import { CONTENIDO_POR_DEFECTO } from '../domain/contenidoPorDefecto'
 import type {
   CambiosDeElemento,
@@ -33,6 +39,8 @@ export interface CasosDeUsoInstitucional {
   enviarMensaje: EnviarMensajeDeContacto
   obtenerPolitica: ObtenerPoliticaDeDatos
   listarEnlaces: ListarEnlaces
+  listarMensajesContacto: ListarMensajesContacto
+  marcarMensajeContactoLeido: MarcarMensajeContactoLeido
   sitio: CasosDeUsoSitio
 }
 
@@ -92,6 +100,33 @@ export function useEnlaces(): { enlaces: Enlace[]; cargando: boolean } {
     staleTime: 5 * 60_000,
   })
   return { enlaces: data ?? [], cargando: habilitado && isPending }
+}
+
+/** Mensajes de contacto recibidos desde el formulario público (RF-03, administrador general). */
+export function useMensajesContacto(soloNoLeidos = false): {
+  mensajes: MensajeContactoRecibido[]
+  cargando: boolean
+  error: boolean
+} {
+  const { listarMensajesContacto } = useCasosDeUso()
+  const { usuario } = useAuth()
+  const habilitado = Boolean(usuario && usuario.rol === 'administrador')
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['mensajes-contacto', usuario?.id, soloNoLeidos],
+    queryFn: () => listarMensajesContacto.ejecutar(soloNoLeidos),
+    enabled: habilitado,
+    staleTime: 30_000,
+  })
+  return { mensajes: data ?? [], cargando: habilitado && isPending, error: isError }
+}
+
+export function useMarcarMensajeContactoLeido() {
+  const { marcarMensajeContactoLeido } = useCasosDeUso()
+  const cliente = useQueryClient()
+  return useMutation({
+    mutationFn: (id: number) => marcarMensajeContactoLeido.ejecutar(id),
+    onSuccess: () => cliente.invalidateQueries({ queryKey: ['mensajes-contacto'] }),
+  })
 }
 
 // --- Contenido de la página de inicio ---
