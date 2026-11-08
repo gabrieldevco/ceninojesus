@@ -2,14 +2,20 @@ import { createContext, useContext, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/modules/auth'
 import type {
+  CalificarEntrega,
   DescargarArchivo,
+  DescargarEntrega,
   EliminarContenido,
+  EntregarActividad,
   ListarActividades,
+  ListarEntregas,
   ListarMateriales,
+  ListarMisEntregas,
   PublicarActividad,
   PublicarMaterial,
 } from '../application/casosDeUso'
-import type { Actividad, Material, NuevaActividad, NuevoMaterial, TipoContenido } from '../domain/contenido'
+import type { Actividad, ArchivoDeContenido, Material, NuevaActividad, NuevoMaterial, TipoContenido } from '../domain/contenido'
+import type { Entrega, NuevaEntrega } from '../domain/entrega'
 
 export interface CasosDeUsoAula {
   listarMateriales: ListarMateriales
@@ -18,6 +24,11 @@ export interface CasosDeUsoAula {
   publicarMaterial: PublicarMaterial
   publicarActividad: PublicarActividad
   eliminarContenido: EliminarContenido
+  listarMisEntregas: ListarMisEntregas
+  entregarActividad: EntregarActividad
+  listarEntregas: ListarEntregas
+  calificarEntrega: CalificarEntrega
+  descargarEntrega: DescargarEntrega
 }
 
 const Contexto = createContext<CasosDeUsoAula | null>(null)
@@ -63,20 +74,91 @@ export function useActividades(grupoId: number | undefined): Lista<Actividad> {
   return { items: data ?? [], cargando: habilitado && isPending, error: isError }
 }
 
+/** Entrega el archivo descargado al navegador con su nombre. */
+function guardarEnEquipo(archivo: ArchivoDeContenido, nombreSugerido: string) {
+  const direccion = URL.createObjectURL(archivo.contenido)
+  const enlace = document.createElement('a')
+  enlace.href = direccion
+  enlace.download = archivo.nombre || nombreSugerido
+  document.body.appendChild(enlace)
+  enlace.click()
+  enlace.remove()
+  setTimeout(() => URL.revokeObjectURL(direccion), 10_000)
+}
+
 /** Descarga el archivo con la sesión del usuario y lo entrega al navegador con su nombre. */
 export function useDescargarArchivo() {
   const { descargarArchivo } = useCasosDeUso()
   return useMutation({
     mutationFn: async (datos: { tipo: TipoContenido; grupoId: number; contenidoId: number; nombreSugerido: string }) => {
-      const archivo = await descargarArchivo.ejecutar(datos.tipo, datos.grupoId, datos.contenidoId)
-      const direccion = URL.createObjectURL(archivo.contenido)
-      const enlace = document.createElement('a')
-      enlace.href = direccion
-      enlace.download = archivo.nombre || datos.nombreSugerido
-      document.body.appendChild(enlace)
-      enlace.click()
-      enlace.remove()
-      setTimeout(() => URL.revokeObjectURL(direccion), 10_000)
+      guardarEnEquipo(await descargarArchivo.ejecutar(datos.tipo, datos.grupoId, datos.contenidoId), datos.nombreSugerido)
+    },
+  })
+}
+
+/** Trae el video subido con la sesión del usuario para reproducirlo en la página (no hay enlace público). */
+export function useVideoDeMaterial() {
+  const { descargarArchivo } = useCasosDeUso()
+  return useMutation({
+    mutationFn: async (datos: { grupoId: number; contenidoId: number }) => {
+      const archivo = await descargarArchivo.ejecutar('materiales', datos.grupoId, datos.contenidoId)
+      return URL.createObjectURL(archivo.contenido)
+    },
+  })
+}
+
+// --- Entregas ---
+
+export function useMisEntregas(grupoId: number | undefined): Lista<Entrega> {
+  const { listarMisEntregas } = useCasosDeUso()
+  const { usuario } = useAuth()
+  const habilitado = usuario?.rol === 'estudiante' && grupoId !== undefined
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['mis-entregas', usuario?.id, grupoId],
+    queryFn: () => listarMisEntregas.ejecutar(grupoId as number),
+    enabled: habilitado,
+  })
+  return { items: data ?? [], cargando: habilitado && isPending, error: isError }
+}
+
+export function useEntregar() {
+  const { entregarActividad } = useCasosDeUso()
+  const cliente = useQueryClient()
+  const { usuario } = useAuth()
+  return useMutation({
+    mutationFn: (datos: { nueva: NuevaEntrega; yaTieneArchivo: boolean }) => entregarActividad.ejecutar(datos.nueva, datos.yaTieneArchivo),
+    onSuccess: (_entrega, datos) => cliente.invalidateQueries({ queryKey: ['mis-entregas', usuario?.id, datos.nueva.grupoId] }),
+  })
+}
+
+export function useEntregas(grupoId: number | undefined, actividadId: number | undefined): Lista<Entrega> {
+  const { listarEntregas } = useCasosDeUso()
+  const { usuario } = useAuth()
+  const habilitado = Boolean(usuario) && grupoId !== undefined && actividadId !== undefined
+  const { data, isPending, isError } = useQuery({
+    queryKey: ['entregas', usuario?.id, grupoId, actividadId],
+    queryFn: () => listarEntregas.ejecutar(grupoId as number, actividadId as number),
+    enabled: habilitado,
+  })
+  return { items: data ?? [], cargando: habilitado && isPending, error: isError }
+}
+
+export function useCalificar() {
+  const { calificarEntrega } = useCasosDeUso()
+  const cliente = useQueryClient()
+  const { usuario } = useAuth()
+  return useMutation({
+    mutationFn: (datos: { grupoId: number; actividadId: number; entregaId: number; nota: string; comentario: string }) =>
+      calificarEntrega.ejecutar(datos),
+    onSuccess: (_e, datos) => cliente.invalidateQueries({ queryKey: ['entregas', usuario?.id, datos.grupoId, datos.actividadId] }),
+  })
+}
+
+export function useDescargarEntrega() {
+  const { descargarEntrega } = useCasosDeUso()
+  return useMutation({
+    mutationFn: async (datos: { grupoId: number; actividadId: number; entregaId: number; nombreSugerido: string }) => {
+      guardarEnEquipo(await descargarEntrega.ejecutar(datos.grupoId, datos.actividadId, datos.entregaId), datos.nombreSugerido)
     },
   })
 }

@@ -152,3 +152,46 @@ describe('RepositorioContenidosHttp', () => {
     await expect(repo.materiales(3)).rejects.toThrow()
   })
 })
+
+const ENTREGA_API = {
+  id: 7,
+  actividad_id: 9,
+  estudiante_id: 12,
+  estudiante_nombre: 'Luis Pérez',
+  texto: 'Mi respuesta',
+  url: '',
+  archivo_url: 'http://localhost:8000/api/grupos/3/actividades/9/entregas/7/archivo/',
+  archivo_nombre: 'robot.pdf',
+  fecha_entrega: '2026-10-05T10:00:00-05:00',
+  tarde: false,
+  calificacion: '4.5',
+  comentario_docente: 'Muy bien',
+  fecha_calificacion: '2026-10-06T10:00:00-05:00',
+}
+
+describe('RepositorioContenidosHttp · entregas', () => {
+  it('convierte la entrega de la API (la nota llega como texto)', async () => {
+    const { repo } = armar(() => respuesta(200, [ENTREGA_API]))
+    const [entrega] = await repo.misEntregas(3)
+    expect(entrega).toMatchObject({ id: 7, actividadId: 9, estudianteNombre: 'Luis Pérez', tieneArchivo: true, calificacion: 4.5, comentarioDocente: 'Muy bien' })
+  })
+
+  it('entrega como multipart a la ruta de la actividad', async () => {
+    const { repo, fetchFalso } = armar(() => respuesta(201, { ...ENTREGA_API, calificacion: null }))
+    const archivo = new File(['%PDF-1.4'], 'robot.pdf', { type: 'application/pdf' })
+    const entrega = await repo.entregar({ grupoId: 3, actividadId: 9, texto: 'Hola', url: '', archivo })
+    const [url, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/grupos/3/actividades/9/entrega/')
+    expect(opciones.body).toBeInstanceOf(FormData)
+    expect((opciones.body as FormData).get('archivo')).toBeInstanceOf(File)
+    expect(entrega.calificacion).toBeNull()
+  })
+
+  it('califica con un decimal y el comentario', async () => {
+    const { repo, fetchFalso } = armar(() => respuesta(200, ENTREGA_API))
+    await repo.calificar({ grupoId: 3, actividadId: 9, entregaId: 7, calificacion: 4, comentario: 'Bien' })
+    const [url, opciones] = fetchFalso.mock.calls[0] as [string, RequestInit]
+    expect(url).toBe('/api/grupos/3/actividades/9/entregas/7/calificar/')
+    expect(JSON.parse(opciones.body as string)).toEqual({ calificacion: '4.0', comentario: 'Bien' })
+  })
+})
