@@ -3,7 +3,7 @@ from typing import Any
 
 from shared.domain.actor import Actor
 
-from .entities import Contenido
+from .entities import Contenido, Entrega
 
 
 class ContenidoRepository(ABC):
@@ -20,6 +20,23 @@ class ContenidoRepository(ABC):
 
     @abstractmethod
     def eliminar(self, contenido_id: int) -> None: ...
+
+
+class EntregaRepository(ABC):
+    @abstractmethod
+    def guardar(self, entrega: Entrega) -> Entrega: ...
+
+    @abstractmethod
+    def obtener_por_id(self, entrega_id: int) -> Entrega | None: ...
+
+    @abstractmethod
+    def obtener_de_estudiante(self, actividad_id: int, estudiante_usuario_id: int) -> Entrega | None: ...
+
+    @abstractmethod
+    def listar_por_actividad(self, actividad_id: int) -> list[Entrega]: ...
+
+    @abstractmethod
+    def listar_de_estudiante(self, estudiante_usuario_id: int, actividad_ids: list[int]) -> list[Entrega]: ...
 
 
 class AccesoGrupos(ABC):

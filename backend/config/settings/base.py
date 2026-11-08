@@ -218,7 +218,7 @@ LOGIN_MAX_INTENTOS = int(os.getenv("LOGIN_MAX_INTENTOS", "5"))
 LOGIN_SEGUNDOS_BLOQUEO = int(os.getenv("LOGIN_SEGUNDOS_BLOQUEO", "900"))
 
 # Archivos subidos por los administradores de grupo (ver shared/infrastructure/archivos.py)
-ARCHIVO_MAX_MB = int(os.getenv("ARCHIVO_MAX_MB", "20"))
+ARCHIVO_MAX_MB = int(os.getenv("ARCHIVO_MAX_MB", "100"))
 
 
 # CORS (el frontend vive en otro origen)
@@ -233,7 +233,10 @@ EMAIL_HOST = os.getenv("EMAIL_HOST", "")
 EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "true").lower() == "true"
+_use_ssl = os.getenv("EMAIL_USE_SSL", "false").lower() == "true"
+EMAIL_USE_SSL = _use_ssl
+EMAIL_USE_TLS = False if _use_ssl else (os.getenv("EMAIL_USE_TLS", "true").lower() == "true")
+EMAIL_TIMEOUT = int(os.getenv("EMAIL_TIMEOUT", "10"))
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "no-responder@ceninojesus.edu.co")
 
 

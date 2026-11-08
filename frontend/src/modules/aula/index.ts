@@ -1,9 +1,15 @@
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
+  CalificarEntrega,
   DescargarArchivo,
+  DescargarEntrega,
   EliminarContenido,
+  EntregarActividad,
   ListarActividades,
+  ListarEntregas,
   ListarMateriales,
+  ListarMisEntregas,
   PublicarActividad,
   PublicarMaterial,
 } from './application/casosDeUso'
@@ -13,8 +19,10 @@ import { RepositorioContenidosHttp } from './infrastructure/RepositorioContenido
 import type { CasosDeUsoAula } from './presentation/AulaProvider'
 
 export { AulaProvider } from './presentation/AulaProvider'
-export { default as AulaPage } from './presentation/AulaPage'
-export { default as GestionContenidoPage } from './presentation/GestionContenidoPage'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const AulaPage = cargaDiferida(() => import('./presentation/AulaPage'))
+export const EspacioPage = cargaDiferida(() => import('./presentation/EspacioPage'))
+export const GestionContenidoPage = cargaDiferida(() => import('./presentation/GestionContenidoPage'))
 
 export function crearCasosDeUsoAula({ http, modoDemo }: { http: HttpClient; modoDemo: boolean }): CasosDeUsoAula {
   const repositorio: RepositorioContenidos = modoDemo ? new RepositorioContenidosDemo() : new RepositorioContenidosHttp(http)
@@ -25,5 +33,10 @@ export function crearCasosDeUsoAula({ http, modoDemo }: { http: HttpClient; modo
     publicarMaterial: new PublicarMaterial(repositorio),
     publicarActividad: new PublicarActividad(repositorio),
     eliminarContenido: new EliminarContenido(repositorio),
+    listarMisEntregas: new ListarMisEntregas(repositorio),
+    entregarActividad: new EntregarActividad(repositorio),
+    listarEntregas: new ListarEntregas(repositorio),
+    calificarEntrega: new CalificarEntrega(repositorio),
+    descargarEntrega: new DescargarEntrega(repositorio),
   }
 }

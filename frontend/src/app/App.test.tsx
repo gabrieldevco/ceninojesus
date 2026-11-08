@@ -113,12 +113,46 @@ describe('aplicación en modo demostración', () => {
     await usuario.click(dentro.getByRole('button', { name: /enviar mensaje/i }))
 
     expect(await screen.findByRole('heading', { name: /gracias por escribirnos/i })).toBeInTheDocument()
-  })
+    // Escribe cuatro campos con la landing completa renderizada: en equipos lentos pasa de los 5 s por defecto
+  }, 20_000)
 
   it('la política de datos es pública', async () => {
     renderizar('/politica-de-datos', { modoDemo: true })
     expect(await screen.findByRole('heading', { name: /política de tratamiento de datos/i })).toBeInTheDocument()
     expect(await screen.findByText(/de demostración/i)).toBeInTheDocument()
+  })
+
+  it('por defecto la página de inicio advierte que los textos del horizonte están pendientes de validación', async () => {
+    // Igual que el backend: el aviso se quita desde Gestión del sitio cuando la institución valida los textos
+    renderizar('/', { modoDemo: true })
+    expect(await screen.findByRole('heading', { name: /nuestro horizonte institucional/i })).toBeInTheDocument()
+    expect(screen.getByText(/textos propuestos/i)).toBeInTheDocument()
+  })
+
+  it('el administrador consulta la bandeja de contacto, filtra y marca un mensaje como leído', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'general')
+    const usuario = userEvent.setup()
+    renderizar('/admin/contacto', { modoDemo: true, almacenamiento })
+
+    expect(await screen.findByRole('heading', { name: /mensajes de contacto recibidos/i })).toBeInTheDocument()
+    expect(await screen.findByText('Carolina Herrera')).toBeInTheDocument()
+    expect(screen.getByText('Jorge Mendoza')).toBeInTheDocument()
+
+    // Filtrar solo no leídos
+    await usuario.click(screen.getByRole('button', { name: /solo no leídos/i }))
+    expect(screen.getByText('Carolina Herrera')).toBeInTheDocument()
+    expect(screen.queryByText('Jorge Mendoza')).not.toBeInTheDocument()
+
+    // Ver detalle y marcar como leído
+    await usuario.click(screen.getByText('Carolina Herrera'))
+    expect(screen.getAllByText('Consulta sobre admisiones para transición').length).toBeGreaterThanOrEqual(1)
+    expect(screen.getAllByText(/quisiera información sobre los costos de matrícula/i).length).toBeGreaterThanOrEqual(1)
+
+    const botonMarcar = screen.getByRole('button', { name: /marcar como leído/i })
+    await usuario.click(botonMarcar)
+
+    expect(await screen.findByText(/mensaje marcado como leído/i)).toBeInTheDocument()
   })
 
   it('un visitante crea su cuenta de acudiente: valida y lo lleva a iniciar sesión', async () => {
@@ -470,13 +504,39 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByRole('heading', { name: /nuevo espacio para sus talentos/i })).toBeInTheDocument()
   })
 
-  it('un estudiante ve el material de su grupo aprobado', async () => {
+  it('un estudiante ve sus clases como tarjetas y entra al material de una', async () => {
     const almacenamiento = new AlmacenamientoMemoria()
     almacenamiento.guardar('nj_user', 'estudiante')
+    const usuario = userEvent.setup()
     renderizar('/estudiante/aula', { modoDemo: true, almacenamiento })
 
+    await usuario.click(await screen.findByRole('button', { name: /abrir la clase ajedrez/i }))
     expect(await screen.findByText('Guía: el tablero y las piezas')).toBeInTheDocument()
-    expect(screen.getByText('Piensa tu próxima jugada')).toBeInTheDocument()
+    expect(screen.getAllByText('Piensa tu próxima jugada').length).toBeGreaterThan(0)
+    // El video de YouTube se ve dentro de la clase
+    expect(screen.getByTitle(/video: cómo se mueve cada pieza/i)).toHaveAttribute('src', expect.stringContaining('youtube-nocookie.com/embed/'))
+  })
+
+  it('el estudiante entrega una tarea y ve la nota y el comentario del docente en otra', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'estudiante')
+    const usuario = userEvent.setup()
+    renderizar('/estudiante/aula?grupo=1', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('tab', { name: /tareas/i }))
+    // La tarea ya calificada muestra la nota y el comentario
+    await usuario.click(await screen.findByRole('button', { name: /piensa tu próxima jugada/i }))
+    expect(await screen.findByText('4.5')).toBeInTheDocument()
+    expect(screen.getByText(/muy buen análisis/i)).toBeInTheDocument()
+
+    // La pendiente se entrega: primero avisa si va vacía
+    await usuario.click(screen.getByRole('button', { name: /resuelve el mate en dos jugadas/i }))
+    await usuario.click(await screen.findByRole('button', { name: /entregar tarea/i }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/escribe una respuesta/i)
+    await usuario.type(screen.getByLabelText(/tu respuesta/i), 'Dama a h5 y luego jaque mate con el alfil.')
+    await usuario.click(screen.getByRole('button', { name: /entregar tarea/i }))
+    expect(await screen.findByText(/entregaste el/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /modificar entrega/i })).toBeInTheDocument()
   })
 
   it('el administrador de grupo publica un material con enlace y puede eliminarlo', async () => {
@@ -485,6 +545,7 @@ describe('aplicación en modo demostración', () => {
     const usuario = userEvent.setup()
     renderizar('/admin/contenido', { modoDemo: true, almacenamiento })
 
+    await usuario.click(await screen.findByRole('button', { name: /abrir la clase ajedrez/i }))
     await usuario.type(await screen.findByLabelText(/título/i), 'Tutorial de apertura')
     await usuario.click(screen.getByRole('button', { name: /publicar material/i }))
     expect(await screen.findByRole('alert')).toHaveTextContent(/archivo o un enlace/i)
@@ -496,6 +557,44 @@ describe('aplicación en modo demostración', () => {
     await usuario.click(screen.getAllByRole('button', { name: 'Eliminar' })[0] as HTMLElement)
     await usuario.click(screen.getByRole('button', { name: /confirmar eliminación/i }))
     await waitFor(() => expect(screen.queryByRole('cell', { name: /Tutorial de apertura/ })).not.toBeInTheDocument())
+  })
+
+  it('el docente crea una clase nueva y aparece como tarjeta', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'admin')
+    const usuario = userEvent.setup()
+    renderizar('/admin/contenido', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('button', { name: /crear clase/i }))
+    await usuario.click(screen.getByRole('button', { name: /^crear$/i }))
+    expect(await screen.findByRole('alert')).toHaveTextContent(/nombre de la clase/i)
+    await usuario.type(screen.getByLabelText(/nombre de la asignatura/i), 'Matemáticas 5°')
+    await usuario.click(screen.getByRole('button', { name: /^crear$/i }))
+    expect(await screen.findByRole('button', { name: /abrir la clase matemáticas 5°/i })).toBeInTheDocument()
+  })
+
+  it('el docente revisa las entregas de una tarea, califica y comenta', async () => {
+    const almacenamiento = new AlmacenamientoMemoria()
+    almacenamiento.guardar('nj_user', 'admin')
+    const usuario = userEvent.setup()
+    renderizar('/admin/contenido?grupo=1', { modoDemo: true, almacenamiento })
+
+    await usuario.click(await screen.findByRole('tab', { name: /entregas y calificaciones/i }))
+    expect(await screen.findByText('Sofía Martínez')).toBeInTheDocument()
+    expect(screen.getByText('Mateo Rodríguez')).toBeInTheDocument()
+
+    const notas = screen.getAllByLabelText(/nota \(0.0/i)
+    const notaSofia = notas[1] as HTMLElement
+    await usuario.type(notaSofia, '7')
+    await usuario.click(screen.getAllByRole('button', { name: /^calificar$/i })[0] as HTMLElement)
+    expect(await screen.findByText(/entre 0.0 y 5.0/i)).toBeInTheDocument()
+
+    await usuario.clear(notaSofia)
+    await usuario.type(notaSofia, '4,2')
+    await usuario.type(screen.getAllByLabelText(/comentario para el estudiante/i)[1] as HTMLElement, 'Bien razonado')
+    await usuario.click(screen.getAllByRole('button', { name: /^calificar$/i })[0] as HTMLElement)
+    expect(await screen.findByText(/calificación guardada para sofía martínez/i)).toBeInTheDocument()
+    expect(await screen.findByText('4.2 / 5.0')).toBeInTheDocument()
   })
 
   it('un estudiante no puede entrar a las solicitudes de administración', async () => {

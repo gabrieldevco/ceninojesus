@@ -1,3 +1,4 @@
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
 import {
   ActualizarGrupo,
@@ -15,7 +16,8 @@ import { RepositorioAdministracionHttp } from './infrastructure/RepositorioAdmin
 import type { CasosDeUsoAdministracion } from './presentation/AdministracionProvider'
 
 export { AdministracionProvider } from './presentation/AdministracionProvider'
-export { default as PanelAdministracionPage } from './presentation/PanelAdministracionPage'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const PanelAdministracionPage = cargaDiferida(() => import('./presentation/PanelAdministracionPage'))
 
 export function crearCasosDeUsoAdministracion({
   http,

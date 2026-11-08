@@ -1,5 +1,12 @@
+import { cargaDiferida } from '@/shared/ui/cargaDiferida'
 import type { HttpClient } from '@/shared/http/HttpClient'
-import { EnviarMensajeDeContacto, ListarEnlaces, ObtenerPoliticaDeDatos } from './application/casosDeUso'
+import {
+  EnviarMensajeDeContacto,
+  ListarEnlaces,
+  ListarMensajesContacto,
+  MarcarMensajeContactoLeido,
+  ObtenerPoliticaDeDatos,
+} from './application/casosDeUso'
 import {
   ActualizarElemento,
   ActualizarEnlace,
@@ -23,13 +30,21 @@ import { RepositorioInstitucionalDemo } from './infrastructure/RepositorioInstit
 import { RepositorioInstitucionalHttp } from './infrastructure/RepositorioInstitucionalHttp'
 import type { CasosDeUsoInstitucional } from './presentation/InstitucionalProvider'
 
-export type { Enlace } from './domain/contacto'
+export type { Enlace, MensajeContactoRecibido } from './domain/contacto'
 export { CONTENIDO_POR_DEFECTO } from './domain/contenidoPorDefecto'
 export type { InformacionLanding } from './domain/landing'
-export { InstitucionalProvider, useContenidoLanding, useEnlaces } from './presentation/InstitucionalProvider'
-export { default as GestionSitioPage } from './presentation/GestionSitioPage'
+export {
+  InstitucionalProvider,
+  useContenidoLanding,
+  useEnlaces,
+  useMarcarMensajeContactoLeido,
+  useMensajesContacto,
+} from './presentation/InstitucionalProvider'
+// Las páginas se cargan al visitar su ruta: no pesan en la carga inicial del sitio
+export const BandejaContactoPage = cargaDiferida(() => import('./presentation/BandejaContactoPage'))
+export const GestionSitioPage = cargaDiferida(() => import('./presentation/GestionSitioPage'))
 export { default as InicioPage } from './presentation/InicioPage'
-export { default as PoliticaDatosPage } from './presentation/PoliticaDatosPage'
+export const PoliticaDatosPage = cargaDiferida(() => import('./presentation/PoliticaDatosPage'))
 
 export function crearCasosDeUsoInstitucional({
   http,
@@ -44,6 +59,8 @@ export function crearCasosDeUsoInstitucional({
     enviarMensaje: new EnviarMensajeDeContacto(repositorio),
     obtenerPolitica: new ObtenerPoliticaDeDatos(repositorio),
     listarEnlaces: new ListarEnlaces(repositorio),
+    listarMensajesContacto: new ListarMensajesContacto(repositorio),
+    marcarMensajeContactoLeido: new MarcarMensajeContactoLeido(repositorio),
     sitio: {
       obtenerContenido: new ObtenerContenidoLanding(sitio),
       actualizarInformacion: new ActualizarInformacion(sitio),

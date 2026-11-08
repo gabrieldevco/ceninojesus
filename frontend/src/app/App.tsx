@@ -1,14 +1,15 @@
-import { useEffect, type ReactNode } from 'react'
+import { Suspense, useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { motion, useScroll, useSpring } from 'framer-motion'
+import { LimiteDeError } from '@/shared/ui/cargaDiferida'
 import { Toasts } from '@/shared/ui/toast'
 import { PanelAdministracionPage } from '@/modules/administracion'
 import { AccesoPage, puedeAcceder, RegistroPage, RestablecerClavePage, useAuth, type Rol } from '@/modules/auth'
-import { AulaPage, GestionContenidoPage } from '@/modules/aula'
+import { AulaPage, EspacioPage, GestionContenidoPage } from '@/modules/aula'
 import { GestionSolicitudesDatosPage, SolicitudDeDatosPage } from '@/modules/datosPersonales'
 import { EstudiantesPage } from '@/modules/estudiantes'
 import { AdmisionesPage, GestionInteresadosPage } from '@/modules/interesados'
-import { GestionSitioPage, InicioPage, PoliticaDatosPage } from '@/modules/institucional'
+import { BandejaContactoPage, GestionSitioPage, InicioPage, PoliticaDatosPage } from '@/modules/institucional'
 import { MatriculaPage, SolicitudesPage } from '@/modules/matriculas'
 import { PortalLayout, PublicLayout } from './Layouts'
 
@@ -47,6 +48,8 @@ export default function App() {
 
   return (
     <>
+      <LimiteDeError>
+      <Suspense fallback={<div className="page-loading" aria-busy="true" />}>
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Anim><InicioPage /></Anim>} />
@@ -63,13 +66,16 @@ export default function App() {
         <Route element={<Guard roles={['acudiente']} crumb="Mis estudiantes" />}>
           <Route path="/familias/estudiantes" element={<Anim><EstudiantesPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['estudiante']} crumb="Aula estudiante" />}>
+        <Route element={<Guard roles={['estudiante']} crumb="Mi espacio" />}>
+          <Route path="/estudiante/espacio" element={<Anim><EspacioPage /></Anim>} />
+        </Route>
+        <Route element={<Guard roles={['estudiante']} crumb="Mis clases" />}>
           <Route path="/estudiante/aula" element={<Anim><AulaPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Solicitudes" />}>
           <Route path="/admin/solicitudes" element={<Anim><SolicitudesPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Contenido del grupo" />}>
+        <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Mis clases" />}>
           <Route path="/admin/contenido" element={<Anim><GestionContenidoPage /></Anim>} />
         </Route>
         <Route element={<Guard roles={['administrador']} crumb="Interesados" />}>
@@ -84,8 +90,13 @@ export default function App() {
         <Route element={<Guard roles={['administrador']} crumb="Sitio web" />}>
           <Route path="/admin/sitio" element={<Anim><GestionSitioPage /></Anim>} />
         </Route>
+        <Route element={<Guard roles={['administrador']} crumb="Mensajes de contacto" />}>
+          <Route path="/admin/contacto" element={<Anim><BandejaContactoPage /></Anim>} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
+      </LimiteDeError>
       <BarraDeScroll />
       <Toasts />
     </>

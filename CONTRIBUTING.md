@@ -33,13 +33,13 @@ Salen de `develop`, viven poco y se borran al fusionarse. El nombre es `<prefijo
 - Título con formato **Conventional Commits**: `tipo(alcance): descripción`. Ej.: `feat(grupos): aprobar o rechazar solicitudes`.
 - El tipo debe corresponder al prefijo de la rama (`feature/` → `feat`, `fix/` y `hotfix/` → `fix`, `docs/` → `docs`, etc.).
 - Se fusiona a `develop` con **squash** y a `main` con **merge commit**.
-- Quien abre el PR no puede aprobarlo, y quien hizo el último push tampoco: la revisión la hace otra persona.
+- Quien abre el PR no puede aprobarlo: la revisión la hace otra persona. En PR a `develop`, tampoco puede aprobar quien hizo el último push; en PR a `main` esa regla no aplica (el último push a `develop` es de quien fusionó el PR anterior y, con pocas personas, bloquearía todas las aprobaciones).
 - Si se sube un cambio nuevo después de aprobar, la aprobación se descarta.
 - Todas las conversaciones del PR deben estar resueltas antes de fusionar.
 
 ## Checks obligatorios
 
-Un PR solo se puede fusionar si pasan, y si la rama está actualizada con su destino:
+Un PR solo se puede fusionar si pasan. A `develop` además debe estar actualizado con su destino; a `main` no se exige, porque `develop` fusiona con squash y `main` con merge commit, así que `develop` nunca contiene los commits de fusión de `main` y quedaría siempre "desactualizado":
 
 | Check | Qué valida |
 |---|---|

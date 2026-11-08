@@ -55,7 +55,7 @@ export function esEnlaceSeguro(url: string): boolean {
 
 // --- Publicación (RF-12 y RF-13): reglas que el backend también exige, para avisar antes de enviar ---
 
-export const TAMANO_MAXIMO_MB = 20
+export const TAMANO_MAXIMO_MB = 100
 export const EXTENSIONES_PERMITIDAS = [
   '.pdf', '.png', '.jpg', '.jpeg', '.docx', '.pptx', '.xlsx', '.zip', '.doc', '.ppt', '.xls', '.mp4', '.txt',
 ] as const

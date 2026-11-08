@@ -8,6 +8,18 @@ export interface NuevoMensaje {
   autorizaTratamientoDatos: boolean
 }
 
+export interface MensajeContactoRecibido {
+  id: number
+  nombre: string
+  correo: string
+  telefono: string
+  asunto: string
+  mensaje: string
+  autorizaTratamientoDatos: boolean
+  leido: boolean
+  fechaEnvio: string
+}
+
 export type ErroresDeMensaje = Partial<Record<keyof NuevoMensaje, string>>
 
 export class MensajeInvalido extends Error {

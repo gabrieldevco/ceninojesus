@@ -1,12 +1,13 @@
 import { createContext, useContext, type ReactNode } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/modules/auth'
-import type { ListarGrupos, ListarMisGrupos } from '../application/casosDeUso'
-import type { Grupo } from '../domain/grupo'
+import type { CrearGrupo, ListarGrupos, ListarMisGrupos } from '../application/casosDeUso'
+import type { Grupo, NuevoGrupo } from '../domain/grupo'
 
 export interface CasosDeUsoGrupos {
   listarGrupos: ListarGrupos
   listarMisGrupos: ListarMisGrupos
+  crearGrupo: CrearGrupo
 }
 
 const Contexto = createContext<CasosDeUsoGrupos | null>(null)
@@ -38,6 +39,19 @@ export function useMisGrupos(): { grupos: Grupo[]; cargando: boolean } {
     enabled: Boolean(usuario),
   })
   return { grupos: data ?? [], cargando: Boolean(usuario) && isPending }
+}
+
+/** El docente crea su clase: aparece de una vez en sus tarjetas y en la lista pública. */
+export function useCrearGrupo() {
+  const { crearGrupo } = useCasosDeUso()
+  const cliente = useQueryClient()
+  return useMutation({
+    mutationFn: (nuevo: NuevoGrupo) => crearGrupo.ejecutar(nuevo),
+    onSuccess: () => {
+      void cliente.invalidateQueries({ queryKey: ['mis-grupos'] })
+      void cliente.invalidateQueries({ queryKey: ['grupos'] })
+    },
+  })
 }
 
 const ICONOS = ['♞', '⚙', '✺', '♪', '★', '✎']
