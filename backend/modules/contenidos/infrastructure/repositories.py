@@ -2,10 +2,10 @@ from dataclasses import asdict, fields
 
 from django.core.files.storage import default_storage
 
-from modules.contenidos.domain.entities import Actividad, Contenido, MaterialApoyo, TipoMaterial
-from modules.contenidos.domain.ports import AlmacenArchivos, ContenidoRepository
+from modules.contenidos.domain.entities import Actividad, Contenido, Entrega, MaterialApoyo, TipoMaterial
+from modules.contenidos.domain.ports import AlmacenArchivos, ContenidoRepository, EntregaRepository
 
-from .models import ActividadModel, MaterialApoyoModel
+from .models import ActividadModel, EntregaModel, MaterialApoyoModel
 
 
 class _DjangoContenidoRepository(ContenidoRepository):
@@ -50,6 +50,60 @@ class DjangoMaterialRepository(_DjangoContenidoRepository):
 class DjangoActividadRepository(_DjangoContenidoRepository):
     model_class = ActividadModel
     entidad = Actividad
+
+
+class DjangoEntregaRepository(EntregaRepository):
+    def guardar(self, entrega: Entrega) -> Entrega:
+        datos = {
+            "actividad_id": entrega.actividad_id,
+            "estudiante_id": entrega.estudiante_usuario_id,
+            "texto": entrega.texto,
+            "archivo": entrega.archivo,
+            "url": entrega.url,
+            "fecha_entrega": entrega.fecha_entrega,
+            "calificacion": entrega.calificacion,
+            "comentario_docente": entrega.comentario_docente,
+            "fecha_calificacion": entrega.fecha_calificacion,
+        }
+        model, _ = EntregaModel.objects.update_or_create(id=entrega.id, defaults=datos)
+        return self.obtener_por_id(model.id)
+
+    def obtener_por_id(self, entrega_id: int) -> Entrega | None:
+        model = self._base().filter(id=entrega_id).first()
+        return self._to_entity(model) if model else None
+
+    def obtener_de_estudiante(self, actividad_id: int, estudiante_usuario_id: int) -> Entrega | None:
+        model = self._base().filter(actividad_id=actividad_id, estudiante_id=estudiante_usuario_id).first()
+        return self._to_entity(model) if model else None
+
+    def listar_por_actividad(self, actividad_id: int) -> list[Entrega]:
+        return [self._to_entity(model) for model in self._base().filter(actividad_id=actividad_id)]
+
+    def listar_de_estudiante(self, estudiante_usuario_id: int, actividad_ids: list[int]) -> list[Entrega]:
+        queryset = self._base().filter(estudiante_id=estudiante_usuario_id, actividad_id__in=actividad_ids)
+        return [self._to_entity(model) for model in queryset]
+
+    @staticmethod
+    def _base():
+        return EntregaModel.objects.select_related("estudiante")
+
+    @staticmethod
+    def _to_entity(model: EntregaModel) -> Entrega:
+        usuario = model.estudiante
+        nombre = f"{usuario.nombres} {usuario.apellidos}".strip() or usuario.nombre_usuario
+        return Entrega(
+            id=model.id,
+            actividad_id=model.actividad_id,
+            estudiante_usuario_id=model.estudiante_id,
+            texto=model.texto,
+            archivo=model.archivo.name or "",
+            url=model.url,
+            fecha_entrega=model.fecha_entrega,
+            calificacion=model.calificacion,
+            comentario_docente=model.comentario_docente,
+            fecha_calificacion=model.fecha_calificacion,
+            estudiante_nombre=nombre,
+        )
 
 
 class DjangoAlmacenArchivos(AlmacenArchivos):

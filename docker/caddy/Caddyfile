@@ -6,9 +6,9 @@
 {$DOMINIO:localhost} {
 	encode zstd gzip
 
-	# Tamaño máximo de una petición (archivos de material y actividades)
+	# Tamaño máximo de una petición (material, actividades, entregas y videos propios de hasta 100 MB)
 	request_body {
-		max_size 25MB
+		max_size 105MB
 	}
 
 	@backend path /api/* /admin/* /static/*
@@ -40,8 +40,9 @@
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		Cross-Origin-Opener-Policy same-origin
 		# Solo recursos propios, más las fuentes de Google; sin scripts en línea ni de terceros.
+		# Los videos de YouTube del aula se incrustan desde youtube-nocookie.com; los videos subidos se reproducen como blob:.
 		# style-src admite 'unsafe-inline' por los estilos que inyectan React y framer-motion.
-		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://i.ytimg.com; media-src 'self' blob:; frame-src https://www.youtube-nocookie.com; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'"
 		-Server
 	}
 }

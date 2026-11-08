@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { HttpClient } from '@/shared/http/HttpClient'
-import type { Grupo } from '../domain/grupo'
+import type { Grupo, NuevoGrupo } from '../domain/grupo'
 import type { RepositorioGrupos } from '../domain/puertos'
 
 const GrupoDto = z.object({
@@ -27,5 +27,10 @@ export class RepositorioGruposHttp implements RepositorioGrupos {
   async listarMios(): Promise<Grupo[]> {
     const datos = await this.http.enviar({ metodo: 'GET', ruta: '/grupos/mis-grupos/' })
     return ListaDto.parse(datos).map(aEntidad)
+  }
+
+  async crear(nuevo: NuevoGrupo): Promise<Grupo> {
+    const datos = await this.http.enviar({ metodo: 'POST', ruta: '/grupos/', cuerpo: nuevo })
+    return aEntidad(GrupoDto.parse(datos))
   }
 }
