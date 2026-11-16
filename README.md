@@ -67,7 +67,18 @@ Total: **144 horas-persona** (48 horas obligatorias × 3 estudiantes).
 | 6 | Formulario de interesados y workflow de seguimiento | 26 h | Formulario y workflow operativos |
 | 7 | Publicación y capacitación | 15 h | Sitio en producción y acta de entrega |
 
-**Estado actual:** Fase 1 (levantamiento de requerimientos) completada. El acta de compromiso No. 001 se firmó el 21 de septiembre de 2026.
+**Estado actual:** actividades 1 a 6 completadas; la actividad 7 (publicación y capacitación) está en curso. El acta de compromiso No. 001 se firmó el 21 de septiembre de 2026.
+
+## Sitio publicado
+
+- **URL:** https://ceninojesus.vercel.app (HTTPS, en Vercel)
+- Se publica solo el `frontend/` en **modo demostración** (`VITE_MODO_DEMO=true`): la página institucional funciona completa, y el acceso, la matrícula y el aula usan datos de ejemplo que no se guardan.
+- La configuración está en `frontend/vercel.json` (las rutas del SPA se redirigen a `index.html`). En Vercel: *Root Directory* `frontend` y la variable `VITE_MODO_DEMO=true`.
+- La plataforma completa (backend, base de datos y tareas) se despliega con `docker-compose.prod.yml` cuando la institución tenga servidor y el dominio `ceninojesus.edu.co`. En ese momento se quita `VITE_MODO_DEMO` y el sitio usa la API real.
+
+### Dominio oficial (`ceninojesus.edu.co`)
+
+Consulta pública del 16 de noviembre de 2026: el dominio está registrado en **Registro Colombia**, vence el 2 de febrero de 2027 y se renovó el 3 de febrero de 2026. El DNS y la página antigua están en **GoDaddy** (sin HTTPS) y el correo en **Google Workspace**. La institución no tiene las credenciales; está gestionando su recuperación. Al cambiar el DNS hay que **conservar los registros MX y TXT de Google** para no cortar el correo.
 
 ## Equipo
 
