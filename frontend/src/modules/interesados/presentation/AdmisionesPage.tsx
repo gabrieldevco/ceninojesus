@@ -147,11 +147,11 @@ export default function Admisiones() {
           </ol>
           <div className="ad-contact">
             <small>PREFIERES HABLAR CON NOSOTROS</small>
-            <a href="tel:+573344105">
-              <span>{Ico.phone}</span>334 4105 · 315 8230785
+            <a href="tel:+573158230285">
+              <span>{Ico.phone}</span>315 8230285
             </a>
-            <a href="mailto:ce_nino@hotmail.com">
-              <span>{Ico.mail}</span>ce_nino@hotmail.com
+            <a href="mailto:ce_ninojesus@hotmail.com">
+              <span>{Ico.mail}</span>ce_ninojesus@hotmail.com
             </a>
             <p>
               <span>{Ico.pin}</span>Calle 38B # 4-35, Barranquilla

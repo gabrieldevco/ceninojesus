@@ -53,7 +53,7 @@ export class RepositorioInstitucionalDemo implements RepositorioInstitucional {
   politicaDeDatos(): Promise<PoliticaDeDatos> {
     return Promise.resolve({
       texto: 'Política de tratamiento de datos de demostración.\n\nEl texto real lo publica la institución.',
-      correo: 'ce_nino@hotmail.com',
+      correo: 'ce_ninojesus@hotmail.com',
     })
   }
 

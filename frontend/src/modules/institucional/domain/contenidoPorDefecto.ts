@@ -27,16 +27,16 @@ const el = (
 export const CONTENIDO_POR_DEFECTO: ContenidoLanding = {
   informacion: {
     nombre: 'Centro Educativo El Niño Jesús',
-    historia:
-      'Nuestra historia se construye en los vínculos entre estudiantes, docentes y familias, y en las experiencias compartidas de aprendizaje.',
+    // La reseña histórica oficial se publicará más adelante; mientras tanto la sección muestra misión y visión.
+    historia: '',
     mision:
-      'Acompañar la formación integral de personas críticas y autónomas, que construyan conocimiento, vivan sus valores y contribuyan al cuidado del medio ambiente.',
+      'El Centro Educativo El Niño Jesús tiene como misión brindar una educación integral, inclusiva, humanista y de calidad desde la educación inicial y preescolar hasta la educación básica y media, reconociendo a cada estudiante como sujeto de derechos, protagonista de su aprendizaje y constructor de su proyecto de vida.\n\nA través de una propuesta pedagógica fundamentada en el aprendizaje significativo, el enfoque constructivista, la exploración, el juego, la investigación, la creatividad y el desarrollo del pensamiento crítico, promovemos en nuestros estudiantes el fortalecimiento de competencias básicas, ciudadanas, socioemocionales, comunicativas, científicas, tecnológicas y laborales, de acuerdo con su edad, nivel de desarrollo, intereses y capacidades.\n\nNuestra misión se orienta a garantizar una educación inclusiva y equitativa, que reconozca y valore la diversidad, elimine barreras para el aprendizaje y la participación y genere los apoyos y ajustes pedagógicos necesarios para que todos los niños, niñas, adolescentes y jóvenes desarrollen sus potencialidades en ambientes seguros, protectores y respetuosos de su dignidad.\n\nFortalecemos desde los primeros años el desarrollo emocional y socioemocional, favoreciendo el reconocimiento, expresión y manejo adecuado de las emociones, la autoestima, la empatía, la autonomía, la toma responsable de decisiones y la resolución pacífica de conflictos. De igual manera, promovemos la formación para la ciudadanía, los derechos humanos y la Cátedra de Paz, contribuyendo a la construcción de relaciones basadas en el respeto, el diálogo, la solidaridad, la convivencia y la cultura de paz.\n\nComo parte de nuestro compromiso con las necesidades del mundo contemporáneo, desarrollamos una Política Institucional de Bilingüismo que propicia el aprendizaje progresivo de una segunda lengua, especialmente el inglés, como herramienta para la comunicación, el intercambio cultural, el acceso al conocimiento y la ampliación de oportunidades académicas, personales y sociales.\n\nAsimismo, estimulamos el pensamiento científico, tecnológico, innovador y ambiental, promoviendo la curiosidad, la investigación, la solución de problemas, el uso responsable de las tecnologías y la construcción de conocimientos orientados a comprender y transformar positivamente el entorno. Formamos estudiantes conscientes de su responsabilidad frente al cuidado de la naturaleza, la protección del medio ambiente y la construcción de sociedades sostenibles.\n\nEl Centro Educativo El Niño Jesús fortalece la articulación entre familia, escuela y sociedad, promoviendo la participación y corresponsabilidad de las familias en los procesos educativos y formativos, con el propósito de acompañar de manera integral el desarrollo de los estudiantes y la construcción de sus proyectos de vida.\n\nDe esta manera, nuestra misión es formar personas íntegras, autónomas, críticas, creativas, emocionalmente competentes, inclusivas, respetuosas de la diversidad, comprometidas con la paz, capaces de comunicarse en diferentes contextos, interesadas por la ciencia y la tecnología, responsables con el medio ambiente y preparadas para afrontar los desafíos de la vida personal, académica, laboral y social, contribuyendo activamente a la transformación positiva de su contexto y de la sociedad.',
     vision:
-      'Una comunidad de aprendizaje que impulse el liderazgo, la investigación, el arte y la participación responsable de sus estudiantes.',
+      'En el año 2029 el Centro Educativo El Niño Jesús será reconocido como una institución líder en el sector por la formación integral de sus estudiantes, basados en un enfoque de mejora continua y con el firme compromiso de brindar a la comunidad bachilleres académicos con profundización en artes, creando espacios de mentalidades progresistas, proactivas, emprendedoras, que permitirán la formación de un individuo autocrítico, con valores, preocupado por el cuidado de su medio ambiente, por su identidad cultural y por su prójimo.',
     direccion: 'Calle 38B # 4-35',
     ciudad: 'Barranquilla - Colombia',
-    telefonos: '334 4105 · 315 8230285',
-    correo: 'ce_nino@hotmail.com',
+    telefonos: '315 8230285',
+    correo: 'ce_ninojesus@hotmail.com',
     horarioAtencion: '',
     urlMapa: '',
     urlFacebook: 'https://www.facebook.com/cenj.bq',
@@ -55,7 +55,7 @@ export const CONTENIDO_POR_DEFECTO: ContenidoLanding = {
       'El estudiante construye sus propios conocimientos a través de la mediación docente. El constructivismo favorece la autonomía, el liderazgo y el sentido de pertenencia para ser gestores y promotores de cambio.',
     enfoquePasos: 'Explorar, Preguntar, Construir, Reflexionar',
     enfoqueNota: 'Experiencias cercanas, diálogo, trabajo colaborativo y reflexión sobre lo aprendido.',
-    horizontePendienteValidacion: true,
+    horizontePendienteValidacion: false,
     contactoTitulo: 'Conversemos en Barranquilla',
     contactoTexto: 'Resolvemos tus dudas sobre admisiones, grupos extracurriculares y servicios del colegio.',
     pieDescripcion:
@@ -77,8 +77,8 @@ export const CONTENIDO_POR_DEFECTO: ContenidoLanding = {
     el(13, 'oferta', 4, 'Énfasis en inglés', 'Herramientas didácticas y pedagógicas para desarrollar su competencia en el idioma universal.', { icono: 'ingles' }),
     el(14, 'oferta', 5, 'Ciencia y tecnología', 'Los mantenemos al tanto de los últimos avances científicos y tecnológicos y su uso en el entorno escolar.', { icono: 'ciencia' }),
     el(15, 'directivo', 0, 'Miryam Junco Martínez', 'Rectora'),
-    el(16, 'directivo', 1, 'Dina Luz Lauren', 'Coordinadora general', { detalle: 'coordinacion@ceninojesus.edu.co' }),
-    el(17, 'directivo', 2, 'Erica Arévalo', 'Psicóloga', { detalle: 'psicologia@ceninojesus.edu.co' }),
+    el(16, 'directivo', 1, 'Harold Amado', 'Coordinador general', { detalle: 'coordinacion@ceninojesus.edu.co' }),
+    el(17, 'directivo', 2, 'Shaiddy Portela', 'Psicóloga', { detalle: 'psicologia@ceninojesus.edu.co' }),
     el(18, 'galeria', 0, 'Cultura y expresión', 'Estudiantes con tambor en una muestra cultural', { imagen: '/img/galeria-drums.jpg' }),
     el(19, 'galeria', 1, 'Danza y movimiento', 'Estudiantes en actividad de expresión corporal', { imagen: '/img/galeria-baile.jpg' }),
     el(20, 'galeria', 2, 'Deporte y trabajo en equipo', 'Estudiantes jugando voleibol', { imagen: '/img/galeria-voleibol.jpg' }),

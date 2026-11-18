@@ -121,7 +121,7 @@ tbody tr{transition:background .15s}.sel tbody tr{cursor:pointer}.sel tbody tr:h
   .portal{grid-template-columns:1fr}.side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px;padding:12px}.side-kicker,.side-note,.side-help{display:none}.side nav{flex-direction:row;flex-wrap:wrap}.side-role{margin:0}
   .portal-content{padding:20px 16px}.topbar{padding:0 16px}.topbar>span{display:none}
 }
-@media(max-width:560px){.grid3,.grid4,.stats{grid-template-columns:1fr}}
+@media(max-width:560px){.grid3,.grid4,.stats,#horizonte .grid3.dos{grid-template-columns:1fr}}
 
 /* escudo real */
 .escudo{object-fit:contain;flex:none;transition:transform .35s}.logo:hover .escudo{transform:rotate(-6deg) scale(1.08)}
@@ -255,6 +255,8 @@ body{background:#fff}
 
 /* horizonte: tarjetas con acento */
 #horizonte .card{border-top:5px solid var(--blue)}#horizonte .card:nth-child(2){border-top-color:var(--coral)}
+#horizonte .grid3.dos{grid-template-columns:repeat(2,1fr);align-items:start}#horizonte .card p+p{margin-top:12px}
+.hz-mas{margin-top:14px;background:none;border:0;padding:0;color:var(--blue);font:700 14px Inter,sans-serif;cursor:pointer;text-decoration:underline;text-underline-offset:3px}.hz-mas:hover{color:var(--coral)}
 #horizonte .grid3>div:nth-child(1) .card{border-top-color:var(--blue)}#horizonte .grid3>div:nth-child(2) .card{border-top-color:var(--coral)}#horizonte .grid3>div:nth-child(3) .card{border-top-color:var(--gold)}
 
 /* valores */
