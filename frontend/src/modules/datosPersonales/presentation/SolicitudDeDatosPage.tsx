@@ -75,7 +75,7 @@ export default function SolicitudDeDatosPage() {
     return (
       <>
         {encabezado}
-        <div className="ad-wrap una">
+        <div className="adm-wrap una">
           <div className="card" role="status">
             <h2>Recibimos tu solicitud</h2>
             <p>
@@ -93,7 +93,7 @@ export default function SolicitudDeDatosPage() {
   return (
     <>
       {encabezado}
-      <div className="ad-wrap una">
+      <div className="adm-wrap una">
         <form className="card form" onSubmit={enviar} noValidate aria-label="Solicitud sobre datos personales">
           <label>
             ¿Qué necesitas? *
