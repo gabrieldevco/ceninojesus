@@ -122,11 +122,19 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByText(/de demostración/i)).toBeInTheDocument()
   })
 
-  it('por defecto la página de inicio advierte que los textos del horizonte están pendientes de validación', async () => {
-    // Igual que el backend: el aviso se quita desde Gestión del sitio cuando la institución valida los textos
+  it('la página de inicio muestra la misión y la visión oficiales, sin aviso de validación', async () => {
     renderizar('/', { modoDemo: true })
     expect(await screen.findByRole('heading', { name: /nuestro horizonte institucional/i })).toBeInTheDocument()
-    expect(screen.getByText(/textos propuestos/i)).toBeInTheDocument()
+    expect(screen.queryByText(/textos propuestos/i)).not.toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Misión' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Visión' })).toBeInTheDocument()
+    // La reseña histórica aún no se publica
+    expect(screen.queryByRole('heading', { name: 'Historia' })).not.toBeInTheDocument()
+    // La misión es larga: se muestra el primer párrafo y se puede ampliar
+    const ampliar = screen.getByRole('button', { name: /leer misión completa/i })
+    expect(screen.queryByText(/Cátedra de Paz/)).not.toBeInTheDocument()
+    await userEvent.click(ampliar)
+    expect(screen.getByText(/Cátedra de Paz/)).toBeInTheDocument()
   })
 
   it('el administrador consulta la bandeja de contacto, filtra y marca un mensaje como leído', async () => {
@@ -328,7 +336,7 @@ describe('aplicación en modo demostración', () => {
     expect(screen.getByRole('heading', { name: 'Cuerpo directivo' })).toBeInTheDocument()
     expect(screen.getByText('Miryam Junco Martínez')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /actividades escolares/i })).toHaveAttribute('src', '/img/hero-colegio.jpg')
-    expect(screen.getAllByText(/334 4105/).length).toBeGreaterThan(0)
+    expect(screen.getAllByText(/315 8230285/).length).toBeGreaterThan(0)
   })
 
   it('si el servidor no responde, la página de inicio sigue mostrando su contenido', async () => {
