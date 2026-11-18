@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, Link, useNavigate, useLocation, Outlet } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
+import { entorno } from '@/shared/config/entorno'
 import { LINKS } from '@/shared/config/links'
 import { Ico, Logo } from '@/shared/ui/ui'
 import { useAuth, type Rol } from '@/modules/auth'
@@ -55,7 +56,7 @@ export function PublicNav() {
         </nav>
         <div className="pacts">
           <a href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer" className="btn-aula"><span>🎓</span> Aula virtual</a>
-          <Link to={usuario ? usuario.inicio : '/acceso'} className="btn-portal">{usuario ? 'Mi portal' : 'Portal de acceso'}</Link>
+          {entorno.portalVisible && <Link to={usuario ? usuario.inicio : '/acceso'} className="btn-portal">{usuario ? 'Mi portal' : 'Portal de acceso'}</Link>}
           <Link to="/admisiones" className="btn coral">Admisiones</Link>
         </div>
         <button className={`burger ${open ? 'x' : ''}`} onClick={() => setOpen(o => !o)} aria-label="Abrir menú" aria-expanded={open}><i /><i /><i /></button>
@@ -70,7 +71,7 @@ export function PublicNav() {
                 </motion.div>
               ))}
               <a href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer" className="m-aula">🎓 Aula virtual ↗</a>
-              <Link to={usuario ? usuario.inicio : '/acceso'} className="m-portal">{usuario ? 'Mi portal' : 'Portal de acceso'}</Link>
+              {entorno.portalVisible && <Link to={usuario ? usuario.inicio : '/acceso'} className="m-portal">{usuario ? 'Mi portal' : 'Portal de acceso'}</Link>}
               <Link to="/admisiones" className="btn coral full">Admisiones</Link>
             </motion.nav>
           </motion.div>
@@ -90,7 +91,7 @@ export function Footer() {
           {info.urlFacebook && <a className="fb-ico" href={info.urlFacebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook del Centro Educativo El Niño Jesús" title="Facebook">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
           </a>}</div>
-        <div><h4>ACCESOS RÁPIDOS</h4><Link to="/#institucional">Institucional</Link><Link to="/admisiones">Admisiones 2025</Link><Link to="/acceso">Portal de acceso</Link><a href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer">Aula virtual ↗</a><a href={LINKS.correo} target="_blank" rel="noopener noreferrer">Correo institucional ↗</a></div>
+        <div><h4>ACCESOS RÁPIDOS</h4><Link to="/#institucional">Institucional</Link><Link to="/admisiones">Admisiones 2025</Link>{entorno.portalVisible && <Link to="/acceso">Portal de acceso</Link>}<a href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer">Aula virtual ↗</a><a href={LINKS.correo} target="_blank" rel="noopener noreferrer">Correo institucional ↗</a></div>
         <div><h4>CONTACTO E INFORMACIÓN</h4>{direccion && <p className="frow">{Ico.pin}<span>{direccion}</span></p>}{info.telefonos && <p className="frow">{Ico.phone}<span>{info.telefonos}</span></p>}{info.correo && <p className="frow">{Ico.mail}<span>{info.correo}</span></p>}</div>
         <img className="icfes" src="/img/icfes.png" alt="Categoría A+ en las Pruebas Saber (ICFES)" width={372} height={179} loading="lazy" decoding="async" />
       </div>

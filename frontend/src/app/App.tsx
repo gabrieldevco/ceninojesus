@@ -1,6 +1,7 @@
 import { Suspense, useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import { motion, useScroll, useSpring } from 'framer-motion'
+import { entorno } from '@/shared/config/entorno'
 import { LimiteDeError } from '@/shared/ui/cargaDiferida'
 import { Toasts } from '@/shared/ui/toast'
 import { PanelAdministracionPage } from '@/modules/administracion'
@@ -53,46 +54,55 @@ export default function App() {
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Anim><InicioPage /></Anim>} />
-          <Route path="/acceso" element={<Anim><AccesoPage /></Anim>} />
-          <Route path="/registro" element={<Anim><RegistroPage /></Anim>} />
-          <Route path="/restablecer-contrasena" element={<Anim><RestablecerClavePage /></Anim>} />
+          {entorno.portalVisible && (
+            <>
+              <Route path="/acceso" element={<Anim><AccesoPage /></Anim>} />
+              <Route path="/registro" element={<Anim><RegistroPage /></Anim>} />
+              <Route path="/restablecer-contrasena" element={<Anim><RestablecerClavePage /></Anim>} />
+            </>
+          )}
           <Route path="/admisiones" element={<Anim><AdmisionesPage /></Anim>} />
           <Route path="/politica-de-datos" element={<Anim><PoliticaDatosPage /></Anim>} />
           <Route path="/solicitud-de-datos" element={<Anim><SolicitudDeDatosPage /></Anim>} />
         </Route>
-        <Route element={<Guard roles={['acudiente']} crumb="Matrícula extracurricular" />}>
-          <Route path="/familias/matricula" element={<Anim><MatriculaPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['acudiente']} crumb="Mis estudiantes" />}>
-          <Route path="/familias/estudiantes" element={<Anim><EstudiantesPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['estudiante']} crumb="Mi espacio" />}>
-          <Route path="/estudiante/espacio" element={<Anim><EspacioPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['estudiante']} crumb="Mis clases" />}>
-          <Route path="/estudiante/aula" element={<Anim><AulaPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Solicitudes" />}>
-          <Route path="/admin/solicitudes" element={<Anim><SolicitudesPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Mis clases" />}>
-          <Route path="/admin/contenido" element={<Anim><GestionContenidoPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['administrador']} crumb="Interesados" />}>
-          <Route path="/admin/interesados" element={<Anim><GestionInteresadosPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['administrador']} crumb="Usuarios y grupos" />}>
-          <Route path="/admin/usuarios" element={<Anim><PanelAdministracionPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['administrador']} crumb="Datos personales" />}>
-          <Route path="/admin/datos-personales" element={<Anim><GestionSolicitudesDatosPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['administrador']} crumb="Sitio web" />}>
-          <Route path="/admin/sitio" element={<Anim><GestionSitioPage /></Anim>} />
-        </Route>
-        <Route element={<Guard roles={['administrador']} crumb="Mensajes de contacto" />}>
-          <Route path="/admin/contacto" element={<Anim><BandejaContactoPage /></Anim>} />
-        </Route>
+        {/* Sin backend el portal sería de demostración: en el sitio público no se publica */}
+        {entorno.portalVisible && (
+          <>
+            <Route element={<Guard roles={['acudiente']} crumb="Matrícula extracurricular" />}>
+              <Route path="/familias/matricula" element={<Anim><MatriculaPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['acudiente']} crumb="Mis estudiantes" />}>
+              <Route path="/familias/estudiantes" element={<Anim><EstudiantesPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['estudiante']} crumb="Mi espacio" />}>
+              <Route path="/estudiante/espacio" element={<Anim><EspacioPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['estudiante']} crumb="Mis clases" />}>
+              <Route path="/estudiante/aula" element={<Anim><AulaPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Solicitudes" />}>
+              <Route path="/admin/solicitudes" element={<Anim><SolicitudesPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['administrador_grupo', 'administrador']} crumb="Mis clases" />}>
+              <Route path="/admin/contenido" element={<Anim><GestionContenidoPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['administrador']} crumb="Interesados" />}>
+              <Route path="/admin/interesados" element={<Anim><GestionInteresadosPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['administrador']} crumb="Usuarios y grupos" />}>
+              <Route path="/admin/usuarios" element={<Anim><PanelAdministracionPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['administrador']} crumb="Datos personales" />}>
+              <Route path="/admin/datos-personales" element={<Anim><GestionSolicitudesDatosPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['administrador']} crumb="Sitio web" />}>
+              <Route path="/admin/sitio" element={<Anim><GestionSitioPage /></Anim>} />
+            </Route>
+            <Route element={<Guard roles={['administrador']} crumb="Mensajes de contacto" />}>
+              <Route path="/admin/contacto" element={<Anim><BandejaContactoPage /></Anim>} />
+            </Route>
+          </>
+        )}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       </Suspense>
