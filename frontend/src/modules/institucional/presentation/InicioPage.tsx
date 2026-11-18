@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CifraAnimada, GarabatosPortada, Inclinable, Paralaje, TituloAnimado } from '@/shared/ui/animaciones'
@@ -24,6 +25,23 @@ const Icon = ({ k }: { k: string }) => (
   </svg>
 )
 
+/** Texto del horizonte institucional: respeta los párrafos y, si es largo, muestra solo el primero con opción de ampliar. */
+function TextoHorizonte({ titulo, texto }: { titulo: string; texto: string }) {
+  const [abierto, setAbierto] = useState(false)
+  const parrafos = texto.split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean)
+  const visibles = abierto ? parrafos : parrafos.slice(0, 1)
+  return (
+    <>
+      {visibles.map((p) => <p key={p}>{p}</p>)}
+      {parrafos.length > 1 && (
+        <button type="button" className="hz-mas" aria-expanded={abierto} onClick={() => setAbierto((a) => !a)}>
+          {abierto ? 'Ver menos' : `Leer ${titulo.toLowerCase()} completa`}
+        </button>
+      )}
+    </>
+  )
+}
+
 export default function Inicio() {
   const { grupos } = useGrupos()
   const { contenido } = useContenidoLanding()
@@ -37,7 +55,7 @@ export default function Inicio() {
   const portada = imagenUnica(contenido, 'imagen_portada', IMAGENES_POR_DEFECTO.imagen_portada)
   const quienes = imagenUnica(contenido, 'imagen_quienes', IMAGENES_POR_DEFECTO.imagen_quienes)
   const enfoque = imagenUnica(contenido, 'imagen_enfoque', IMAGENES_POR_DEFECTO.imagen_enfoque)
-  const horizonte = [['Historia', info.historia], ['Misión', info.mision], ['Visión', info.vision]].filter(([, texto]) => texto)
+  const horizonte = ([['Historia', info.historia], ['Misión', info.mision], ['Visión', info.vision]] as [string, string][]).filter(([, texto]) => texto)
   const llamada = enlaceDeLlamada(info.telefonos)
 
   return (
@@ -101,9 +119,9 @@ export default function Inicio() {
           {info.horizontePendienteValidacion && (
             <div className="notice">⚠ <b>Textos propuestos · Pendientes de validación.</b> La historia, la misión y la visión oficiales no han sido suministradas.</div>
           )}</Reveal>
-          <div className="grid3">
+          <div className={`grid3${horizonte.length === 2 ? ' dos' : ''}`}>
             {horizonte.map(([t, p], i) => (
-              <Reveal key={t} delay={i * .1}><Inclinable className="card hover" grados={6}><h3>{t}</h3><p>{p}</p></Inclinable></Reveal>
+              <Reveal key={t} delay={i * .1}><Inclinable className="card hover" grados={6}><h3>{t}</h3><TextoHorizonte titulo={t} texto={p} /></Inclinable></Reveal>
             ))}
           </div>
         </section>

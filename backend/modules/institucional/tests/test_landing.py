@@ -38,8 +38,14 @@ class LandingApiTests(APITestCase):
 
         informacion = self.client.get("/api/institucional/").data
         self.assertEqual(informacion["portada_destacado"], "aprende y crece.")
-        self.assertTrue(informacion["horizonte_pendiente_validacion"])
-        self.assertTrue(informacion["mision"])
+        # Misión y visión oficiales (migración 0008); la reseña histórica se publicará más adelante
+        self.assertFalse(informacion["horizonte_pendiente_validacion"])
+        self.assertIn("Cátedra de Paz", informacion["mision"])
+        self.assertTrue(informacion["vision"].startswith("En el año 2029"))
+        self.assertEqual(informacion["historia"], "")
+        self.assertEqual(informacion["telefonos"], "315 8230285")
+        self.assertEqual(informacion["correo"], "ce_ninojesus@hotmail.com")
+        self.assertEqual(self.titulos("directivo"), ["Miryam Junco Martínez", "Harold Amado", "Shaiddy Portela"])
 
     def test_los_elementos_ocultos_solo_los_ve_el_administrador(self):
         valor = ElementoLandingModel.objects.get(seccion="valor", titulo="Liderazgo")
