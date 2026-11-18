@@ -31,6 +31,7 @@ export interface InformacionLanding {
   horarioAtencion: string
   urlMapa: string
   urlFacebook: string
+  urlInstagram: string
   politicaTratamientoDatos: string
   portadaEtiqueta: string
   portadaTitulo: string

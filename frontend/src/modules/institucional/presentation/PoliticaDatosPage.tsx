@@ -48,7 +48,7 @@ export default function PoliticaDatosPage() {
       <EncabezadoPagina etiqueta="LEY 1581 DE 2012" titulo={<>Política de tratamiento de <em>datos personales</em></>}>
         Cómo el Centro Educativo El Niño Jesús recolecta, usa y protege los datos de familias, estudiantes y visitantes.
       </EncabezadoPagina>
-      <div className="ad-wrap una ancha">
+      <div className="adm-wrap una ancha">
         <article className="ac-card politica">
           {cargando && <p className="muted-p">Cargando…</p>}
           {error && <p role="alert">No pudimos cargar la política en este momento. Intenta de nuevo más tarde.</p>}

@@ -45,6 +45,8 @@ class LandingApiTests(APITestCase):
         self.assertEqual(informacion["historia"], "")
         self.assertEqual(informacion["telefonos"], "315 8230285")
         self.assertEqual(informacion["correo"], "ce_ninojesus@hotmail.com")
+        self.assertEqual(informacion["url_instagram"], "https://www.instagram.com/ceninojesus/")
+        self.assertEqual(informacion["url_facebook"], "https://www.facebook.com/share/1EAp6wkQwV/")
         self.assertEqual(self.titulos("directivo"), ["Miryam Junco Martínez", "Harold Amado", "Shaiddy Portela"])
 
     def test_los_elementos_ocultos_solo_los_ve_el_administrador(self):

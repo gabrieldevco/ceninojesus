@@ -53,8 +53,8 @@ export default function RestablecerClavePage() {
       <EncabezadoPagina etiqueta="PORTAL DE ACCESO" titulo={<>Recupera tu <em>acceso</em></>}>
         Elige una contraseña nueva para volver a entrar al portal.
       </EncabezadoPagina>
-      <div className="ad-wrap una">
-        <form className="ac-card ad-form" onSubmit={(e) => void enviar(e)} noValidate aria-label="Restablecer contraseña">
+      <div className="adm-wrap una">
+        <form className="ac-card adm-form" onSubmit={(e) => void enviar(e)} noValidate aria-label="Restablecer contraseña">
           <h2>Crea una contraseña nueva</h2>
           {sinDatos || enlaceInvalido ? (
             <>

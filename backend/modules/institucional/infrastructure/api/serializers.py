@@ -16,6 +16,7 @@ class InformacionSerializer(serializers.Serializer):
     horario_atencion = serializers.CharField(max_length=200, required=False, allow_blank=True)
     url_mapa = serializers.URLField(max_length=500, required=False, allow_blank=True)
     url_facebook = serializers.URLField(required=False, allow_blank=True)
+    url_instagram = serializers.URLField(required=False, allow_blank=True)
     politica_tratamiento_datos = serializers.CharField(required=False, allow_blank=True)
     portada_etiqueta = serializers.CharField(max_length=100, required=False, allow_blank=True)
     portada_titulo = serializers.CharField(max_length=200, required=False, allow_blank=True)

@@ -110,7 +110,7 @@ export default function Admisiones() {
 
   return (
     <>
-      <section className="ad-hero">
+      <section className="adm-hero">
         <i className="ac-blob a" />
         <i className="ac-blob b" />
         <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
@@ -125,10 +125,10 @@ export default function Admisiones() {
         </motion.div>
       </section>
 
-      <div className="ad-wrap">
-        <aside className="ad-info">
+      <div className="adm-wrap">
+        <aside className="adm-info">
           <h3>¿Cómo funciona?</h3>
-          <ol className="ad-steps">
+          <ol className="adm-steps">
             {PASOS.map((s, i) => (
               <motion.li
                 key={s.t}
@@ -145,7 +145,7 @@ export default function Admisiones() {
               </motion.li>
             ))}
           </ol>
-          <div className="ad-contact">
+          <div className="adm-contact">
             <small>PREFIERES HABLAR CON NOSOTROS</small>
             <a href="tel:+573158230285">
               <span>{Ico.phone}</span>315 8230285
@@ -164,7 +164,7 @@ export default function Admisiones() {
             {!enviado ? (
               <motion.form
                 key="f"
-                className="ac-card ad-form"
+                className="ac-card adm-form"
                 onSubmit={enviar}
                 noValidate
                 initial={{ opacity: 0, y: 28 }}
@@ -174,7 +174,7 @@ export default function Admisiones() {
               >
                 <h2>Solicita información</h2>
                 <p className="sub">Los campos con * son obligatorios.</p>
-                <div className="ad-row">
+                <div className="adm-row">
                   <label>
                     Nombre del acudiente *
                     <span className="fld">
@@ -231,8 +231,8 @@ export default function Admisiones() {
                     />
                   </span>
                 </label>
-                <div className="ad-lbl">Grado de interés</div>
-                <div className="ad-grades">
+                <div className="adm-lbl">Grado de interés</div>
+                <div className="adm-grades">
                   {GRADOS.map((g) => (
                     <button
                       type="button"
@@ -283,12 +283,12 @@ export default function Admisiones() {
                     </>
                   )}
                 </button>
-                <p className="ad-priv">🔒 Usaremos tus datos únicamente para contactarte sobre admisiones.</p>
+                <p className="adm-priv">🔒 Usaremos tus datos únicamente para contactarte sobre admisiones.</p>
               </motion.form>
             ) : (
               <motion.div
                 key="ok"
-                className="ac-card ad-ok"
+                className="ac-card adm-ok"
                 initial={{ opacity: 0, scale: 0.94 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ type: 'spring', stiffness: 160, damping: 16 }}
@@ -302,7 +302,7 @@ export default function Admisiones() {
                   Recibimos tu solicitud para <b>{enviado.gradoInteres}</b>. Un asesor se pondrá en contacto contigo y el seguimiento
                   queda registrado para el equipo de admisiones.
                 </p>
-                <div className="ad-ok-btns">
+                <div className="adm-ok-btns">
                   <Link to="/" className="btn">
                     Volver al inicio
                   </Link>

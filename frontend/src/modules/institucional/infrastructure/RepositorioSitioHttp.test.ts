@@ -15,6 +15,7 @@ const INFORMACION = {
   correo: 'ce@example.com',
   horario_atencion: null,
   url_mapa: '',
+  url_instagram: '',
   url_facebook: 'https://facebook.com/x',
   politica_tratamiento_datos: '',
   portada_etiqueta: 'ETIQUETA',
