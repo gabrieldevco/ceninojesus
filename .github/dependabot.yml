@@ -17,6 +17,8 @@ updates:
       # Celery/kombu fijan el rango compatible de redis-py
       - dependency-name: redis
         update-types: ["version-update:semver-major"]
+      # Celery fija python-dateutil con una versión exacta: otra versión hace imposible instalar las dependencias
+      - dependency-name: python-dateutil
 
   - package-ecosystem: npm
     directory: /frontend
