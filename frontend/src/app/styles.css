@@ -213,6 +213,7 @@ tbody tr{transition:background .15s}.sel tbody tr{cursor:pointer}.sel tbody tr:h
 @media(max-width:1180px){.ptabs,.pacts{display:none}.burger{display:flex}.pnav{padding:0 18px;height:72px}.pnav.scrolled{height:62px}}
 .fb-ico{display:grid!important;place-items:center;width:42px;height:42px;margin-top:6px!important;border-radius:50%;background:rgba(255,255,255,.12);color:#fff!important;transition:background .25s,transform .25s}
 .fb-ico:hover{background:#1877f2;transform:translateY(-3px) scale(1.08)}
+.redes{display:flex;gap:10px}.ig-ico:hover{background:linear-gradient(45deg,#f9ce34,#ee2a7b,#6228d7)}
 .mmenu{padding-top:84px}
 
 /* ===== dinamismo de color ===== */

@@ -24,6 +24,7 @@ class InformacionInstitucional:
     horario_atencion: str = ""
     url_mapa: str = ""
     url_facebook: str = ""
+    url_instagram: str = ""
     # Ley 1581 de 2012 (RNF-10): política publicada que el titular acepta al autorizar
     politica_tratamiento_datos: str = ""
     # Portada y secciones de la página de inicio (editables por la institución)

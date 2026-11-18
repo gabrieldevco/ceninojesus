@@ -356,6 +356,8 @@ describe('aplicación en modo demostración', () => {
     expect(screen.getByText('Miryam Junco Martínez')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /actividades escolares/i })).toHaveAttribute('src', '/img/hero-colegio.jpg')
     expect(screen.getAllByText(/315 8230285/).length).toBeGreaterThan(0)
+    expect(screen.getByRole('link', { name: /instagram del centro educativo/i })).toHaveAttribute('href', 'https://www.instagram.com/ceninojesus/')
+    expect(screen.getByRole('link', { name: /facebook del centro educativo/i })).toHaveAttribute('href', 'https://www.facebook.com/share/1EAp6wkQwV/')
   })
 
   it('si el servidor no responde, la página de inicio sigue mostrando su contenido', async () => {
@@ -379,6 +381,7 @@ describe('aplicación en modo demostración', () => {
       correo: 'info@colegio.co',
       horario_atencion: 'Lunes a viernes, 7 a. m.',
       url_mapa: '',
+      url_instagram: '',
       url_facebook: '',
       politica_tratamiento_datos: '',
       portada_etiqueta: 'ETIQUETA NUEVA',

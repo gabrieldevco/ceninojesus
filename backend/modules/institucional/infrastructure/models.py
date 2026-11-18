@@ -17,6 +17,7 @@ class InformacionInstitucionalModel(models.Model):
     horario_atencion = models.CharField("horario de atención", max_length=200, blank=True)
     url_mapa = models.URLField("URL del mapa", max_length=500, blank=True)
     url_facebook = models.URLField("URL de Facebook", blank=True)
+    url_instagram = models.URLField("URL de Instagram", blank=True)
     politica_tratamiento_datos = models.TextField("política de tratamiento de datos personales", blank=True)
     portada_etiqueta = models.CharField("etiqueta de la portada", max_length=100, blank=True)
     portada_titulo = models.CharField("título de la portada", max_length=200, blank=True)

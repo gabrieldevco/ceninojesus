@@ -56,10 +56,11 @@ export function validarEnlace<T extends Partial<NuevoEnlace>>(datos: T): T {
 }
 
 /** Direcciones de redes y mapa de la información institucional, vacías o válidas. */
-export function validarDireccionesWeb(cambios: { urlMapa?: string; urlFacebook?: string }): void {
+export function validarDireccionesWeb(cambios: { urlMapa?: string; urlFacebook?: string; urlInstagram?: string }): void {
   for (const [campo, etiqueta] of [
     ['urlMapa', 'del mapa'],
     ['urlFacebook', 'de Facebook'],
+    ['urlInstagram', 'de Instagram'],
   ] as const) {
     const valor = cambios[campo]
     if (valor && !esUrlWeb(valor)) throw new EnlaceInvalido('url', `La dirección ${etiqueta} debe empezar por https://`)

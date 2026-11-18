@@ -88,9 +88,14 @@ export function Footer() {
     <footer className="footer">
       <div className="footer-grid">
         <div><Logo light /><p className="fdesc">{info.pieDescripcion}</p>
-          {info.urlFacebook && <a className="fb-ico" href={info.urlFacebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook del Centro Educativo El Niño Jesús" title="Facebook">
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
-          </a>}</div>
+          {(info.urlFacebook || info.urlInstagram) && <div className="redes">
+            {info.urlFacebook && <a className="fb-ico" href={info.urlFacebook} target="_blank" rel="noopener noreferrer" aria-label="Facebook del Centro Educativo El Niño Jesús" title="Facebook">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true"><path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.78-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.78l-.44 2.89h-2.34v6.99A10 10 0 0 0 22 12z"/></svg>
+            </a>}
+            {info.urlInstagram && <a className="fb-ico ig-ico" href={info.urlInstagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram del Centro Educativo El Niño Jesús" title="Instagram">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6" fill="currentColor"/></svg>
+            </a>}
+          </div>}</div>
         <div><h4>ACCESOS RÁPIDOS</h4><Link to="/#institucional">Institucional</Link><Link to="/admisiones">Admisiones 2025</Link>{entorno.portalVisible && <Link to="/acceso">Portal de acceso</Link>}<a href={LINKS.aulaVirtual} target="_blank" rel="noopener noreferrer">Aula virtual ↗</a><a href={LINKS.correo} target="_blank" rel="noopener noreferrer">Correo institucional ↗</a></div>
         <div><h4>CONTACTO E INFORMACIÓN</h4>{direccion && <p className="frow">{Ico.pin}<span>{direccion}</span></p>}{info.telefonos && <p className="frow">{Ico.phone}<span>{info.telefonos}</span></p>}{info.correo && <p className="frow">{Ico.mail}<span>{info.correo}</span></p>}</div>
         <img className="icfes" src="/img/icfes.png" alt="Categoría A+ en las Pruebas Saber (ICFES)" width={372} height={179} loading="lazy" decoding="async" />
