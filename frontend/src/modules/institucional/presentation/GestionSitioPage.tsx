@@ -102,6 +102,7 @@ const GRUPOS_DE_TEXTO: ReadonlyArray<{ titulo: string; campos: CampoDeTexto[] }>
       { campo: 'correo', etiqueta: 'Correo' },
       { campo: 'horarioAtencion', etiqueta: 'Horario de atención' },
       { campo: 'urlFacebook', etiqueta: 'Dirección de Facebook', ayuda: 'Debe empezar por https://' },
+      { campo: 'urlInstagram', etiqueta: 'Dirección de Instagram', ayuda: 'Debe empezar por https://' },
       { campo: 'urlMapa', etiqueta: 'Dirección del mapa', ayuda: 'Debe empezar por https://' },
     ],
   },

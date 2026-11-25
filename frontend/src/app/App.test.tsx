@@ -96,6 +96,25 @@ describe('aplicación en modo demostración', () => {
     expect(await screen.findByRole('heading', { name: /gracias, marta/i })).toBeInTheDocument()
   })
 
+  it('sin backend y con hoja de cálculo configurada, la solicitud de admisiones llega a la hoja', async () => {
+    const usuario = userEvent.setup()
+    const fetchImpl = vi.fn<typeof fetch>().mockResolvedValue(new Response(null))
+    const url = 'https://script.google.com/macros/s/prueba/exec'
+    renderizar('/admisiones', { modoDemo: true, formulariosUrl: url, fetchImpl })
+
+    await usuario.type(await screen.findByPlaceholderText('Nombre completo'), 'Marta Gómez')
+    await usuario.type(screen.getByPlaceholderText('300 000 0000'), '3001234567')
+    await usuario.type(screen.getByPlaceholderText('correo@ejemplo.com'), 'marta@example.com')
+    await usuario.click(screen.getByRole('checkbox'))
+    await usuario.click(screen.getByRole('button', { name: /enviar solicitud/i }))
+
+    expect(await screen.findByRole('heading', { name: /gracias, marta/i })).toBeInTheDocument()
+    const llamada = fetchImpl.mock.calls.find(([destino]) => destino === url)
+    expect(llamada).toBeDefined()
+    const cuerpo = JSON.parse(String(llamada?.[1]?.body)) as Record<string, unknown>
+    expect(cuerpo).toMatchObject({ formulario: 'admisiones', acudiente: 'Marta Gómez', correo: 'marta@example.com', autorizaDatos: true })
+  })
+
   it('un visitante escribe desde el inicio: valida la autorización y luego agradece', async () => {
     const usuario = userEvent.setup()
     renderizar('/', { modoDemo: true })
@@ -337,6 +356,8 @@ describe('aplicación en modo demostración', () => {
     expect(screen.getByText('Miryam Junco Martínez')).toBeInTheDocument()
     expect(screen.getByRole('img', { name: /actividades escolares/i })).toHaveAttribute('src', '/img/hero-colegio.jpg')
     expect(screen.getAllByText(/315 8230285/).length).toBeGreaterThan(0)
+    expect(screen.getByRole('link', { name: /instagram del centro educativo/i })).toHaveAttribute('href', 'https://www.instagram.com/ceninojesus/')
+    expect(screen.getByRole('link', { name: /facebook del centro educativo/i })).toHaveAttribute('href', 'https://www.facebook.com/share/1EAp6wkQwV/')
   })
 
   it('si el servidor no responde, la página de inicio sigue mostrando su contenido', async () => {
@@ -360,6 +381,7 @@ describe('aplicación en modo demostración', () => {
       correo: 'info@colegio.co',
       horario_atencion: 'Lunes a viernes, 7 a. m.',
       url_mapa: '',
+      url_instagram: '',
       url_facebook: '',
       politica_tratamiento_datos: '',
       portada_etiqueta: 'ETIQUETA NUEVA',

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { CifraAnimada, GarabatosPortada, Inclinable, Paralaje, TituloAnimado } from '@/shared/ui/animaciones'
+import { entorno } from '@/shared/config/entorno'
 import { Reveal, Ico } from '@/shared/ui/ui'
 import Carousel from '@/shared/ui/Carousel'
 import { iconoDeGrupo, useGrupos } from '@/modules/grupos'
@@ -69,7 +70,7 @@ export default function Inicio() {
           <p className="lead">{info.portadaTexto}</p>
           <div className="hero-cta">
             <Link to="/admisiones" className="btn coral">Solicitar información</Link>
-            <Link to="/acceso" className="btn ghost">Portal de acceso</Link>
+            {entorno.portalVisible && <Link to="/acceso" className="btn ghost">Portal de acceso</Link>}
           </div>
         </motion.div>
         <motion.div className="hero-card photo" initial={{ opacity: 0, scale: .92, rotate: 3 }} animate={{ opacity: 1, scale: 1, rotate: 0 }} transition={{ duration: .8, delay: .15 }}>
@@ -178,12 +179,14 @@ export default function Inicio() {
 
       <section className="sec alt" id="servicios">
         <Reveal><p className="eyebrow coral">SERVICIOS Y GRUPOS</p><TituloAnimado texto="Grupos extracurriculares" />
-        <p className="muted-p">Las familias solicitan la matrícula desde el portal y el administrador de cada grupo aprueba el acceso.</p></Reveal>
+        <p className="muted-p">{entorno.portalVisible
+          ? 'Las familias solicitan la matrícula desde el portal y el administrador de cada grupo aprueba el acceso.'
+          : 'Pregúntanos por los grupos extracurriculares y sus horarios.'}</p></Reveal>
         <div className="grid4">
           {grupos.map((g, i) => (
             <Reveal key={g.id} delay={i * .08}>
-              <Inclinable className="tilt-link"><Link to="/familias/matricula" className={`card hover group-card g${(i % 4) + 1}`}>
-                <span className="gicon">{iconoDeGrupo(g.nombre, i)}</span><h3>{g.nombre}</h3><p>Solicitar matrícula →</p>
+              <Inclinable className="tilt-link"><Link to={entorno.portalVisible ? '/familias/matricula' : '/admisiones'} className={`card hover group-card g${(i % 4) + 1}`}>
+                <span className="gicon">{iconoDeGrupo(g.nombre, i)}</span><h3>{g.nombre}</h3><p>{entorno.portalVisible ? 'Solicitar matrícula →' : 'Pedir información →'}</p>
               </Link></Inclinable>
             </Reveal>
           ))}

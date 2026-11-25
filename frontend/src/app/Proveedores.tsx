@@ -18,6 +18,8 @@ interface Opciones {
   almacenamiento: Almacenamiento
   modoDemo: boolean
   apiUrl: string
+  /** Sin backend: aplicación web de Apps Script que recibe los formularios públicos */
+  formulariosUrl?: string
   /** Para pruebas: reemplaza a `fetch` */
   fetchImpl?: typeof fetch
 }
@@ -27,7 +29,7 @@ interface Opciones {
  * implementaciones concretas de cada puerto.
  * Todos los módulos usan la API; con VITE_MODO_DEMO=true cada uno usa su repositorio de demostración.
  */
-function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opciones) {
+function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, formulariosUrl, fetchImpl }: Opciones) {
   // El gestor de sesión renueva el token con un cliente sin sesión; el cliente principal usa al gestor.
   const sinSesion = new FetchHttpClient(apiUrl, undefined, fetchImpl)
   const sesion = crearGestorDeSesion(almacenamiento, sinSesion)
@@ -36,10 +38,10 @@ function crearCasosDeUso({ almacenamiento, modoDemo, apiUrl, fetchImpl }: Opcion
     auth: crearCasosDeUsoAuth({ almacenamiento, http, sesion, modoDemo }),
     estudiantes: crearCasosDeUsoEstudiantes({ http, almacenamiento, modoDemo }),
     grupos: crearCasosDeUsoGrupos({ http, modoDemo }),
-    interesados: crearCasosDeUsoInteresados({ http, modoDemo }),
+    interesados: crearCasosDeUsoInteresados({ http, modoDemo, formulariosUrl, fetchImpl }),
     matriculas: crearCasosDeUsoMatriculas({ http, almacenamiento, modoDemo }),
     aula: crearCasosDeUsoAula({ http, modoDemo }),
-    institucional: crearCasosDeUsoInstitucional({ http, modoDemo }),
+    institucional: crearCasosDeUsoInstitucional({ http, modoDemo, formulariosUrl, fetchImpl }),
     administracion: crearCasosDeUsoAdministracion({ http, modoDemo }),
     datosPersonales: crearCasosDeUsoDatosPersonales({ http, modoDemo }),
   }
@@ -49,11 +51,12 @@ export function Proveedores({
   almacenamiento,
   modoDemo = entorno.modoDemo,
   apiUrl = entorno.apiUrl,
+  formulariosUrl = entorno.formulariosUrl,
   fetchImpl,
   children,
 }: Partial<Opciones> & { children: ReactNode }) {
   const [casosDeUso] = useState(() =>
-    crearCasosDeUso({ almacenamiento: almacenamiento ?? new AlmacenamientoLocal(), modoDemo, apiUrl, fetchImpl }),
+    crearCasosDeUso({ almacenamiento: almacenamiento ?? new AlmacenamientoLocal(), modoDemo, apiUrl, formulariosUrl, fetchImpl }),
   )
   const [cliente] = useState(
     () => new QueryClient({ defaultOptions: { queries: { staleTime: 30_000, retry: 1, refetchOnWindowFocus: false } } }),

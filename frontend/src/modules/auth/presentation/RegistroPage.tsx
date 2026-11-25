@@ -86,7 +86,7 @@ export default function RegistroPage() {
 
   return (
     <>
-      <section className="ad-hero">
+      <section className="adm-hero">
         <i className="ac-blob a" />
         <i className="ac-blob b" />
         <motion.div initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
@@ -98,10 +98,10 @@ export default function RegistroPage() {
         </motion.div>
       </section>
 
-      <div className="ad-wrap">
-        <aside className="ad-info">
+      <div className="adm-wrap">
+        <aside className="adm-info">
           <h3>¿Para qué sirve tu cuenta?</h3>
-          <ol className="ad-steps">
+          <ol className="adm-steps">
             {PASOS.map((s, i) => (
               <motion.li
                 key={s.t}
@@ -118,17 +118,17 @@ export default function RegistroPage() {
               </motion.li>
             ))}
           </ol>
-          <div className="ad-contact">
+          <div className="adm-contact">
             <small>¿YA TIENES CUENTA?</small>
             <Link to="/acceso">Inicia sesión en el portal →</Link>
           </div>
         </aside>
 
         <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}>
-          <form className="ac-card ad-form" onSubmit={(e) => void enviar(e)} noValidate aria-label="Crear cuenta">
+          <form className="ac-card adm-form" onSubmit={(e) => void enviar(e)} noValidate aria-label="Crear cuenta">
             <h2>Crear cuenta de acudiente</h2>
             <p className="sub">Los campos con * son obligatorios.</p>
-            <div className="ad-row">
+            <div className="adm-row">
               <label>
                 Nombres *
                 <input value={datos.nombres} onChange={(e) => cambiar('nombres', e.target.value)} maxLength={150} autoComplete="given-name" />
@@ -140,7 +140,7 @@ export default function RegistroPage() {
                 {mensaje('apellidos')}
               </label>
             </div>
-            <div className="ad-row">
+            <div className="adm-row">
               <label>
                 Correo electrónico *
                 <input type="email" value={datos.correo} onChange={(e) => cambiar('correo', e.target.value)} autoComplete="email" />
@@ -163,7 +163,7 @@ export default function RegistroPage() {
               />
               {mensaje('nombreUsuario')}
             </label>
-            <div className="ad-row">
+            <div className="adm-row">
               <label>
                 Contraseña *
                 <input type="password" value={datos.clave} onChange={(e) => cambiar('clave', e.target.value)} autoComplete="new-password" />
